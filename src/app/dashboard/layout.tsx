@@ -1,7 +1,6 @@
 import { DashboardSidebar } from "@/components/sidebar/DashboardSidebar";
 import { Topbar } from "@/components/topbar/Topbar";
 import DashboardClient from "@/components/dashboard/DashboardClient";
-import { Footer } from "@/components/layout/Footer";
 
 export default function DashboardLayout({
   children,
@@ -21,7 +20,6 @@ export default function DashboardLayout({
         <div className="flex-1 p-6 md:p-8 space-y-6">
           <DashboardClient>{children}</DashboardClient>
         </div>
-        <Footer />
       </main>
 
       {/* Decorative glow effects */}
