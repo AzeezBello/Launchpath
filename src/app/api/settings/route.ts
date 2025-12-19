@@ -55,17 +55,22 @@ function writeSettings(v: Settings) {
   });
 }
 
-function deepMerge<T extends Record<string, any>>(a: T, b: Partial<T>): T {
-  const out: any = Array.isArray(a) ? [...a] : { ...a };
-  for (const k of Object.keys(b)) {
-    const v = (b as any)[k];
-    if (v && typeof v === "object" && !Array.isArray(v)) {
-      out[k] = deepMerge(a[k] || {}, v);
-    } else if (v !== undefined) {
-      out[k] = v;
+type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
+};
+
+function deepMerge<T extends Record<string, unknown>>(base: T, patch: DeepPartial<T>): T {
+  const output: Record<string, unknown> = Array.isArray(base) ? [...(base as unknown[])] : { ...base };
+  for (const key of Object.keys(patch) as (keyof T)[]) {
+    const value = patch[key];
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      const nestedBase = (base as Record<string, unknown>)[key] as Record<string, unknown> | undefined;
+      output[key as string] = deepMerge(nestedBase || {}, value as Record<string, unknown>);
+    } else if (value !== undefined) {
+      output[key as string] = value as unknown;
     }
   }
-  return out;
+  return output as T;
 }
 
 export async function GET() {
@@ -91,7 +96,7 @@ export async function PATCH(req: Request) {
     const merged = deepMerge(current, patch);
     writeSettings(merged);
     return NextResponse.json(merged, { status: 200 });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 }

@@ -2,15 +2,16 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { useSupabase } from "@/providers/SupabaseProvider"
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { supabase } = useSupabase()
 
   async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault()

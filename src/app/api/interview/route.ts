@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 
-let cache: any = null;
+type Interview = {
+  id: number;
+  candidate: string;
+  position: string;
+  date: string;
+  status: "Scheduled" | "Completed" | "Pending";
+};
+
+let cache: Interview[] | null = null;
 let lastFetched = 0;
 const CACHE_DURATION = 1000 * 60 * 5; // 5 minutes
 
@@ -21,13 +29,12 @@ export async function GET(req: Request) {
     });
   }
 
-  // Mock Interview Data
-  const mockData = Array.from({ length: 40 }, (_, i) => ({
+  const mockData: Interview[] = Array.from({ length: 40 }, (_, i) => ({
     id: i + 1,
     candidate: `Candidate ${i + 1}`,
     position: ["Frontend Developer", "UI/UX Designer", "Backend Developer"][i % 3],
     date: new Date(Date.now() + i * 86400000).toISOString().split("T")[0],
-    status: ["Scheduled", "Completed", "Pending"][i % 3],
+    status: ["Scheduled", "Completed", "Pending"][i % 3] as Interview["status"],
   }));
 
   cache = mockData;

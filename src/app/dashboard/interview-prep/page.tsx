@@ -20,13 +20,20 @@ export default function InterviewPage() {
   useEffect(() => {
     async function fetchInterviews() {
       setLoading(true);
-      const res = await fetch(`/dashboard/interview/api/interview?page=${page}&limit=10`, {
-        cache: "force-cache",
-      });
-      const data = await res.json();
-      setInterviews(data.data);
-      setTotalPages(data.totalPages);
-      setLoading(false);
+      try {
+        const res = await fetch(`/api/interview?page=${page}&limit=10`);
+        if (!res.ok) throw new Error("Failed to load interviews");
+
+        const data = await res.json();
+        setInterviews(data.data || []);
+        setTotalPages(data.totalPages || 1);
+      } catch (error) {
+        console.error(error);
+        setInterviews([]);
+        setTotalPages(1);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchInterviews();
   }, [page]);
@@ -37,6 +44,10 @@ export default function InterviewPage() {
 
       {loading ? (
         <div className="text-center py-10">Loading interview data...</div>
+      ) : interviews.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-6">
+          No interviews found. Try again later.
+        </p>
       ) : (
         <div className="grid gap-4">
           {interviews.map((interview) => (

@@ -1,47 +1,50 @@
-"use client"
+"use client";
 
-import { createBrowserClient } from "@supabase/ssr"
-import { useState, useEffect, createContext, useContext } from "react"
-import type { Session, User } from "@supabase/supabase-js"
+import { useState } from "react";
+import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  SessionContextProvider,
+  useSessionContext,
+  useUser,
+} from "@supabase/auth-helpers-react";
+import { ThemeProvider, type ThemeProviderProps } from "next-themes";
 
-const SupabaseContext = createContext<any>(null)
+type Props = ThemeProviderProps & { children: React.ReactNode };
 
-export function SupabaseProvider({ children }: { children: React.ReactNode }) {
-  const [supabase] = useState(() =>
+/**
+ * Shares a single Supabase browser client + theme provider across the app.
+ * This enables the `useUser` / `useSupabaseClient` hooks from
+ * `@supabase/auth-helpers-react` and powers the ThemeToggle component.
+ */
+export function SupabaseProvider({ children, ...themeProps }: Props) {
+  const [supabaseClient] = useState<SupabaseClient>(() =>
     createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
-  )
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      setUser(data?.user ?? null)
-      setLoading(false)
-    }
-
-    fetchUser()
-
-    // Listen for changes
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => listener.subscription.unsubscribe()
-  }, [supabase])
+  );
 
   return (
-    <SupabaseContext.Provider value={{ supabase, user, loading }}>
-      {children}
-    </SupabaseContext.Provider>
-  )
+    <ThemeProvider {...themeProps}>
+      <SessionContextProvider supabaseClient={supabaseClient}>
+        {children}
+      </SessionContextProvider>
+    </ThemeProvider>
+  );
 }
 
 export function useSupabase() {
-  const context = useContext(SupabaseContext)
-  if (!context) throw new Error("useSupabase must be used inside SupabaseProvider")
-  return context
+  const { supabaseClient, isLoading } = useSessionContext();
+  const user = useUser();
+
+  if (!supabaseClient) {
+    throw new Error("useSupabase must be used inside SupabaseProvider");
+  }
+
+  return {
+    supabase: supabaseClient,
+    user: user ?? null,
+    loading: isLoading,
+  };
 }

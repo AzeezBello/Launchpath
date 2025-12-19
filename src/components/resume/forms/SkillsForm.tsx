@@ -1,12 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function SkillsForm({
   onChange,
+  initialData,
 }: {
+  initialData?: string[];
   onChange?: (value: string[]) => void;
 }) {
-  const [skills, setSkills] = useState<string[]>([]);
+  const [skills, setSkills] = useState<string[]>(initialData || []);
   const [newSkill, setNewSkill] = useState("");
 
   const handleAdd = () => {
@@ -17,8 +19,16 @@ export default function SkillsForm({
     onChange?.(updated);
   };
 
+  useEffect(() => {
+    setSkills(initialData || []);
+  }, [initialData]);
+
+  useEffect(() => {
+    onChange?.(skills);
+  }, [skills, onChange]);
+
   return (
-    <div className="space-y-3">
+    <div className="glass-card p-4 rounded-xl shadow-md space-y-3">
       <h3 className="text-lg font-semibold">🛠 Skills</h3>
       <div className="flex gap-2">
         <input
@@ -34,7 +44,6 @@ export default function SkillsForm({
           Add
         </button>
       </div>
-
       <ul className="flex flex-wrap gap-2">
         {skills.map((skill, i) => (
           <li

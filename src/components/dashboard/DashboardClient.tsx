@@ -1,37 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSupabase } from "@/providers/SupabaseProvider"
-import { Topbar } from "@/components/topbar/Topbar"
 
 export default function DashboardClient({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { user, supabase } = useSupabase()
-  const [loading, setLoading] = useState(true)
+  const { user, loading } = useSupabase()
   const router = useRouter()
 
-  // ✅ On mount, check current session (and set loading states properly)
   useEffect(() => {
-    const checkUser = async () => {
-      const { data, error } = await supabase.auth.getUser()
-      if (error) {
-        console.error("Error fetching user:", error)
-      }
-
-      // Wait until Supabase confirms user state
-      if (!data?.user) {
-        router.push("/login")
-      }
-
-      setLoading(false)
+    if (!loading && !user) {
+      router.push("/login")
     }
-
-    checkUser()
-  }, [supabase, router])
+  }, [loading, router, user])
 
   if (loading) {
     return (

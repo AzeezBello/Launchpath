@@ -8,7 +8,7 @@ export async function GET() {
       { id: "3", program: "Oxford - Law", status: "Rejected", date: "2025-09-10" },
     ];
     return NextResponse.json({ results: mockApplications });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ results: [] });
   }
 }

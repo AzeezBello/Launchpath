@@ -1,72 +1,101 @@
+// src/app/dashboard/cover-letter/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import CoverLetterForm  from "@/components/cover-letter/CoverLetterForm";
+import GeneratedLetterPreview  from "@/components/cover-letter/GeneratedLetterPreview";
+import { saveLetter } from "@/utils/coverLetterHelpers";
+import { toast } from "sonner";
 
-export default function CoverLetterPage() {
-  const [savedContent, setSavedContent] = useState("");
-  const [isMounted, setIsMounted] = useState(false);
+export default function CoverLetterGeneratePage() {
+  const supabase = useSupabaseClient();
+  const user = useUser();
 
-  // ✅ Ensure editor only mounts on client
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const [generated, setGenerated] = useState<string>("");
+  const [meta, setMeta] = useState<{ company?: string; position?: string; tone?: string; description?: string }>({});
+  const [loading, setLoading] = useState(false);
+  const [source, setSource] = useState<string | null>(null);
 
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: "<p>Start writing your cover letter here...</p>",
-    immediatelyRender: false, // 👈 important fix for SSR
-    editorProps: {
-      attributes: {
-        class:
-          "prose dark:prose-invert max-w-none min-h-[200px] p-3 rounded-md border border-gray-300 focus:outline-none",
-      },
-    },
-  });
+  const handleGenerate = async (payload: { company: string; position: string; description?: string; tone?: string; }) => {
+    setLoading(true);
+    setGenerated("");
+    setSource(null);
+    setMeta({ company: payload.company, position: payload.position, tone: payload.tone, description: payload.description });
 
-  const handleSave = () => {
-    if (editor) {
-      const html = editor.getHTML();
-      setSavedContent(html);
+    try {
+      const res = await fetch("/api/ai/generate-cover-letter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company: payload.company,
+          position: payload.position,
+          description: payload.description || "",
+          tone: payload.tone || "professional",
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "AI generation failed");
+        setLoading(false);
+        return;
+      }
+
+      const content = data.content || data.letter || "";
+      setSource(data.source || null);
+      setGenerated(content);
+      if (data.source && data.source !== "openai") {
+        toast.info("Using offline template. Add OPENAI_API_KEY to switch to OpenAI.");
+      } else {
+        toast.success("Cover letter generated");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Generation failed (network/server)");
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!isMounted) return null; // 👈 prevents hydration mismatch
+  const handleSave = async () => {
+    if (!user) { toast.error("You must be logged in to save"); return; }
+    if (!generated) { toast.error("Nothing to save"); return; }
+
+    const payload = {
+      user_id: user.id,
+      company_name: meta.company || "",
+      position: meta.position || "",
+      tone: meta.tone || "professional",
+      description: meta.description || "",
+      content: generated,
+    };
+
+    const { error } = await saveLetter(supabase, payload);
+    if (error) toast.error("Save failed");
+    else toast.success("Saved to your dashboard");
+  };
 
   return (
-    <div className="p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Cover Letter Generator</CardTitle>
-        </CardHeader>
+    <div className="max-w-4xl mx-auto py-10 px-4">
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="glass p-6 rounded-2xl">
+        <h1 className="text-2xl font-semibold mb-3">AI Cover Letter Generator</h1>
+        <p className="text-sm text-gray-300 mb-6">Enter the job details below and get a tailored cover letter.</p>
 
-        <CardContent className="space-y-4">
-          <EditorContent editor={editor} />
+        <CoverLetterForm onGenerate={handleGenerate} loading={loading} />
 
-          <div className="flex justify-end gap-2">
-            <Button
-              onClick={handleSave}
-              disabled={!editor}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Save Cover Letter
-            </Button>
+        {generated && (
+          <div className="mt-6">
+            <GeneratedLetterPreview
+              content={generated}
+              meta={{ company: meta.company || "", position: meta.position || "", tone: meta.tone || "" }}
+              source={source || undefined}
+              onSave={handleSave}
+            />
           </div>
-
-          {savedContent && (
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-2">📄 Preview</h2>
-              <div
-                className="border rounded-md p-3 prose dark:prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: savedContent }}
-              />
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+      </motion.div>
     </div>
   );
 }

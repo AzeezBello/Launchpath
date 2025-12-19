@@ -1,19 +1,19 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Education } from "@/types/resume";
 
-interface Education {
-  school: string;
-  degree: string;
-  year: string;
+interface EducationFormProps {
+  initialData?: Education[];
+  onChange?: (value: Education[]) => void;
 }
 
-export default function EducationForm({
-  onChange,
-}: {
-  onChange?: (value: Education[]) => void;
-}) {
-  const [education, setEducation] = useState<Education[]>([]);
-  const [form, setForm] = useState<Education>({ school: "", degree: "", year: "" });
+export default function EducationForm({ onChange, initialData }: EducationFormProps) {
+  const [education, setEducation] = useState<Education[]>(initialData || []);
+  const [form, setForm] = useState<Education>({
+    school: "",
+    degree: "",
+    year: "",
+  });
 
   const handleAdd = () => {
     if (!form.school || !form.degree) return;
@@ -23,8 +23,16 @@ export default function EducationForm({
     onChange?.(updated);
   };
 
+  useEffect(() => {
+    setEducation(initialData || []);
+  }, [initialData]);
+
+  useEffect(() => {
+    onChange?.(education);
+  }, [education, onChange]);
+
   return (
-    <div className="space-y-3">
+    <div className="glass-card p-4 rounded-xl shadow-md space-y-3">
       <h3 className="text-lg font-semibold">🎓 Education</h3>
       <input
         placeholder="School Name"
@@ -50,7 +58,6 @@ export default function EducationForm({
       >
         Add Education
       </button>
-
       <ul className="space-y-2">
         {education.map((edu, i) => (
           <li key={i} className="border rounded p-2">

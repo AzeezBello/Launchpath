@@ -6,8 +6,10 @@
  * -------------------------------
  */
 
+type AuthUser = Record<string, unknown>;
+
 /** Save user data to cookie + localStorage */
-export function setAuth(user: any) {
+export function setAuth(user: AuthUser) {
   if (!user) return;
   const serialized = encodeURIComponent(JSON.stringify(user));
 
@@ -21,13 +23,13 @@ export function setAuth(user: any) {
 /** Remove user data (logout) */
 export function clearAuth() {
   document.cookie =
-    "authUser=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax";
+  "authUser=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax";
   localStorage.removeItem("authUser");
 }
 
 /** Get user data from localStorage (client only) */
-export function getClientUser(): any | null {
+export function getClientUser(): AuthUser | null {
   if (typeof window === "undefined") return null;
   const data = localStorage.getItem("authUser");
-  return data ? JSON.parse(data) : null;
+  return data ? (JSON.parse(data) as AuthUser) : null;
 }

@@ -3,8 +3,15 @@
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
+type Application = {
+  id: string;
+  program: string;
+  status: string;
+  date: string;
+};
+
 export default function ApplicationsPage() {
-  const [applications, setApplications] = useState<any[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {
     fetch("/api/applications")

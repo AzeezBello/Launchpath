@@ -1,11 +1,13 @@
 "use client";
 
+import type { PersonalInfo, Education, Experience, Achievement } from "@/types/resume";
+
 interface ResumePreviewProps {
-  personalInfo: { name: string; email: string; phone: string };
-  education?: any[];
-  workExperience?: any[];
+  personalInfo: PersonalInfo;
+  education?: Education[];
+  workExperience?: Experience[];
   skills?: string[];
-  achievements?: any[];
+  achievements?: Achievement[];
 }
 
 export default function ResumePreview({

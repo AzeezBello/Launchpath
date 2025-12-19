@@ -7,7 +7,7 @@ import { createServerSupabaseClient } from "@/lib/supabase-server"
  */
 export async function POST() {
   try {
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
     const { error } = await supabase.auth.signOut()
 
     if (error) {
@@ -15,7 +15,7 @@ export async function POST() {
     }
 
     return NextResponse.json({ success: true, message: "Signed out successfully" }, { status: 200 })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Logout error:", err)
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 })
   }

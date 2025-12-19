@@ -2,16 +2,17 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { useSupabase } from "@/providers/SupabaseProvider"
 
 export default function SignupForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { supabase } = useSupabase()
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,15 +21,21 @@ export default function SignupForm() {
     setLoading(false)
 
     if (error) {
-      toast.error(error.message)
-    } else {
-      toast.success("Account created successfully! 🎉")
-      router.push("/dashboard")
+      toast.error(error.message || "Sign up failed")
+      return
     }
+
+    toast.success("Account created successfully! 🎉")
+    router.push("/dashboard")
   }
 
   const handleGoogleSignup = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "google" })
+    setLoading(true)
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    })
+    setLoading(false)
     if (error) toast.error("Google sign-up failed")
   }
 

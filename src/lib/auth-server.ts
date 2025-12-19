@@ -7,13 +7,15 @@ import { redirect } from "next/navigation";
  * -------------------------------
  */
 
+type AuthUser = Record<string, unknown>;
+
 /** Get user cookie (server-side only) */
-export async function getServerUser(): Promise<any | null> {
+export async function getServerUser(): Promise<AuthUser | null> {
   try {
     const cookieStore = await cookies(); // ✅ must await
     const userCookie = cookieStore.get("authUser")?.value;
     if (!userCookie) return null;
-    return JSON.parse(decodeURIComponent(userCookie));
+    return JSON.parse(decodeURIComponent(userCookie)) as AuthUser;
   } catch (err) {
     console.error("getServerUser error:", err);
     return null;

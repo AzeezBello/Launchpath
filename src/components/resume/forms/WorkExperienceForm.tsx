@@ -1,19 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-interface Experience {
-  company: string;
-  role: string;
-  duration: string;
-  description: string;
+import { Experience } from "@/types/resume";
+
+interface WorkExperienceFormProps {
+  initialData?: Experience[];
+  onChange?: (value: Experience[]) => void;
 }
 
+
 export default function WorkExperienceForm({
-  onChange,
-}: {
-  onChange?: (value: Experience[]) => void;
-}) {
-  const [work, setWork] = useState<Experience[]>([]);
+  onChange, initialData,
+}: WorkExperienceFormProps) {
+  const [work, setWork] = useState<Experience[]>(initialData || []);
   const [form, setForm] = useState<Experience>({
     company: "",
     role: "",
@@ -29,8 +28,16 @@ export default function WorkExperienceForm({
     onChange?.(updated);
   };
 
+  useEffect(() => {
+    setWork(initialData || []);
+  }, [initialData]);
+
+  useEffect(() => {
+    onChange?.(work);
+  }, [work, onChange]);
+
   return (
-    <div className="space-y-3">
+    <div className="glass-card p-4 rounded-xl shadow-md space-y-3">
       <h3 className="text-lg font-semibold">💼 Work Experience</h3>
       <input
         placeholder="Company"
@@ -62,7 +69,6 @@ export default function WorkExperienceForm({
       >
         Add Experience
       </button>
-
       <ul className="space-y-2">
         {work.map((exp, i) => (
           <li key={i} className="border rounded p-2">

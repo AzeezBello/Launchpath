@@ -9,7 +9,7 @@ import { createServerSupabaseClient } from "@/lib/supabase-server"
 export async function POST(request: Request) {
   try {
     const { email, password, fullName } = await request.json()
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       { success: true, message: "Account created successfully", user: data.user },
       { status: 201 }
     )
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Signup error:", err)
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 })
   }

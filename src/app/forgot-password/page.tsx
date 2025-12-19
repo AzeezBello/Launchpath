@@ -1,14 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { supabase } from "@/lib/supabase"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { useSupabase } from "@/providers/SupabaseProvider"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
   const [loading, setLoading] = useState(false)
+  const { supabase } = useSupabase()
 
   async function handlePasswordReset(e: React.FormEvent) {
     e.preventDefault()

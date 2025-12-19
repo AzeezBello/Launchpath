@@ -2,35 +2,48 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import Link from "next/link"
+import { useSupabase } from "@/providers/SupabaseProvider"
+import { useSearchParams } from "next/navigation"
 
 
 export default function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { supabase } = useSupabase()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+    setLoading(true)
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     })
+    setLoading(false)
 
-    if (!res.ok) {
-      const { error } = await res.json()
-      toast.error(error || "Login failed")
+    if (error) {
+      toast.error(error.message || "Login failed")
       return
     }
 
-    toast.success("Login successful!")
-    router.push("/dashboard") // Redirect user to dashboard
+    toast.success("Logged in")
+    const redirectTo = searchParams.get("redirectedFrom") || "/dashboard"
+    router.push(redirectTo)
+  }
+
+  const handleGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    })
+    if (error) toast.error("Google sign-in failed")
   }
 
   return (
@@ -58,16 +71,15 @@ export default function LoginForm() {
 
 
       <div className="flex flex-col gap-2">
-        <Button type="submit" className="w-full bg-green-600 text-white p-2 rounded">
-          Login
+        <Button type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
         </Button>
-        <Button type="button" variant="outline" onClick="">
+
+        <Button type="button" variant="outline" onClick={handleGoogle} disabled={loading}>
           Continue with Google
         </Button>
       </div>
     </form>
   )
 }
-
-
 

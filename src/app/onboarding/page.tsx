@@ -15,7 +15,7 @@ export default function OnboardingPage() {
       <div className="glass max-w-2xl w-full p-10 rounded-3xl backdrop-blur-xl border border-white/10 text-center space-y-6">
         <h1 className="text-4xl font-bold tracking-tight">Welcome to LaunchPath 🌟</h1>
         <p className="text-gray-300 text-lg max-w-md mx-auto">
-          Let's personalize your experience. We’ll ask a few questions to help tailor your dashboard to your goals.
+          Let&apos;s personalize your experience. We’ll ask a few questions to help tailor your dashboard to your goals.
         </p>
 
         <Button

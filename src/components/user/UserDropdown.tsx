@@ -1,6 +1,5 @@
 "use client";
 
-import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
@@ -10,9 +9,12 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSupabase } from "@/providers/SupabaseProvider";
 
 export function UserDropdown() {
   const router = useRouter();
+  const { supabase, user } = useSupabase();
+  const initials = user?.email?.[0]?.toUpperCase() || "U";
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -29,7 +31,7 @@ export function UserDropdown() {
       <DropdownMenuTrigger>
         <Avatar className="cursor-pointer ring-2 ring-white/20 hover:ring-white/40 transition">
           <AvatarImage src="" alt="User" />
-          <AvatarFallback>U</AvatarFallback>
+          <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="glass border border-white/10 backdrop-blur-md">
