@@ -18,7 +18,11 @@ export async function middleware(request: NextRequest) {
         },
         remove(name, options) {
           request.cookies.delete(name)
-          response.cookies.delete(name, options)
+          if (options) {
+            response.cookies.delete({ name, ...options })
+          } else {
+            response.cookies.delete(name)
+          }
         },
       },
     }

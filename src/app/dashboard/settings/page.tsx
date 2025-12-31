@@ -138,9 +138,7 @@ export default function SettingsPage() {
               <p className="text-sm text-gray-300">Theme</p>
               <Select
                 value={settings.appearance.theme}
-                onValueChange={(val: Settings["appearance"]["theme"]) =>
-                  update("appearance", "theme", val)
-                }
+                onValueChange={(val) => update("appearance", "theme", val as Settings["appearance"]["theme"])}
               >
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Choose theme" />
@@ -156,9 +154,7 @@ export default function SettingsPage() {
               <p className="text-sm text-gray-300">Accent</p>
               <Select
                 value={settings.appearance.accent}
-                onValueChange={(val: Settings["appearance"]["accent"]) =>
-                  update("appearance", "accent", val)
-                }
+                onValueChange={(val) => update("appearance", "accent", val as Settings["appearance"]["accent"])}
               >
                 <SelectTrigger className="bg-white/5 border-white/10">
                   <SelectValue placeholder="Accent color" />

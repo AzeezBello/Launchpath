@@ -33,8 +33,9 @@ const DEFAULTS: Settings = {
   appearance: { theme: "light", accent: "indigo" },
 };
 
-function readSettings(): Settings {
-  const c = cookies().get(COOKIE_KEY)?.value;
+async function readSettings(): Promise<Settings> {
+  const store = await cookies();
+  const c = store.get(COOKIE_KEY)?.value;
   if (!c) return DEFAULTS;
   try {
     const parsed = JSON.parse(c);
@@ -44,8 +45,9 @@ function readSettings(): Settings {
   }
 }
 
-function writeSettings(v: Settings) {
-  cookies().set({
+async function writeSettings(v: Settings) {
+  const store = await cookies();
+  store.set({
     name: COOKIE_KEY,
     value: JSON.stringify(v),
     httpOnly: false, // demo: allow client to read if needed; switch to true when using server reads only
@@ -60,11 +62,11 @@ type DeepPartial<T> = {
 };
 
 function deepMerge<T extends Record<string, unknown>>(base: T, patch: DeepPartial<T>): T {
-  const output: Record<string, unknown> = Array.isArray(base) ? [...(base as unknown[])] : { ...base };
+  const output: Record<string, unknown> = { ...base };
   for (const key of Object.keys(patch) as (keyof T)[]) {
     const value = patch[key];
     if (value && typeof value === "object" && !Array.isArray(value)) {
-      const nestedBase = (base as Record<string, unknown>)[key] as Record<string, unknown> | undefined;
+      const nestedBase = (base as Record<string, unknown>)[key as string] as Record<string, unknown> | undefined;
       output[key as string] = deepMerge(nestedBase || {}, value as Record<string, unknown>);
     } else if (value !== undefined) {
       output[key as string] = value as unknown;
@@ -74,7 +76,7 @@ function deepMerge<T extends Record<string, unknown>>(base: T, patch: DeepPartia
 }
 
 export async function GET() {
-  const data = readSettings();
+  const data = await readSettings();
   return NextResponse.json(data, { status: 200 });
 }
 
@@ -92,9 +94,9 @@ export async function PATCH(req: Request) {
     if (patch.profile?.email && typeof patch.profile.email !== "string")
       return NextResponse.json({ error: "Invalid email" }, { status: 422 });
 
-    const current = readSettings();
+    const current = await readSettings();
     const merged = deepMerge(current, patch);
-    writeSettings(merged);
+    await writeSettings(merged);
     return NextResponse.json(merged, { status: 200 });
   } catch {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });

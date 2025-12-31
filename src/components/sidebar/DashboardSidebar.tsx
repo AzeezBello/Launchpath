@@ -26,13 +26,20 @@ export function DashboardSidebar() {
     academics: false,
   });
 
+  type NavSection = {
+    label: string;
+    key: keyof typeof openMenus;
+    icon: LucideIcon;
+    links: { name: string; href: string; icon: LucideIcon }[];
+  };
+
   const toggleMenu = (key: keyof typeof openMenus) =>
     setOpenMenus((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
 
-  const navSections = useMemo(
+  const navSections = useMemo<NavSection[]>(
     () => [
       {
         label: "Career Tools",
