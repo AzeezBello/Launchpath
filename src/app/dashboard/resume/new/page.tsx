@@ -91,6 +91,17 @@ export default function NewResumePage() {
     }
 
     setSaving(true);
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user) {
+      setSaving(false);
+      toast.error("You must be logged in to save your resume.");
+      return;
+    }
+
     const title =
       formData.title ||
       (formData.personalInfo?.name
@@ -98,6 +109,7 @@ export default function NewResumePage() {
         : "Untitled Resume");
 
     const { error } = await supabase.from("resumes").insert({
+      user_id: user.id,
       title,
       data: formData,
     });

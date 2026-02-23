@@ -13,9 +13,11 @@ import { createClient } from "@/utils/supabase/client";
 import type { ResumeFormData } from "@/types/resume";
 
 export default function EditResumePage() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
   const [step, setStep] = useState(1);
   const [resumeData, setResumeData] = useState<ResumeFormData | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const supabase = createClient();
@@ -23,7 +25,30 @@ export default function EditResumePage() {
 
   useEffect(() => {
     const fetchResume = async () => {
-      const { data, error } = await supabase.from("resumes").select("*").eq("id", id).single();
+      if (!id) {
+        setLoading(false);
+        toast.error("Invalid resume ID");
+        return;
+      }
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        toast.error("You must be logged in");
+        setLoading(false);
+        return;
+      }
+
+      setUserId(user.id);
+      const { data, error } = await supabase
+        .from("resumes")
+        .select("*")
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single();
       if (error) {
         toast.error("Unable to load resume");
       }
@@ -55,8 +80,17 @@ export default function EditResumePage() {
 
   const updateResume = async () => {
     if (!resumeData) return;
+    if (!userId || !id) {
+      toast.error("Unauthorized");
+      return;
+    }
+
     setSaving(true);
-    const { error } = await supabase.from("resumes").update({ data: resumeData }).eq("id", id);
+    const { error } = await supabase
+      .from("resumes")
+      .update({ data: resumeData })
+      .eq("id", id)
+      .eq("user_id", userId);
     setSaving(false);
 
     if (error) {

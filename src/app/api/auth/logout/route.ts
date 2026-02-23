@@ -1,22 +1,26 @@
-import { NextResponse } from "next/server"
-import { createServerSupabaseClient } from "@/lib/supabase-server"
+import { apiError, apiSuccess, applyRateLimit } from "@/lib/server/api";
+import { createServerSupabaseClient } from "@/lib/supabase-server";
 
-/**
- * Handle POST /api/auth/logout
- * Signs out the user and clears session cookies
- */
-export async function POST() {
+export async function POST(req: Request) {
+  const rateLimit = applyRateLimit({
+    request: req,
+    route: "auth:logout",
+    limit: 60,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (!rateLimit.ok) return rateLimit.response;
+
   try {
-    const supabase = await createServerSupabaseClient()
-    const { error } = await supabase.auth.signOut()
+    const supabase = await createServerSupabaseClient();
+    const { error } = await supabase.auth.signOut();
 
     if (error) {
-      return NextResponse.json({ success: false, message: error.message }, { status: 400 })
+      return apiError(error.message, { status: 400, headers: rateLimit.headers });
     }
 
-    return NextResponse.json({ success: true, message: "Signed out successfully" }, { status: 200 })
+    return apiSuccess({ message: "Signed out successfully" }, { status: 200, headers: rateLimit.headers });
   } catch (err: unknown) {
-    console.error("Logout error:", err)
-    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 })
+    console.error("Logout error:", err);
+    return apiError("Server error", { status: 500, headers: rateLimit.headers });
   }
 }

@@ -24,11 +24,21 @@ type Settings = {
 };
 
 const DEFAULTS: Settings = {
-  profile: { name: "", email: "", company: "Viral Ad Media" },
+  profile: { name: "", email: "", company: "" },
   integrations: { meta_token: "", tiktok_token: "", google_refresh: "" },
   security: { twofa: false, session_alerts: false },
   appearance: { theme: "light", accent: "indigo" },
 };
+
+function normalizeSettings(input: unknown): Settings {
+  const source = (input || {}) as Partial<Settings>;
+  return {
+    profile: { ...DEFAULTS.profile, ...(source.profile || {}) },
+    integrations: { ...DEFAULTS.integrations, ...(source.integrations || {}) },
+    security: { ...DEFAULTS.security, ...(source.security || {}) },
+    appearance: { ...DEFAULTS.appearance, ...(source.appearance || {}) },
+  };
+}
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
@@ -38,10 +48,10 @@ export default function SettingsPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch("/api/settings");
-        if (!res.ok) throw new Error("Failed to load settings");
-        const data = await res.json();
-        setSettings({ ...DEFAULTS, ...data });
+        const res = await fetch("/api/settings", { cache: "no-store" });
+        const payload = await res.json();
+        if (!res.ok) throw new Error(payload?.error || "Failed to load settings");
+        setSettings(normalizeSettings(payload?.data ?? payload));
       } catch (error) {
         console.error(error);
         toast.error("Could not load settings");
@@ -74,10 +84,9 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
-
-      if (!res.ok) throw new Error("Failed to update settings");
-      const data = await res.json();
-      setSettings(data);
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload?.error || "Failed to update settings");
+      setSettings(normalizeSettings(payload?.data ?? payload));
       toast.success("Settings updated");
     } catch (error) {
       console.error(error);
@@ -183,7 +192,7 @@ export default function SettingsPage() {
                 onChange={(e) => update("security", "twofa", e.target.checked)}
                 className="h-4 w-4 rounded border-white/40 bg-transparent"
               />
-              Enable 2FA (demo)
+              Enable 2FA
             </label>
             <label className="flex items-center gap-2">
               <input

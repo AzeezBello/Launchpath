@@ -16,13 +16,28 @@ interface Resume {
 export default function ResumePage() {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const supabase = createClient();
 
   const fetchResumes = useCallback(async () => {
     setLoading(true);
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      setResumes([]);
+      setUserId(null);
+      setLoading(false);
+      return;
+    }
+
+    setUserId(user.id);
     const { data, error } = await supabase
       .from("resumes")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (!error) setResumes(data || []);
@@ -69,7 +84,8 @@ export default function ResumePage() {
                 <Button
                   variant="destructive"
                   onClick={async () => {
-                    await supabase.from("resumes").delete().eq("id", resume.id);
+                    if (!userId) return;
+                    await supabase.from("resumes").delete().eq("id", resume.id).eq("user_id", userId);
                     fetchResumes();
                   }}
                 >

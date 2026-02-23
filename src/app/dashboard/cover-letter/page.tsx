@@ -19,6 +19,11 @@ export default function CoverLetterGeneratePage() {
   const [source, setSource] = useState<string | null>(null);
 
   const handleGenerate = async (payload: { company: string; position: string; description?: string; tone?: string; }) => {
+    if (!user) {
+      toast.error("Please sign in to generate cover letters.");
+      return;
+    }
+
     setLoading(true);
     setGenerated("");
     setSource(null);
@@ -43,10 +48,11 @@ export default function CoverLetterGeneratePage() {
         return;
       }
 
-      const content = data.content || data.letter || "";
-      setSource(data.source || null);
+      const result = (data?.data || data) as { content?: string; letter?: string; source?: string };
+      const content = result.content || result.letter || "";
+      setSource(result.source || null);
       setGenerated(content);
-      if (data.source && data.source !== "openai") {
+      if (result.source && result.source !== "openai") {
         toast.info("Using offline template. Add OPENAI_API_KEY to switch to OpenAI.");
       } else {
         toast.success("Cover letter generated");

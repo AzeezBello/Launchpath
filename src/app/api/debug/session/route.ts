@@ -1,10 +1,24 @@
-// src/app/api/debug/session/route.ts
-import { NextResponse } from "next/server"
-import { createServerSupabaseClient } from "@/lib/supabase-server"
+import { apiSuccess, applyRateLimit, mergeHeaders, requireApiUser } from "@/lib/server/api";
 
-export async function GET() {
-  const supabase = await createServerSupabaseClient()
-  const { data } = await supabase.auth.getUser()
-  return NextResponse.json({ user: data.user })
+export async function GET(req: Request) {
+  const { user, errorResponse } = await requireApiUser();
+  if (errorResponse) return errorResponse;
+
+  const rateLimit = applyRateLimit({
+    request: req,
+    route: "debug:session:get",
+    userId: user.id,
+    limit: 60,
+    windowMs: 60 * 1000,
+  });
+  if (!rateLimit.ok) return rateLimit.response;
+
+  return apiSuccess(
+    {
+      id: user.id,
+      email: user.email || null,
+      created_at: user.created_at,
+    },
+    { status: 200, headers: mergeHeaders(rateLimit.headers) }
+  );
 }
-

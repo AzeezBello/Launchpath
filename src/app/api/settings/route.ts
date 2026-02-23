@@ -1,104 +1,159 @@
-// File: app/api/settings/route.ts
-import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { apiError, apiSuccess, applyRateLimit, mergeHeaders, requireApiUser } from "@/lib/server/api";
+import {
+  DEFAULT_SETTINGS,
+  ONE_YEAR_SECONDS,
+  SETTINGS_COOKIE_KEY,
+  deepMerge,
+  isLikelyMissingTable,
+  sanitizeSettingsPatch,
+  type Settings,
+} from "@/lib/server/settings";
 
-const COOKIE_KEY = "vam_settings";
-const ONE_YEAR = 60 * 60 * 24 * 365;
-
-type Settings = {
-  profile: {
-    name?: string;
-    email?: string;
-    company?: string;
-  };
-  integrations: {
-    meta_token?: string;
-    tiktok_token?: string;
-    google_refresh?: string;
-  };
-  security: {
-    twofa?: boolean;
-    session_alerts?: boolean;
-  };
-  appearance: {
-    theme?: "light" | "dark" | "system";
-    accent?: "violet" | "indigo" | "fuchsia" | "emerald" | "cyan";
-  };
+type SettingsRow = {
+  user_id: string;
+  data: Settings | null;
+  updated_at: string | null;
 };
 
-const DEFAULTS: Settings = {
-  profile: { name: "", email: "", company: "Viral Ad Media" },
-  integrations: { meta_token: "", tiktok_token: "", google_refresh: "" },
-  security: { twofa: false, session_alerts: false },
-  appearance: { theme: "light", accent: "indigo" },
-};
-
-async function readSettings(): Promise<Settings> {
-  const store = await cookies();
-  const c = store.get(COOKIE_KEY)?.value;
-  if (!c) return DEFAULTS;
+function parseCookieSettings(raw: string | undefined) {
+  if (!raw) return DEFAULT_SETTINGS;
   try {
-    const parsed = JSON.parse(c);
-    return deepMerge(DEFAULTS, parsed);
+    const parsed = JSON.parse(raw) as Partial<Settings>;
+    return deepMerge(DEFAULT_SETTINGS, parsed);
   } catch {
-    return DEFAULTS;
+    return DEFAULT_SETTINGS;
   }
 }
 
-async function writeSettings(v: Settings) {
+async function writeSettingsCookie(value: Settings) {
   const store = await cookies();
   store.set({
-    name: COOKIE_KEY,
-    value: JSON.stringify(v),
-    httpOnly: false, // demo: allow client to read if needed; switch to true when using server reads only
+    name: SETTINGS_COOKIE_KEY,
+    value: JSON.stringify(value),
+    httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: ONE_YEAR,
+    maxAge: ONE_YEAR_SECONDS,
   });
 }
 
-type DeepPartial<T> = {
-  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
-};
+export async function GET(req: Request) {
+  const { supabase, user, errorResponse } = await requireApiUser();
+  if (errorResponse) return errorResponse;
 
-function deepMerge<T extends Record<string, unknown>>(base: T, patch: DeepPartial<T>): T {
-  const output: Record<string, unknown> = { ...base };
-  for (const key of Object.keys(patch) as (keyof T)[]) {
-    const value = patch[key];
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      const nestedBase = (base as Record<string, unknown>)[key as string] as Record<string, unknown> | undefined;
-      output[key as string] = deepMerge(nestedBase || {}, value as Record<string, unknown>);
-    } else if (value !== undefined) {
-      output[key as string] = value as unknown;
-    }
+  const rateLimit = applyRateLimit({
+    request: req,
+    route: "settings:get",
+    userId: user.id,
+    limit: 120,
+    windowMs: 60 * 1000,
+  });
+  if (!rateLimit.ok) return rateLimit.response;
+
+  const store = await cookies();
+  const fallback = parseCookieSettings(store.get(SETTINGS_COOKIE_KEY)?.value);
+
+  const { data, error } = await supabase
+    .from("user_settings")
+    .select("data")
+    .eq("user_id", user.id)
+    .maybeSingle<SettingsRow>();
+
+  if (error && !isLikelyMissingTable(error)) {
+    return apiError(
+      "Failed to load settings",
+      { status: 500, headers: mergeHeaders(rateLimit.headers) },
+      error.message
+    );
   }
-  return output as T;
-}
 
-export async function GET() {
-  const data = await readSettings();
-  return NextResponse.json(data, { status: 200 });
+  const resolved = data?.data ? deepMerge(DEFAULT_SETTINGS, data.data) : fallback;
+  await writeSettingsCookie(resolved);
+
+  return apiSuccess(
+    resolved,
+    { status: 200, headers: mergeHeaders(rateLimit.headers) },
+    {
+      source: error ? "cookie-fallback" : "supabase",
+    }
+  );
 }
 
 export async function PATCH(req: Request) {
-  try {
-    const patch = (await req.json()) as Partial<Settings>;
-    // Basic validation / narrowing
-    if (patch.appearance?.theme && !["light", "dark", "system"].includes(patch.appearance.theme))
-      return NextResponse.json({ error: "Invalid theme" }, { status: 422 });
-    if (
-      patch.appearance?.accent &&
-      !["violet", "indigo", "fuchsia", "emerald", "cyan"].includes(patch.appearance.accent)
-    )
-      return NextResponse.json({ error: "Invalid accent" }, { status: 422 });
-    if (patch.profile?.email && typeof patch.profile.email !== "string")
-      return NextResponse.json({ error: "Invalid email" }, { status: 422 });
+  const { supabase, user, errorResponse } = await requireApiUser();
+  if (errorResponse) return errorResponse;
 
-    const current = await readSettings();
-    const merged = deepMerge(current, patch);
-    await writeSettings(merged);
-    return NextResponse.json(merged, { status: 200 });
+  const rateLimit = applyRateLimit({
+    request: req,
+    route: "settings:patch",
+    userId: user.id,
+    limit: 40,
+    windowMs: 60 * 1000,
+  });
+  if (!rateLimit.ok) return rateLimit.response;
+
+  let rawBody: unknown;
+  try {
+    rawBody = await req.json();
   } catch {
-    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+    return apiError("Invalid JSON body", { status: 400, headers: mergeHeaders(rateLimit.headers) });
   }
+
+  const patch = sanitizeSettingsPatch(rawBody);
+  if (!patch) {
+    return apiError("Invalid settings payload", { status: 422, headers: mergeHeaders(rateLimit.headers) });
+  }
+
+  const store = await cookies();
+  const fallback = parseCookieSettings(store.get(SETTINGS_COOKIE_KEY)?.value);
+
+  const currentResult = await supabase
+    .from("user_settings")
+    .select("data")
+    .eq("user_id", user.id)
+    .maybeSingle<SettingsRow>();
+
+  if (currentResult.error && !isLikelyMissingTable(currentResult.error)) {
+    return apiError(
+      "Failed to update settings",
+      { status: 500, headers: mergeHeaders(rateLimit.headers) },
+      currentResult.error.message
+    );
+  }
+
+  const current = currentResult.data?.data
+    ? deepMerge(DEFAULT_SETTINGS, currentResult.data.data)
+    : fallback;
+  const merged = deepMerge(current, patch);
+
+  if (!isLikelyMissingTable(currentResult.error)) {
+    const upsert = await supabase.from("user_settings").upsert(
+      {
+        user_id: user.id,
+        data: merged,
+      },
+      {
+        onConflict: "user_id",
+      }
+    );
+
+    if (upsert.error) {
+      return apiError(
+        "Failed to persist settings",
+        { status: 500, headers: mergeHeaders(rateLimit.headers) },
+        upsert.error.message
+      );
+    }
+  }
+
+  await writeSettingsCookie(merged);
+  return apiSuccess(
+    merged,
+    { status: 200, headers: mergeHeaders(rateLimit.headers) },
+    {
+      source: isLikelyMissingTable(currentResult.error) ? "cookie-fallback" : "supabase",
+    }
+  );
 }

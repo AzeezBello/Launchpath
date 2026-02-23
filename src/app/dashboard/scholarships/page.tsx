@@ -25,7 +25,9 @@ export default function ScholarshipsPage() {
     try {
       const res = await fetch(`/api/scholarships?query=${encodeURIComponent(query)}`);
       const data = await res.json();
-      setScholarships(data?.results || []);
+      if (!res.ok) throw new Error(data?.error || "Failed to fetch scholarships");
+      const rows = Array.isArray(data?.data) ? data.data : data?.results;
+      setScholarships(Array.isArray(rows) ? rows : []);
     } catch (error) {
       console.error("Error fetching scholarships:", error);
       setScholarships([]);

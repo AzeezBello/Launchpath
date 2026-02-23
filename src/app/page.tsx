@@ -32,7 +32,7 @@ const plans = [
     name: "Starter",
     price: "$0",
     detail: "Perfect for getting started with opportunities.",
-    perks: ["Unlimited searches", "AI cover letter fallback", "Saved settings on-device"],
+    perks: ["Unlimited searches", "AI cover letter fallback", "Cloud-synced settings"],
     cta: "Start free",
     href: "/signup",
     popular: false,

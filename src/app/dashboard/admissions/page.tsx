@@ -31,9 +31,10 @@ export default function AdmissionsPage() {
         `/api/admissions?country=${encodeURIComponent(c || country)}&field=${encodeURIComponent(f || field)}`
       );
 
-      if (!res.ok) throw new Error("Failed to fetch admissions");
       const json = await res.json();
-      setAdmissions(json.results || []);
+      if (!res.ok) throw new Error(json?.error || "Failed to fetch admissions");
+      const rows = Array.isArray(json?.data) ? json.data : json?.results;
+      setAdmissions(Array.isArray(rows) ? rows : []);
     } catch (err) {
       console.error("Error fetching admissions:", err);
       setError("Unable to load admissions. Please try again later.");

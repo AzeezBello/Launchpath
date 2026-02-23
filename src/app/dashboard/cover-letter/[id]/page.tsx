@@ -11,7 +11,8 @@ import { motion } from "framer-motion";
 export default function EditCoverLetterPage() {
   const supabase = useSupabaseClient();
   const user = useUser();
-  const { id } = useParams();
+  const params = useParams();
+  const id = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
 
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -59,6 +60,10 @@ export default function EditCoverLetterPage() {
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (!user || !id) {
+      toast.error("You are not authorized to update this draft");
+      return;
+    }
     const { error } = await supabase
       .from("cover_letters")
       .update({
@@ -68,7 +73,8 @@ export default function EditCoverLetterPage() {
         description: form.description,
         content: form.content,
       })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", user.id);
 
     if (error) {
       console.error(error);
@@ -94,7 +100,8 @@ export default function EditCoverLetterPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "AI failed");
-      setForm((f) => ({ ...f, content: data.content || data.letter || "" }));
+      const result = (data?.data || data) as { content?: string; letter?: string };
+      setForm((f) => ({ ...f, content: result.content || result.letter || "" }));
       toast.success("Regenerated with AI");
     } catch (err) {
       console.error(err);

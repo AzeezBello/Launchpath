@@ -28,10 +28,10 @@ export default function GrantsPage() {
 
     try {
       const res = await fetch(`/api/grants?query=${encodeURIComponent(searchTerm)}`);
-      if (!res.ok) throw new Error("Failed to fetch grants");
-
       const data = await res.json();
-      setGrants(data?.results || []);
+      if (!res.ok) throw new Error(data?.error || "Failed to fetch grants");
+      const rows = Array.isArray(data?.data) ? data.data : data?.results;
+      setGrants(Array.isArray(rows) ? rows : []);
     } catch (err) {
       console.error("Error fetching grants:", err);
       setError("Unable to load grants. Please try again later.");

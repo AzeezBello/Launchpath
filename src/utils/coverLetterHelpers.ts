@@ -18,8 +18,15 @@ export async function saveLetter(supabase: SupabaseClient, payload: CoverLetterP
 export async function updateLetter(
   supabase: SupabaseClient,
   id: string,
+  userId: string,
   patch: Partial<CoverLetterPayload>
 ) {
-  const { error, data } = await supabase.from("cover_letters").update(patch).eq("id", id).select().single();
+  const { error, data } = await supabase
+    .from("cover_letters")
+    .update(patch)
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select()
+    .single();
   return { error, data };
 }

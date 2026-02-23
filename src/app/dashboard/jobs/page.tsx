@@ -22,24 +22,25 @@ export default function JobsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchJobs = useCallback(async () => {
+  const fetchJobs = useCallback(async (searchTerm = "") => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/jobs?query=${encodeURIComponent(query)}`);
-      if (!res.ok) throw new Error("Failed to fetch jobs");
+      const res = await fetch(`/api/jobs?query=${encodeURIComponent(searchTerm)}`);
       const data = await res.json();
-      setJobs(data?.results || []);
+      if (!res.ok) throw new Error(data?.error || "Failed to fetch jobs");
+      const rows = Array.isArray(data?.data) ? data.data : data?.results;
+      setJobs(Array.isArray(rows) ? rows : []);
     } catch (err: unknown) {
       console.error("Error fetching jobs:", err);
       setError("Unable to fetch jobs. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [query]);
+  }, []);
 
   useEffect(() => {
-    fetchJobs();
+    fetchJobs("");
   }, [fetchJobs]);
 
   return (
@@ -62,7 +63,7 @@ export default function JobsPage() {
           />
         </div>
         <Button
-          onClick={fetchJobs}
+          onClick={() => fetchJobs(query)}
           disabled={loading}
           className="bg-emerald-500 hover:bg-emerald-600 text-white"
         >
