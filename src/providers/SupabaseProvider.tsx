@@ -9,6 +9,7 @@ import {
   useUser,
 } from "@supabase/auth-helpers-react";
 import { ThemeProvider, type ThemeProviderProps } from "next-themes";
+import { getSupabasePublicEnv } from "@/lib/supabase-env";
 
 type Props = ThemeProviderProps & { children: React.ReactNode };
 
@@ -18,12 +19,8 @@ type Props = ThemeProviderProps & { children: React.ReactNode };
  * `@supabase/auth-helpers-react` and powers the ThemeToggle component.
  */
 export function SupabaseProvider({ children, ...themeProps }: Props) {
-  const [supabaseClient] = useState<SupabaseClient>(() =>
-    createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-  );
+  const env = getSupabasePublicEnv();
+  const [supabaseClient] = useState<SupabaseClient>(() => createBrowserClient(env.url, env.anonKey));
 
   return (
     <ThemeProvider {...themeProps}>

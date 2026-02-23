@@ -98,6 +98,7 @@ OPENAI_API_KEY=your_openai_api_key_optional
 
 - `OPENAI_API_KEY` is optional. If missing, cover letters use deterministic fallback templates.
 - `NEXT_PUBLIC_BASE_URL` is used for signup email redirect URL generation.
+- On Vercel, ensure `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set for each target environment (`Production`, `Preview`, and `Development`) before deploying.
 
 ## Database Setup (Supabase)
 
@@ -108,20 +109,10 @@ Run the migration:
 This migration creates and secures:
 
 - `user_settings`
+- `resumes`
+- `cover_letters`
 - `applications`
 - `interviews`
-
-It also applies owner-only RLS policies to:
-
-- `resumes` (if table exists)
-- `cover_letters` (if table exists)
-
-### Required Existing Tables
-
-The app also expects these tables for existing features:
-
-- `resumes` with fields used by app: `id`, `user_id`, `title`, `data`, `created_at`
-- `cover_letters` with fields used by app: `id`, `user_id`, `company_name`, `position`, `tone`, `description`, `content`, `created_at`
 
 ## Scripts
 
@@ -257,6 +248,12 @@ Important: current limiter is in-memory and process-local. For multi-instance pr
 - Verify user is logged in and session cookies are present.
 - Confirm Supabase URL/anon key are correct.
 
+### Build fails with `@supabase/ssr: Your project's URL and API key are required`
+
+- Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in your deployment environment.
+- In Vercel: Project Settings -> Environment Variables -> add both vars for all environments.
+- Redeploy after updating variables.
+
 ### Settings/Applications/Interviews return empty fallback
 
 - The related table may not exist yet. Run the migration.
@@ -270,4 +267,3 @@ Important: current limiter is in-memory and process-local. For multi-instance pr
 
 - Limits are per IP/user and process-local.
 - Restarting dev server clears in-memory buckets.
-
