@@ -8,23 +8,21 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-screen text-white bg-gradient-to-br from-slate-900 to-slate-800">
-      {/* Sidebar */}
-      <div className="hidden md:flex">
+    <div className="relative min-h-screen text-foreground">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.1),transparent_22%)]" />
+
+      <div className="relative flex min-h-screen">
         <DashboardSidebar />
+
+        <main className="flex min-w-0 flex-1 flex-col">
+          <Topbar />
+          <div className="flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8">
+            <div className="mx-auto w-full max-w-7xl">
+              <DashboardClient>{children}</DashboardClient>
+            </div>
+          </div>
+        </main>
       </div>
-
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-auto backdrop-blur-lg">
-        <Topbar />
-        <div className="flex-1 p-6 md:p-8 space-y-6">
-          <DashboardClient>{children}</DashboardClient>
-        </div>
-      </main>
-
-      {/* Decorative glow effects */}
-      <div className="absolute top-0 left-0 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl -z-10" />
-      <div className="absolute bottom-10 right-10 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl -z-10" />
     </div>
   );
 }

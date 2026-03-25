@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Building2, MapPin } from "lucide-react"
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Building2, MapPin } from "lucide-react";
 
 interface Job {
-  id: number
-  title: string
-  company: string
-  location: string
-  matchScore: number
+  id: number;
+  title: string;
+  company: string;
+  location: string;
+  matchScore: number;
 }
 
 const jobs: Job[] = [
@@ -34,37 +34,43 @@ const jobs: Job[] = [
     location: "Hybrid - NYC",
     matchScore: 85,
   },
-]
+];
 
 export function RecommendedJobs() {
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-          <Building2 className="w-5 h-5" />
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+          <Building2 className="h-5 w-5 text-primary" />
           Recommended Jobs
         </CardTitle>
+        <CardDescription>
+          Curated roles with strong profile alignment.
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {jobs.map((job) => (
           <div
             key={job.id}
-            className="flex justify-between items-start border-b last:border-none pb-3"
+            className="flex items-start justify-between gap-3 rounded-[1.25rem] border border-border/80 bg-background/45 p-4"
           >
             <div>
               <h4 className="font-medium">{job.title}</h4>
               <p className="text-sm text-muted-foreground">{job.company}</p>
-              <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                <MapPin className="w-4 h-4" />
+              <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="h-4 w-4" />
                 {job.location}
               </div>
             </div>
-            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+            <Badge
+              variant="secondary"
+              className="bg-sky-500/15 text-sky-600 dark:text-sky-300"
+            >
               {job.matchScore}% Match
             </Badge>
           </div>
         ))}
       </CardContent>
     </Card>
-  )
+  );
 }

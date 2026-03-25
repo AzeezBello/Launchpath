@@ -1,52 +1,67 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
-import { useSupabase } from "@/providers/SupabaseProvider"
+import Link from "next/link";
+import { useState } from "react";
+import { AuthShell } from "@/components/auth/AuthShell";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { useSupabase } from "@/providers/SupabaseProvider";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("")
-  const [loading, setLoading] = useState(false)
-  const { supabase } = useSupabase()
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { supabase } = useSupabase();
 
   async function handlePasswordReset(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
-    })
+    });
 
-    setLoading(false)
+    setLoading(false);
 
     if (error) {
-      toast.error(error.message || "Something went wrong.")
+      toast.error(error.message || "Something went wrong.");
     } else {
-      toast.success("Password reset email sent! Check your inbox.")
-      setEmail("")
+      toast.success("Password reset email sent. Check your inbox.");
+      setEmail("");
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/10">
+    <AuthShell
+      eyebrow="Password support"
+      title="Reset your password"
+      description="Enter the email tied to your account and we will send you a secure reset link."
+      footer={
+        <>
+          Remembered it?{" "}
+          <Link href="/login" className="font-medium text-foreground hover:text-primary">
+            Back to login
+          </Link>
+        </>
+      }
+    >
       <form
         onSubmit={handlePasswordReset}
-        className="bg-background border p-6 rounded-xl w-full max-w-sm space-y-4 shadow-lg"
+        className="space-y-5"
       >
-        <h1 className="text-2xl font-semibold text-center">Forgot Password</h1>
-        <p className="text-sm text-center text-muted-foreground">
-          Enter your email to receive a password reset link.
-        </p>
-
-        <Input
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <div className="space-y-2">
+          <Label htmlFor="forgot-email">Email</Label>
+          <Input
+            id="forgot-email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            required
+          />
+        </div>
 
         <Button
           type="submit"
@@ -56,6 +71,6 @@ export default function ForgotPasswordPage() {
           {loading ? "Sending..." : "Send Reset Link"}
         </Button>
       </form>
-    </div>
-  )
+    </AuthShell>
+  );
 }
