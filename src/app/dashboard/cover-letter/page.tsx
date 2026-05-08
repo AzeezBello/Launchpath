@@ -3,15 +3,14 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useSupabase } from "@/providers/SupabaseProvider";
 import CoverLetterForm  from "@/components/cover-letter/CoverLetterForm";
 import GeneratedLetterPreview  from "@/components/cover-letter/GeneratedLetterPreview";
 import { saveLetter } from "@/utils/coverLetterHelpers";
 import { toast } from "sonner";
 
 export default function CoverLetterGeneratePage() {
-  const supabase = useSupabaseClient();
-  const user = useUser();
+  const { supabase, user } = useSupabase();
 
   const [generated, setGenerated] = useState<string>("");
   const [meta, setMeta] = useState<{ company?: string; position?: string; tone?: string; description?: string }>({});

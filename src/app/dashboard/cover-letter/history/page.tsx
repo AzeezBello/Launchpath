@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useSupabase } from "@/providers/SupabaseProvider";
 import { toast } from "sonner";
 import LetterCard from "@/components/cover-letter/LetterCard";
 
@@ -17,8 +17,7 @@ type CoverLetter = {
 };
 
 export default function CoverLetterHistoryPage() {
-  const supabase = useSupabaseClient();
-  const user = useUser();
+  const { supabase, user } = useSupabase();
   const [letters, setLetters] = useState<CoverLetter[]>([]);
   const [loading, setLoading] = useState(true);
 

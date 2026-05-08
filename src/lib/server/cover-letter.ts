@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { logger } from "@/lib/logger";
 
 export type CoverLetterPrompt = {
   company: string;
@@ -78,7 +79,7 @@ Keep it concise, human, and tailored to measurable impact.
         };
       }
     } catch (error) {
-      console.error("OpenAI generation failed, falling back to template:", error);
+      logger.error("OpenAI generation failed, falling back to template:", error);
     }
   }
 

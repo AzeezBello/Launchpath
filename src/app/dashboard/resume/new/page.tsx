@@ -1,19 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import PersonalInfoForm from "@/components/resume/forms/PersonalInfoForm";
-import EducationForm from "@/components/resume/forms/EducationForm";
-import SkillsForm from "@/components/resume/forms/SkillsForm";
-import WorkExperienceForm from "@/components/resume/forms/WorkExperienceForm";
-import AchievementsForm from "@/components/resume/forms/AchievementsForm";
-import { createClient } from "@/utils/supabase/client";
-
+import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
-import {
-  ResumeFormData,
-} from "@/types/resume";
+import { ResumeFormData } from "@/types/resume";
+
+// Lazy load form components for better performance
+const PersonalInfoForm = lazy(() => import("@/components/resume/forms/PersonalInfoForm"));
+const EducationForm = lazy(() => import("@/components/resume/forms/EducationForm"));
+const SkillsForm = lazy(() => import("@/components/resume/forms/SkillsForm"));
+const WorkExperienceForm = lazy(() => import("@/components/resume/forms/WorkExperienceForm"));
+const AchievementsForm = lazy(() => import("@/components/resume/forms/AchievementsForm"));
 
 export default function NewResumePage() {
   const [step, setStep] = useState<number>(1);
@@ -27,7 +26,6 @@ export default function NewResumePage() {
     title: "",
   });
   const router = useRouter();
-  const supabase = createClient();
 
   const updateSection = <K extends keyof ResumeFormData>(
     key: K,
@@ -40,46 +38,56 @@ export default function NewResumePage() {
     {
       id: 1,
       content: (
-        <PersonalInfoForm
-          initialData={formData.personalInfo}
-          onChange={(data) => updateSection("personalInfo", data)}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <PersonalInfoForm
+            initialData={formData.personalInfo}
+            onChange={(data) => updateSection("personalInfo", data)}
+          />
+        </Suspense>
       ),
     },
     {
       id: 2,
       content: (
-        <EducationForm
-          initialData={formData.education}
-          onChange={(data) => updateSection("education", data)}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <EducationForm
+            initialData={formData.education}
+            onChange={(data) => updateSection("education", data)}
+          />
+        </Suspense>
       ),
     },
     {
       id: 3,
       content: (
-        <SkillsForm
-          initialData={formData.skills}
-          onChange={(data) => updateSection("skills", data)}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <SkillsForm
+            initialData={formData.skills}
+            onChange={(data) => updateSection("skills", data)}
+          />
+        </Suspense>
       ),
     },
     {
       id: 4,
       content: (
-        <WorkExperienceForm
-          initialData={formData.experience}
-          onChange={(data) => updateSection("experience", data)}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <WorkExperienceForm
+            initialData={formData.experience}
+            onChange={(data) => updateSection("experience", data)}
+          />
+        </Suspense>
       ),
     },
     {
       id: 5,
       content: (
-        <AchievementsForm
-          initialData={formData.achievements}
-          onChange={(data) => updateSection("achievements", data)}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <AchievementsForm
+            initialData={formData.achievements}
+            onChange={(data) => updateSection("achievements", data)}
+          />
+        </Suspense>
       ),
     },
   ];

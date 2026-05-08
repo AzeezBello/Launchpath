@@ -2,15 +2,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { useSupabase } from "@/providers/SupabaseProvider";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
 import { motion } from "framer-motion";
 
 export default function EditCoverLetterPage() {
-  const supabase = useSupabaseClient();
-  const user = useUser();
+  const { supabase, user } = useSupabase();
   const params = useParams();
   const id = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
 

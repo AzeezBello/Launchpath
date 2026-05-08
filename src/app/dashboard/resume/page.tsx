@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, FileText } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "@/lib/supabaseClient";
 
 interface Resume {
   id: string;
@@ -17,7 +17,6 @@ export default function ResumePage() {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const supabase = createClient();
 
   const fetchResumes = useCallback(async () => {
     setLoading(true);

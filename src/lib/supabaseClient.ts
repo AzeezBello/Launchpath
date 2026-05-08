@@ -14,5 +14,6 @@ export function getSupabaseBrowserClient() {
   return client;
 }
 
+// Export the singleton client for backward compatibility
 export const supabase = getSupabaseBrowserClient();
  

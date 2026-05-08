@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import PersonalInfoForm from "@/components/resume/forms/PersonalInfoForm";
-import EducationForm from "@/components/resume/forms/EducationForm";
-import SkillsForm from "@/components/resume/forms/SkillsForm";
-import WorkExperienceForm from "@/components/resume/forms/WorkExperienceForm";
-import AchievementsForm from "@/components/resume/forms/AchievementsForm";
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "@/lib/supabaseClient";
 import type { ResumeFormData } from "@/types/resume";
+
+// Lazy load form components for better performance
+const PersonalInfoForm = lazy(() => import("@/components/resume/forms/PersonalInfoForm"));
+const EducationForm = lazy(() => import("@/components/resume/forms/EducationForm"));
+const SkillsForm = lazy(() => import("@/components/resume/forms/SkillsForm"));
+const WorkExperienceForm = lazy(() => import("@/components/resume/forms/WorkExperienceForm"));
+const AchievementsForm = lazy(() => import("@/components/resume/forms/AchievementsForm"));
 
 export default function EditResumePage() {
   const params = useParams();
@@ -20,7 +22,6 @@ export default function EditResumePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const supabase = createClient();
   const router = useRouter();
 
   useEffect(() => {
@@ -109,34 +110,44 @@ export default function EditResumePage() {
       <h1 className="text-2xl font-semibold text-white mb-4">Edit Resume</h1>
 
       {step === 1 && (
-        <PersonalInfoForm
-          initialData={resumeData.personalInfo}
-          onChange={(data) => updateSection("personalInfo", data)}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <PersonalInfoForm
+            initialData={resumeData.personalInfo}
+            onChange={(data) => updateSection("personalInfo", data)}
+          />
+        </Suspense>
       )}
       {step === 2 && (
-        <EducationForm
-          initialData={resumeData.education}
-          onChange={(data) => updateSection("education", data)}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <EducationForm
+            initialData={resumeData.education}
+            onChange={(data) => updateSection("education", data)}
+          />
+        </Suspense>
       )}
       {step === 3 && (
-        <SkillsForm
-          initialData={resumeData.skills}
-          onChange={(data) => updateSection("skills", data)}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <SkillsForm
+            initialData={resumeData.skills}
+            onChange={(data) => updateSection("skills", data)}
+          />
+        </Suspense>
       )}
       {step === 4 && (
-        <WorkExperienceForm
-          initialData={resumeData.experience}
-          onChange={(data) => updateSection("experience", data)}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <WorkExperienceForm
+            initialData={resumeData.experience}
+            onChange={(data) => updateSection("experience", data)}
+          />
+        </Suspense>
       )}
       {step === 5 && (
-        <AchievementsForm
-          initialData={resumeData.achievements}
-          onChange={(data) => updateSection("achievements", data)}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <AchievementsForm
+            initialData={resumeData.achievements}
+            onChange={(data) => updateSection("achievements", data)}
+          />
+        </Suspense>
       )}
 
       <div className="flex justify-between">
