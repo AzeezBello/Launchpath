@@ -6,6 +6,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
 import type { ResumeFormData } from "@/types/resume";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { StepProgress } from "@/components/resume/StepProgress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FileText } from "lucide-react";
 
 // Lazy load form components for better performance
 const PersonalInfoForm = lazy(() => import("@/components/resume/forms/PersonalInfoForm"));
@@ -77,7 +81,12 @@ export default function EditResumePage() {
   };
 
   if (loading || !resumeData)
-    return <p className="text-center py-10 text-gray-400">Loading...</p>;
+    return (
+      <div className="mx-auto max-w-3xl space-y-4">
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
 
   const updateResume = async () => {
     if (!resumeData) return;
@@ -106,69 +115,71 @@ export default function EditResumePage() {
   const totalSteps = 5;
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl mx-auto bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20">
-      <h1 className="text-2xl font-semibold text-white mb-4">Edit Resume</h1>
+    <div className="mx-auto max-w-3xl space-y-8">
+      <PageHeader icon={FileText} title="Edit Resume" description="Update any section and save your changes." />
 
-      {step === 1 && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <PersonalInfoForm
-            initialData={resumeData.personalInfo}
-            onChange={(data) => updateSection("personalInfo", data)}
-          />
-        </Suspense>
-      )}
-      {step === 2 && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <EducationForm
-            initialData={resumeData.education}
-            onChange={(data) => updateSection("education", data)}
-          />
-        </Suspense>
-      )}
-      {step === 3 && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <SkillsForm
-            initialData={resumeData.skills}
-            onChange={(data) => updateSection("skills", data)}
-          />
-        </Suspense>
-      )}
-      {step === 4 && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <WorkExperienceForm
-            initialData={resumeData.experience}
-            onChange={(data) => updateSection("experience", data)}
-          />
-        </Suspense>
-      )}
-      {step === 5 && (
-        <Suspense fallback={<div>Loading...</div>}>
-          <AchievementsForm
-            initialData={resumeData.achievements}
-            onChange={(data) => updateSection("achievements", data)}
-          />
-        </Suspense>
-      )}
+      <div className="surface-panel space-y-6 p-6 sm:p-8">
+        <StepProgress step={step} totalSteps={totalSteps} />
 
-      <div className="flex justify-between">
-        {step > 1 && (
-          <Button variant="outline" onClick={() => setStep(step - 1)}>
-            Previous
-          </Button>
+        {step === 1 && (
+          <Suspense fallback={<div>Loading...</div>}>
+            <PersonalInfoForm
+              initialData={resumeData.personalInfo}
+              onChange={(data) => updateSection("personalInfo", data)}
+            />
+          </Suspense>
         )}
-        {step < totalSteps ? (
-          <Button onClick={() => setStep((prev) => Math.min(prev + 1, totalSteps))}>
-            Next
-          </Button>
-        ) : (
-          <Button
-            className="bg-emerald-500 hover:bg-emerald-600 text-white"
-            onClick={updateResume}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Update Resume"}
-          </Button>
+        {step === 2 && (
+          <Suspense fallback={<div>Loading...</div>}>
+            <EducationForm
+              initialData={resumeData.education}
+              onChange={(data) => updateSection("education", data)}
+            />
+          </Suspense>
         )}
+        {step === 3 && (
+          <Suspense fallback={<div>Loading...</div>}>
+            <SkillsForm
+              initialData={resumeData.skills}
+              onChange={(data) => updateSection("skills", data)}
+            />
+          </Suspense>
+        )}
+        {step === 4 && (
+          <Suspense fallback={<div>Loading...</div>}>
+            <WorkExperienceForm
+              initialData={resumeData.experience}
+              onChange={(data) => updateSection("experience", data)}
+            />
+          </Suspense>
+        )}
+        {step === 5 && (
+          <Suspense fallback={<div>Loading...</div>}>
+            <AchievementsForm
+              initialData={resumeData.achievements}
+              onChange={(data) => updateSection("achievements", data)}
+            />
+          </Suspense>
+        )}
+
+        <div className="flex justify-between">
+          {step > 1 && (
+            <Button variant="outline" onClick={() => setStep(step - 1)}>
+              Previous
+            </Button>
+          )}
+          <div className="ml-auto">
+            {step < totalSteps ? (
+              <Button onClick={() => setStep((prev) => Math.min(prev + 1, totalSteps))}>
+                Next
+              </Button>
+            ) : (
+              <Button onClick={updateResume} disabled={saving}>
+                {saving ? "Saving..." : "Update Resume"}
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

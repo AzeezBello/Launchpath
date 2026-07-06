@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { CalendarClock, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
 
 interface Interview {
   id: string;
@@ -18,6 +25,7 @@ const STATUS_OPTIONS = ["Scheduled", "Completed", "Pending"] as const;
 export default function InterviewPage() {
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [refreshToken, setRefreshToken] = useState(0);
@@ -30,6 +38,7 @@ export default function InterviewPage() {
   useEffect(() => {
     async function fetchInterviews() {
       setLoading(true);
+      setError(null);
       try {
         const res = await fetch(`/api/interview?page=${page}&limit=10`);
         const data = await res.json();
@@ -38,8 +47,9 @@ export default function InterviewPage() {
         const rows = Array.isArray(data?.data) ? data.data : [];
         setInterviews(rows);
         setTotalPages(Number(data?.meta?.totalPages || 1));
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
+        setError(err instanceof Error ? err.message : "Failed to load interviews");
         setInterviews([]);
         setTotalPages(1);
       } finally {
@@ -78,90 +88,99 @@ export default function InterviewPage() {
       setDate(new Date().toISOString().slice(0, 10));
       setPage(1);
       setRefreshToken((v) => v + 1);
-    } catch (error) {
-      console.error(error);
-      toast.error(error instanceof Error ? error.message : "Could not create interview");
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Could not create interview");
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold">🗓️ Interview Prep</h2>
+    <div className="space-y-8">
+      <PageHeader
+        icon={CalendarClock}
+        title="Interview Prep"
+        description="Keep upcoming and past interviews organized in one place."
+      />
 
-      <div className="mt-4 mb-6 grid gap-3 md:grid-cols-[1fr_1fr_160px_160px_auto]">
-        <Input
-          placeholder="Candidate name"
-          value={candidate}
-          onChange={(e) => setCandidate(e.target.value)}
-        />
-        <Input
-          placeholder="Role / position"
-          value={position}
-          onChange={(e) => setPosition(e.target.value)}
-        />
-        <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value as (typeof STATUS_OPTIONS)[number])}
-          className="h-9 rounded-md border border-white/20 bg-white/5 px-3 text-sm"
-        >
-          {STATUS_OPTIONS.map((option) => (
-            <option key={option} value={option} className="text-black">
-              {option}
-            </option>
-          ))}
-        </select>
-        <Button onClick={addInterview} disabled={saving}>
-          {saving ? "Saving..." : "Add"}
-        </Button>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Add interview</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-[1fr_1fr_160px_160px_auto]">
+          <Input
+            placeholder="Candidate name"
+            value={candidate}
+            onChange={(e) => setCandidate(e.target.value)}
+          />
+          <Input
+            placeholder="Role / position"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+          />
+          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value as (typeof STATUS_OPTIONS)[number])}
+            className="h-11 rounded-2xl border border-input bg-background/60 px-4 text-sm text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring"
+          >
+            {STATUS_OPTIONS.map((option) => (
+              <option key={option} value={option} className="bg-background text-foreground">
+                {option}
+              </option>
+            ))}
+          </select>
+          <Button onClick={addInterview} disabled={saving}>
+            <Plus className="h-4 w-4" />
+            {saving ? "Saving..." : "Add"}
+          </Button>
+        </CardContent>
+      </Card>
 
       {loading ? (
-        <div className="text-center py-10">Loading interview data...</div>
+        <div className="grid gap-4">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-20 w-full" />
+          ))}
+        </div>
+      ) : error ? (
+        <EmptyState icon={CalendarClock} title="Couldn't load interviews" description={error} />
       ) : interviews.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-6">
-          No interviews found. Try again later.
-        </p>
+        <EmptyState
+          icon={CalendarClock}
+          title="No interviews yet"
+          description="Add one above to start prepping."
+        />
       ) : (
         <div className="grid gap-4">
-          {interviews.map((interview) => (
-            <div
+          {interviews.map((interview, i) => (
+            <motion.div
               key={interview.id}
-              className="p-4 border rounded-lg shadow-sm bg-card hover:bg-accent transition"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.4) }}
             >
-              <h2 className="font-semibold text-lg">{interview.candidate}</h2>
-              <p className="text-sm text-muted-foreground">
-                Role: {interview.position} | Status:{" "}
-                <span
-                  className={`font-medium ${
-                    interview.status === "Completed"
-                      ? "text-green-600"
-                      : interview.status === "Scheduled"
-                      ? "text-yellow-600"
-                      : "text-gray-600"
-                  }`}
-                >
-                  {interview.status}
-                </span>
-              </p>
-              <p className="text-xs mt-1 text-muted-foreground">Date: {interview.date}</p>
-            </div>
+              <Card className="hover-card">
+                <CardContent className="flex items-start justify-between gap-3 p-5">
+                  <div>
+                    <h3 className="font-semibold">{interview.candidate}</h3>
+                    <p className="text-sm text-muted-foreground">Role: {interview.position}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Date: {interview.date}</p>
+                  </div>
+                  <StatusBadge status={interview.status} />
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
       )}
 
-      {/* Pagination */}
-      <div className="flex justify-center items-center gap-3 mt-6">
-        <Button
-          variant="outline"
-          disabled={page === 1}
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-        >
+      <div className="flex items-center justify-center gap-3">
+        <Button variant="outline" disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
           Previous
         </Button>
-        <span className="text-sm">
+        <span className="text-sm text-muted-foreground">
           Page {page} of {totalPages}
         </span>
         <Button

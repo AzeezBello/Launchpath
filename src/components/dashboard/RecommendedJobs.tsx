@@ -3,38 +3,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, MapPin } from "lucide-react";
+import { jobData } from "@/data/opportunities";
 
-interface Job {
-  id: number;
-  title: string;
-  company: string;
-  location: string;
-  matchScore: number;
-}
-
-const jobs: Job[] = [
-  {
-    id: 1,
-    title: "React Developer",
-    company: "NextGen Labs",
-    location: "Remote",
-    matchScore: 92,
-  },
-  {
-    id: 2,
-    title: "Product Designer",
-    company: "Designify",
-    location: "San Francisco, CA",
-    matchScore: 88,
-  },
-  {
-    id: 3,
-    title: "Full Stack Engineer",
-    company: "TechNova",
-    location: "Hybrid - NYC",
-    matchScore: 85,
-  },
-];
+const FEATURED_JOBS = jobData.slice(0, 3);
 
 export function RecommendedJobs() {
   return (
@@ -45,14 +16,17 @@ export function RecommendedJobs() {
           Recommended Jobs
         </CardTitle>
         <CardDescription>
-          Curated roles with strong profile alignment.
+          Curated roles worth a look this week.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        {jobs.map((job) => (
-          <div
+        {FEATURED_JOBS.map((job) => (
+          <a
             key={job.id}
-            className="flex items-start justify-between gap-3 rounded-[1.25rem] border border-border/80 bg-background/45 p-4"
+            href={job.link}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-start justify-between gap-3 rounded-[1.25rem] border border-border/80 bg-background/45 p-4 transition-colors hover:border-primary/40"
           >
             <div>
               <h4 className="font-medium">{job.title}</h4>
@@ -66,9 +40,9 @@ export function RecommendedJobs() {
               variant="secondary"
               className="bg-sky-500/15 text-sky-600 dark:text-sky-300"
             >
-              {job.matchScore}% Match
+              {job.type}
             </Badge>
-          </div>
+          </a>
         ))}
       </CardContent>
     </Card>

@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useState } from "react";
+import { Loader2, Search, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Loader2, Search } from "lucide-react";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { OpportunityCard, OpportunityGridSkeleton } from "@/components/opportunities/OpportunityCard";
+import { useOpportunitySearch } from "@/lib/hooks/useOpportunitySearch";
 
 interface Admission {
   id: string;
@@ -17,132 +20,73 @@ interface Admission {
 export default function AdmissionsPage() {
   const [country, setCountry] = useState("");
   const [field, setField] = useState("");
-  const [admissions, setAdmissions] = useState<Admission[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const buildUrl = useCallback(
+    (params: Record<string, string>) =>
+      `/api/admissions?country=${encodeURIComponent(params.country || "")}&field=${encodeURIComponent(params.field || "")}`,
+    []
+  );
+  const { items, loading, error, search } = useOpportunitySearch<Admission>(buildUrl);
 
-  // --- Fetch admissions ---
-  const fetchData = useCallback(async (c?: string, f?: string) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch(
-        `/api/admissions?country=${encodeURIComponent(c || country)}&field=${encodeURIComponent(f || field)}`
-      );
-
-      const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Failed to fetch admissions");
-      const rows = Array.isArray(json?.data) ? json.data : json?.results;
-      setAdmissions(Array.isArray(rows) ? rows : []);
-    } catch (err) {
-      console.error("Error fetching admissions:", err);
-      setError("Unable to load admissions. Please try again later.");
-      setAdmissions([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [country, field]);
-
-  // --- Initial fetch ---
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // --- Trigger search on Enter ---
+  const handleSearch = () => search({ country, field });
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") fetchData();
+    if (e.key === "Enter") handleSearch();
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-white mb-2">🎓 Admissions Finder</h2>
-        <p className="text-white/70 text-sm">
-          Explore universities and programs by country and field of study.
-        </p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        icon={Users}
+        title="Admissions Finder"
+        description="Explore universities and programs by country and field of study."
+      />
 
-      {/* Search Inputs */}
-      <div className="flex flex-col md:flex-row justify-center gap-3 mb-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Input
           placeholder="Country (e.g. Nigeria)"
           value={country}
           onChange={(e) => setCountry(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+          className="sm:max-w-xs"
         />
         <Input
           placeholder="Field (e.g. Engineering)"
           value={field}
           onChange={(e) => setField(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+          className="sm:max-w-xs"
         />
-        <Button
-          onClick={() => fetchData()}
-          disabled={loading}
-          className="bg-emerald-500 hover:bg-emerald-600 text-white"
-        >
-          {loading ? (
-            <Loader2 className="animate-spin mr-2 h-4 w-4" />
-          ) : (
-            <Search className="mr-2 h-4 w-4" />
-          )}
+        <Button onClick={handleSearch} disabled={loading}>
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
           Search
         </Button>
       </div>
 
-      {/* Loading State */}
-      {loading && (
-        <div className="flex justify-center py-12">
-          <Loader2 className="animate-spin h-8 w-8 text-white/70" />
+      {loading ? (
+        <OpportunityGridSkeleton />
+      ) : error ? (
+        <EmptyState icon={Users} title="Couldn't load admissions" description={error} />
+      ) : items.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title="No admissions found"
+          description="Try a different country or field."
+        />
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((u, i) => (
+            <OpportunityCard
+              key={u.id}
+              index={i}
+              title={u.name}
+              href={u.website}
+              linkLabel="Visit website"
+              meta={[
+                { label: "Country", value: u.country },
+                { label: "Field", value: u.field },
+              ]}
+            />
+          ))}
         </div>
-      )}
-
-      {/* Error State */}
-      {!loading && error && (
-        <p className="text-center text-red-400 py-6">{error}</p>
-      )}
-
-      {/* Results */}
-      {!loading && !error && (
-        <>
-          {admissions.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {admissions.map((u) => (
-                <Card
-                  key={u.id}
-                  className="bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:border-emerald-400/40 hover:shadow-lg transition"
-                >
-                  <CardHeader>
-                    <h3 className="font-semibold text-lg">{u.name}</h3>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-sm text-white/80">
-                    <p>
-                      <span className="font-medium text-white">Country:</span> {u.country}
-                    </p>
-                    <p>
-                      <span className="font-medium text-white">Field:</span> {u.field}
-                    </p>
-                    <a
-                      href={u.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-2 text-emerald-400 hover:text-emerald-300 font-medium"
-                    >
-                      Visit Website →
-                    </a>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-white/60 py-10">
-              No admissions found. Try a different search.
-            </p>
-          )}
-        </>
       )}
     </div>
   );

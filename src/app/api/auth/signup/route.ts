@@ -42,6 +42,7 @@ export async function POST(request: Request) {
     return apiSuccess(
       {
         user: data.user,
+        session: data.session,
         message: "Account created successfully",
       },
       { status: 201, headers: rateLimit.headers }

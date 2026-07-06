@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, createContext, useContext, useEffect } from "react";
+import { useState, createContext, useContext, useEffect, useCallback } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { ThemeProvider, type ThemeProviderProps } from "next-themes";
@@ -12,6 +12,7 @@ type SupabaseContextType = {
   supabase: SupabaseClient;
   user: User | null;
   loading: boolean;
+  refreshSession: () => Promise<void>;
 };
 
 const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined);
@@ -46,9 +47,14 @@ export function SupabaseProvider({ children, ...themeProps }: Props) {
     return () => subscription.unsubscribe();
   }, [supabaseClient]);
 
+  const refreshSession = useCallback(async () => {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    setUser(session?.user ?? null);
+  }, [supabaseClient]);
+
   return (
     <ThemeProvider {...themeProps}>
-      <SupabaseContext.Provider value={{ supabase: supabaseClient, user, loading }}>
+      <SupabaseContext.Provider value={{ supabase: supabaseClient, user, loading, refreshSession }}>
         {children}
       </SupabaseContext.Provider>
     </ThemeProvider>

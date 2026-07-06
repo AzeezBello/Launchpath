@@ -1,70 +1,55 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Briefcase, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Briefcase } from "lucide-react";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
 
 interface Application {
-  id: number;
-  title: string;
-  company: string;
-  status: "pending" | "accepted" | "rejected" | "in-review";
+  id: string;
+  program: string;
+  status: string;
   date: string;
 }
 
-const applications: Application[] = [
-  {
-    id: 1,
-    title: "Frontend Developer",
-    company: "TechCorp Inc.",
-    status: "in-review",
-    date: "2 days ago",
-  },
-  {
-    id: 2,
-    title: "UI/UX Designer",
-    company: "Creative Studio",
-    status: "pending",
-    date: "4 days ago",
-  },
-  {
-    id: 3,
-    title: "Full Stack Engineer",
-    company: "StartUp X",
-    status: "accepted",
-    date: "1 week ago",
-  },
-];
-
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case "accepted":
-      return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
-    case "rejected":
-      return <XCircle className="h-4 w-4 text-red-500" />;
-    case "in-review":
-      return <Clock className="h-4 w-4 text-sky-500" />;
-    default:
-      return <Clock className="h-4 w-4 text-muted-foreground" />;
-  }
-};
-
-const getStatusBadge = (status: string) => {
-  const variants: Record<string, string> = {
-    pending: "bg-muted text-muted-foreground",
-    accepted: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300",
-    rejected: "bg-red-500/15 text-red-600 dark:text-red-300",
-    "in-review": "bg-sky-500/15 text-sky-600 dark:text-sky-300",
-  };
-
-  return (
-    <Badge variant="secondary" className={variants[status]}>
-      {status === "in-review" ? "In Review" : status.charAt(0).toUpperCase() + status.slice(1)}
-    </Badge>
-  );
-};
-
 export function RecentApplications() {
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function load() {
+      setLoading(true);
+      setError(false);
+
+      try {
+        const res = await fetch("/api/applications?page=1&limit=4", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const payload = await res.json();
+
+        if (!res.ok || !payload.success) {
+          throw new Error(payload?.error || "Failed to load applications");
+        }
+
+        setApplications(payload.data || []);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        console.error(err);
+        setError(true);
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => controller.abort();
+  }, []);
+
   return (
     <Card className="h-full">
       <CardHeader>
@@ -77,22 +62,40 @@ export function RecentApplications() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        {applications.map((app) => (
-          <div
-            key={app.id}
-            className="flex items-start justify-between gap-3 rounded-[1.25rem] border border-border/80 bg-background/45 p-4"
-          >
-            <div>
-              <h4 className="font-medium">{app.title}</h4>
-              <p className="text-sm text-muted-foreground">{app.company}</p>
-              <p className="text-xs text-muted-foreground mt-1">{app.date}</p>
-            </div>
-            <div className="flex items-center gap-2 pt-1">
-              {getStatusIcon(app.status)}
-              {getStatusBadge(app.status)}
-            </div>
+        {loading ? (
+          <div className="space-y-3">
+            {[0, 1, 2].map((item) => (
+              <div key={item} className="h-16 animate-pulse rounded-[1.25rem] bg-muted/60" />
+            ))}
           </div>
-        ))}
+        ) : error ? (
+          <p className="text-sm text-muted-foreground">
+            Couldn&apos;t load your applications right now.
+          </p>
+        ) : applications.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No applications yet.{" "}
+            <Link href="/dashboard/applications" className="font-medium text-primary hover:underline">
+              Track your first one
+            </Link>
+            .
+          </p>
+        ) : (
+          applications.map((app) => (
+            <div
+              key={app.id}
+              className="flex items-start justify-between gap-3 rounded-[1.25rem] border border-border/80 bg-background/45 p-4"
+            >
+              <div>
+                <h4 className="font-medium">{app.program}</h4>
+                <p className="text-xs text-muted-foreground mt-1">{app.date}</p>
+              </div>
+              <div className="flex items-center gap-2 pt-1">
+                <StatusBadge status={app.status} showIcon />
+              </div>
+            </div>
+          ))
+        )}
       </CardContent>
     </Card>
   );

@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { BriefcaseBusiness, Loader2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Loader2, Search } from "lucide-react";
-import { motion } from "framer-motion";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { OpportunityCard, OpportunityGridSkeleton } from "@/components/opportunities/OpportunityCard";
+import { useOpportunitySearch } from "@/lib/hooks/useOpportunitySearch";
 
 interface Job {
   id: string;
@@ -17,117 +19,66 @@ interface Job {
 }
 
 export default function JobsPage() {
-  const [jobs, setJobs] = useState<Job[]>([]);
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const buildUrl = useCallback(
+    (params: Record<string, string>) => `/api/jobs?query=${encodeURIComponent(params.query || "")}`,
+    []
+  );
+  const { items, loading, error, search } = useOpportunitySearch<Job>(buildUrl);
 
-  const fetchJobs = useCallback(async (searchTerm = "") => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/jobs?query=${encodeURIComponent(searchTerm)}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to fetch jobs");
-      const rows = Array.isArray(data?.data) ? data.data : data?.results;
-      setJobs(Array.isArray(rows) ? rows : []);
-    } catch (err: unknown) {
-      console.error("Error fetching jobs:", err);
-      setError("Unable to fetch jobs. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchJobs("");
-  }, [fetchJobs]);
+  const handleSearch = () => search({ query: query.trim() });
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") handleSearch();
+  };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-cyan-400">
-          💼 Explore Jobs
-        </h2>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        icon={BriefcaseBusiness}
+        title="Explore Jobs"
+        description="Curated roles from teams worth applying to."
+      />
 
-      {/* Search Bar */}
-      <div className="flex gap-3 mb-8">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative sm:max-w-md sm:flex-1">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search by title, field, or location..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 bg-white/10 backdrop-blur-xl border border-white/20 focus:ring-2 focus:ring-emerald-400"
+            onKeyDown={handleKeyDown}
+            className="pl-10"
           />
         </div>
-        <Button
-          onClick={() => fetchJobs(query)}
-          disabled={loading}
-          className="bg-emerald-500 hover:bg-emerald-600 text-white"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="animate-spin mr-2 h-4 w-4" /> Searching...
-            </>
-          ) : (
-            "Search"
-          )}
+        <Button onClick={handleSearch} disabled={loading}>
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+          Search
         </Button>
       </div>
 
-      {/* Error */}
-      {error && (
-        <p className="text-red-400 text-center mb-4">{error}</p>
-      )}
-
-      {/* Job Cards */}
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="animate-spin h-6 w-6 text-emerald-400" />
-        </div>
-      ) : jobs.length > 0 ? (
-        <motion.div
-          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4 }}
-        >
-          {jobs.map((job, i) => (
-            <motion.div
-              key={job.id}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <Card className="bg-white/10 backdrop-blur-xl border border-white/20 hover:shadow-lg hover:shadow-emerald-400/10 transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-white">
-                    {job.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-gray-200 space-y-1">
-                  <p><span className="font-medium text-gray-300">Company:</span> {job.company}</p>
-                  <p><span className="font-medium text-gray-300">Location:</span> {job.location}</p>
-                  <p><span className="font-medium text-gray-300">Type:</span> {job.type}</p>
-                  <a
-                    href={job.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-emerald-400 mt-3 inline-block hover:underline"
-                  >
-                    View job →
-                  </a>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </motion.div>
+        <OpportunityGridSkeleton />
+      ) : error ? (
+        <EmptyState icon={BriefcaseBusiness} title="Couldn't load jobs" description={error} />
+      ) : items.length === 0 ? (
+        <EmptyState icon={BriefcaseBusiness} title="No jobs found" description="Try a different search." />
       ) : (
-        <p className="text-center text-muted-foreground mt-10">
-          No jobs found. Try a different search.
-        </p>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((job, i) => (
+            <OpportunityCard
+              key={job.id}
+              index={i}
+              title={job.title}
+              href={job.link}
+              linkLabel="View job"
+              meta={[
+                { label: "Company", value: job.company },
+                { label: "Location", value: job.location },
+                { label: "Type", value: job.type },
+              ]}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { ResumeFormData } from "@/types/resume";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { StepProgress } from "@/components/resume/StepProgress";
+import { FileText } from "lucide-react";
 
 // Lazy load form components for better performance
 const PersonalInfoForm = lazy(() => import("@/components/resume/forms/PersonalInfoForm"));
@@ -135,32 +138,36 @@ export default function NewResumePage() {
   const totalSteps = steps.length;
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl mx-auto bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20">
-      <h1 className="text-2xl font-semibold text-white mb-4">
-        Create New Resume
-      </h1>
+    <div className="mx-auto max-w-3xl space-y-8">
+      <PageHeader
+        icon={FileText}
+        title="Create New Resume"
+        description="Fill in each section — you can always come back and edit later."
+      />
 
-      {steps[step - 1]?.content}
+      <div className="surface-panel space-y-6 p-6 sm:p-8">
+        <StepProgress step={step} totalSteps={totalSteps} />
 
-      <div className="flex justify-between">
-        {step > 1 && (
-          <Button variant="outline" onClick={() => setStep(step - 1)}>
-            Previous
-          </Button>
-        )}
-        {step < totalSteps ? (
-          <Button onClick={() => setStep((prev) => Math.min(prev + 1, totalSteps))}>
-            Next
-          </Button>
-        ) : (
-          <Button
-            className="bg-emerald-500 hover:bg-emerald-600 text-white"
-            onClick={saveResume}
-            disabled={saving}
-          >
-            {saving ? "Saving..." : "Save Resume"}
-          </Button>
-        )}
+        {steps[step - 1]?.content}
+
+        <div className="flex justify-between">
+          {step > 1 && (
+            <Button variant="outline" onClick={() => setStep(step - 1)}>
+              Previous
+            </Button>
+          )}
+          <div className="ml-auto">
+            {step < totalSteps ? (
+              <Button onClick={() => setStep((prev) => Math.min(prev + 1, totalSteps))}>
+                Next
+              </Button>
+            ) : (
+              <Button onClick={saveResume} disabled={saving}>
+                {saving ? "Saving..." : "Save Resume"}
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

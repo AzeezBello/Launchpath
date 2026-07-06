@@ -13,28 +13,45 @@ export default function SignupForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { supabase } = useSupabase();
+  const { supabase, refreshSession } = useSupabase();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
+    let payload: { success: boolean; error?: string; data?: { session: unknown } } | null = null;
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      payload = await res.json();
+    } catch {
+      payload = { success: false, error: "Network error. Please try again." };
+    }
     setLoading(false);
 
-    if (error) {
-      toast.error(error.message || "Sign up failed");
+    if (!payload?.success) {
+      toast.error(payload?.error || "Sign up failed");
       return;
     }
 
-    toast.success("Account created successfully");
-    router.push("/dashboard");
+    if (payload.data?.session) {
+      await refreshSession();
+      toast.success("Account created successfully");
+      router.push("/dashboard");
+      router.refresh();
+    } else {
+      toast.success("Account created! Check your email to confirm before signing in.");
+      router.push("/login");
+    }
   };
 
   const handleGoogleSignup = async () => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
     });
     setLoading(false);
 

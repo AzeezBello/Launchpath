@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,21 @@ import { useSupabase } from "@/providers/SupabaseProvider";
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [linkValid, setLinkValid] = useState<boolean | null>(null);
   const router = useRouter();
   const { supabase } = useSupabase();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!cancelled) setLinkValid(Boolean(session));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [supabase]);
 
   async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault();
@@ -46,31 +59,37 @@ export default function ResetPasswordPage() {
         </>
       }
     >
-      <form
-        onSubmit={handleResetPassword}
-        className="space-y-5"
-      >
-        <div className="space-y-2">
-          <Label htmlFor="new-password">New password</Label>
-          <Input
-            id="new-password"
-            type="password"
-            placeholder="Create a strong password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="new-password"
-            required
-          />
-        </div>
-
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={loading}
+      {linkValid === false ? (
+        <p className="text-center text-sm text-muted-foreground">
+          This reset link is invalid or has expired. Request a new one above.
+        </p>
+      ) : (
+        <form
+          onSubmit={handleResetPassword}
+          className="space-y-5"
         >
-          {loading ? "Updating..." : "Update Password"}
-        </Button>
-      </form>
+          <div className="space-y-2">
+            <Label htmlFor="new-password">New password</Label>
+            <Input
+              id="new-password"
+              type="password"
+              placeholder="Create a strong password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              required
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading || linkValid !== true}
+          >
+            {loading ? "Updating..." : "Update Password"}
+          </Button>
+        </form>
+      )}
     </AuthShell>
   );
 }

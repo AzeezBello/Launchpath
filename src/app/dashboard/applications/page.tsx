@@ -1,10 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { Briefcase, Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { StatusBadge } from "@/components/dashboard/StatusBadge";
 
 type Application = {
   id: string;
@@ -89,12 +95,16 @@ export default function ApplicationsPage() {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-4">📄 My Applications</h2>
+    <div className="space-y-8">
+      <PageHeader
+        icon={Briefcase}
+        title="My Applications"
+        description="Track every submission and keep the pipeline moving."
+      />
 
-      <Card className="mb-6 bg-white/10 border-white/20">
+      <Card>
         <CardHeader>
-          <h3 className="font-semibold text-white">Add application</h3>
+          <CardTitle className="text-base">Add application</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-[1fr_180px_160px_auto]">
           <Input
@@ -105,44 +115,60 @@ export default function ApplicationsPage() {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as (typeof STATUS_OPTIONS)[number])}
-            className="h-9 rounded-md border border-white/20 bg-white/5 px-3 text-sm"
+            className="h-11 rounded-2xl border border-input bg-background/60 px-4 text-sm text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring"
           >
             {STATUS_OPTIONS.map((option) => (
-              <option key={option} value={option} className="text-black">
+              <option key={option} value={option} className="bg-background text-foreground">
                 {option}
               </option>
             ))}
           </select>
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           <Button onClick={addApplication} disabled={saving}>
+            <Plus className="h-4 w-4" />
             {saving ? "Saving..." : "Add"}
           </Button>
         </CardContent>
       </Card>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading applications...</p>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-28 w-full" />
+          ))}
+        </div>
       ) : error ? (
-        <p className="text-sm text-red-400">{error}</p>
+        <EmptyState icon={Briefcase} title="Couldn't load applications" description={error} />
       ) : applications.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No applications yet. Add your first one above.</p>
+        <EmptyState
+          icon={Briefcase}
+          title="No applications yet"
+          description="Add your first one above to start tracking it."
+        />
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {applications.map((app) => (
-            <Card key={app.id}>
-              <CardHeader>
-                <h3 className="font-semibold">{app.program}</h3>
-              </CardHeader>
-              <CardContent>
-                <p>Status: {app.status}</p>
-                <p className="text-sm text-muted-foreground">Date: {app.date}</p>
-              </CardContent>
-            </Card>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {applications.map((app, i) => (
+            <motion.div
+              key={app.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.4) }}
+            >
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-base">{app.program}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <StatusBadge status={app.status} />
+                  <p className="text-sm text-muted-foreground">Date: {app.date}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
       )}
 
-      <div className="mt-6 flex items-center justify-center gap-3">
+      <div className="flex items-center justify-center gap-3">
         <Button variant="outline" disabled={page <= 1 || loading} onClick={() => fetchApplications(page - 1)}>
           Previous
         </Button>

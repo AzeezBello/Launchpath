@@ -15,32 +15,41 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { supabase } = useSupabase();
+  const { supabase, refreshSession } = useSupabase();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    let payload: { success: boolean; error?: string } | null = null;
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      payload = await res.json();
+    } catch {
+      payload = { success: false, error: "Network error. Please try again." };
+    }
     setLoading(false);
 
-    if (error) {
-      toast.error(error.message || "Login failed");
+    if (!payload?.success) {
+      toast.error(payload?.error || "Login failed");
       return;
     }
 
+    await refreshSession();
     toast.success("Logged in");
     const redirectTo = searchParams.get("redirectedFrom") || "/dashboard";
     router.push(redirectTo);
+    router.refresh();
   };
 
   const handleGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
     });
 
     if (error) {
