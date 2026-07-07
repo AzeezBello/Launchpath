@@ -2,9 +2,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { FileStack } from "lucide-react";
 import { useSupabase } from "@/providers/SupabaseProvider";
 import { toast } from "sonner";
 import LetterCard from "@/components/cover-letter/LetterCard";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { EmptyState } from "@/components/dashboard/EmptyState";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type CoverLetter = {
   id: string;
@@ -22,7 +27,10 @@ export default function CoverLetterHistoryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) { setLoading(false); return; }
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     const fetchLetters = async () => {
       const { data, error } = await supabase
@@ -43,19 +51,47 @@ export default function CoverLetterHistoryPage() {
     fetchLetters();
   }, [supabase, user]);
 
-  if (!user) return <div className="p-8 text-gray-300">Please log in to view saved cover letters.</div>;
+  if (!user) {
+    return (
+      <EmptyState
+        icon={FileStack}
+        title="Please log in"
+        description="Sign in to view your saved cover letters."
+      />
+    );
+  }
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-semibold mb-6">Saved Cover Letters</h1>
+    <div className="space-y-8">
+      <PageHeader
+        icon={FileStack}
+        title="Saved Cover Letters"
+        description="Every letter you've generated and saved, in one place."
+      />
+
       {loading ? (
-        <p className="text-gray-400">Loading...</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
+        </div>
       ) : letters.length === 0 ? (
-        <p className="text-gray-400">No saved letters yet.</p>
+        <EmptyState
+          icon={FileStack}
+          title="No saved letters yet"
+          description="Generate a cover letter and save it to see it here."
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {letters.map((l) => (
-            <LetterCard key={l.id} letter={l} />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {letters.map((l, i) => (
+            <motion.div
+              key={l.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.4) }}
+            >
+              <LetterCard letter={l} />
+            </motion.div>
           ))}
         </div>
       )}

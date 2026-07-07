@@ -3,11 +3,13 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Sparkles } from "lucide-react";
 import { useSupabase } from "@/providers/SupabaseProvider";
 import CoverLetterForm  from "@/components/cover-letter/CoverLetterForm";
 import GeneratedLetterPreview  from "@/components/cover-letter/GeneratedLetterPreview";
 import { saveLetter } from "@/utils/coverLetterHelpers";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export default function CoverLetterGeneratePage() {
   const { supabase, user } = useSupabase();
@@ -83,24 +85,31 @@ export default function CoverLetterGeneratePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4">
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="glass p-6 rounded-2xl">
-        <h1 className="text-2xl font-semibold mb-3">AI Cover Letter Generator</h1>
-        <p className="text-sm text-gray-300 mb-6">Enter the job details below and get a tailored cover letter.</p>
+    <div className="mx-auto max-w-4xl space-y-8">
+      <PageHeader
+        icon={Sparkles}
+        title="AI Cover Letter Generator"
+        description="Enter the job details below and get a tailored cover letter in seconds."
+      />
 
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="surface-panel p-6 sm:p-8"
+      >
         <CoverLetterForm onGenerate={handleGenerate} loading={loading} />
-
-        {generated && (
-          <div className="mt-6">
-            <GeneratedLetterPreview
-              content={generated}
-              meta={{ company: meta.company || "", position: meta.position || "", tone: meta.tone || "" }}
-              source={source || undefined}
-              onSave={handleSave}
-            />
-          </div>
-        )}
       </motion.div>
+
+      {generated && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <GeneratedLetterPreview
+            content={generated}
+            meta={{ company: meta.company || "", position: meta.position || "", tone: meta.tone || "" }}
+            source={source || undefined}
+            onSave={handleSave}
+          />
+        </motion.div>
+      )}
     </div>
   );
 }

@@ -1,8 +1,11 @@
 // src/app/dashboard/cover-letter/components/GeneratedLetterPreview.tsx
 "use client";
 
-import React from "react";
 import { jsPDF } from "jspdf";
+import { Download, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 type Props = {
   content: string;
@@ -22,25 +25,31 @@ export default function GeneratedLetterPreview({ content, meta, onSave, source }
   };
 
   return (
-    <div className="glass p-4 rounded-lg">
-      <div className="flex justify-between items-start mb-3">
+    <Card>
+      <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3 space-y-0">
         <div>
-          <h3 className="text-lg font-semibold">{meta?.position || "Cover Letter"}</h3>
-          <p className="text-sm text-gray-400">{meta?.company}</p>
+          <CardTitle>{meta?.position || "Cover Letter"}</CardTitle>
+          <CardDescription>{meta?.company}</CardDescription>
         </div>
-
-        <div className="flex gap-2 items-center">
+        <div className="flex items-center gap-2">
           {source && (
-            <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-gray-200 border border-white/10">
-              {source === "openai" ? "OpenAI" : "Template"}
-            </span>
+            <Badge variant="outline">{source === "openai" ? "OpenAI" : "Template"}</Badge>
           )}
-          <button onClick={onSave} className="btn">Save</button>
-          <button onClick={downloadPdf} className="btn outline">Download PDF</button>
+          <Button variant="secondary" size="sm" onClick={onSave}>
+            <Save className="h-4 w-4" />
+            Save
+          </Button>
+          <Button variant="outline" size="sm" onClick={downloadPdf}>
+            <Download className="h-4 w-4" />
+            PDF
+          </Button>
         </div>
-      </div>
-
-      <pre className="whitespace-pre-wrap text-sm text-gray-100">{content}</pre>
-    </div>
+      </CardHeader>
+      <CardContent>
+        <pre className="whitespace-pre-wrap rounded-2xl border border-border/70 bg-background/60 p-4 text-sm leading-relaxed text-foreground">
+          {content}
+        </pre>
+      </CardContent>
+    </Card>
   );
 }

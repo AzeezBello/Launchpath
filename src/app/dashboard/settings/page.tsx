@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Settings as SettingsIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -12,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 type Settings = {
   profile: { name?: string; email?: string; company?: string };
@@ -98,25 +102,35 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="p-6 text-sm text-gray-300">
-        Loading your settings...
+      <div className="space-y-8">
+        <Skeleton className="h-14 w-72" />
+        <div className="grid gap-4 md:grid-cols-2">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-56 w-full" />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-white">Settings</h1>
-        <Button onClick={save} disabled={saving} className="bg-emerald-500 hover:bg-emerald-600">
-          {saving ? "Saving..." : "Save changes"}
-        </Button>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        icon={SettingsIcon}
+        title="Settings"
+        description="Manage your profile, appearance, security, and integrations."
+        action={
+          <Button onClick={save} disabled={saving}>
+            {saving ? "Saving..." : "Save changes"}
+          </Button>
+        }
+      />
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="bg-white/10 border-white/20">
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
           <CardHeader>
             <CardTitle>Profile</CardTitle>
+            <CardDescription>Basic account details shown across the workspace.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Input
@@ -138,18 +152,19 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 border-white/20">
+        <Card>
           <CardHeader>
             <CardTitle>Appearance</CardTitle>
+            <CardDescription>Choose how LaunchPath looks for you.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <p className="text-sm text-gray-300">Theme</p>
+              <Label>Theme</Label>
               <Select
                 value={settings.appearance.theme}
                 onValueChange={(val) => update("appearance", "theme", val as Settings["appearance"]["theme"])}
               >
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger>
                   <SelectValue placeholder="Choose theme" />
                 </SelectTrigger>
                 <SelectContent>
@@ -160,12 +175,12 @@ export default function SettingsPage() {
               </Select>
             </div>
             <div className="space-y-2">
-              <p className="text-sm text-gray-300">Accent</p>
+              <Label>Accent</Label>
               <Select
                 value={settings.appearance.accent}
                 onValueChange={(val) => update("appearance", "accent", val as Settings["appearance"]["accent"])}
               >
-                <SelectTrigger className="bg-white/5 border-white/10">
+                <SelectTrigger>
                   <SelectValue placeholder="Accent color" />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,35 +195,37 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 border-white/20">
+        <Card>
           <CardHeader>
             <CardTitle>Security</CardTitle>
+            <CardDescription>Keep your account protected.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-gray-200">
-            <label className="flex items-center gap-2">
+          <CardContent className="space-y-3 text-sm">
+            <label className="flex items-center gap-2.5">
               <input
                 type="checkbox"
                 checked={!!settings.security.twofa}
                 onChange={(e) => update("security", "twofa", e.target.checked)}
-                className="h-4 w-4 rounded border-white/40 bg-transparent"
+                className="h-4 w-4 rounded border-input accent-primary"
               />
               Enable 2FA
             </label>
-            <label className="flex items-center gap-2">
+            <label className="flex items-center gap-2.5">
               <input
                 type="checkbox"
                 checked={!!settings.security.session_alerts}
                 onChange={(e) => update("security", "session_alerts", e.target.checked)}
-                className="h-4 w-4 rounded border-white/40 bg-transparent"
+                className="h-4 w-4 rounded border-input accent-primary"
               />
               Session alerts
             </label>
           </CardContent>
         </Card>
 
-        <Card className="bg-white/10 border-white/20">
+        <Card>
           <CardHeader>
             <CardTitle>Integrations</CardTitle>
+            <CardDescription>Connect external accounts and services.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Input

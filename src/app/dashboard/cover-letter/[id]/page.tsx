@@ -7,6 +7,13 @@ import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
 import { motion } from "framer-motion";
+import { Download, Save, Sparkles } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export default function EditCoverLetterPage() {
   const { supabase, user } = useSupabase();
@@ -122,28 +129,66 @@ export default function EditCoverLetterPage() {
     toast.success("Downloaded PDF");
   };
 
-  if (loading) return <div className="p-8 text-gray-300">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-4">
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-80 w-full" />
+      </div>
+    );
+  }
 
   return (
-    <motion.form onSubmit={handleSave} className="max-w-3xl mx-auto p-6 glass rounded-2xl space-y-4">
-      <h1 className="text-2xl font-semibold">Edit Cover Letter</h1>
+    <div className="mx-auto max-w-3xl space-y-8">
+      <PageHeader icon={Sparkles} title="Edit Cover Letter" description="Fine-tune the details and regenerate as needed." />
 
-      <div className="grid md:grid-cols-2 gap-3">
-        <input name="company_name" value={form.company_name} onChange={handleChange} placeholder="Company" className="input" />
-        <input name="position" value={form.position} onChange={handleChange} placeholder="Position" className="input" />
-      </div>
+      <motion.form
+        onSubmit={handleSave}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="surface-panel space-y-4 p-6 sm:p-8"
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="company_name">Company</Label>
+            <Input id="company_name" name="company_name" value={form.company_name} onChange={handleChange} placeholder="Company" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="position">Position</Label>
+            <Input id="position" name="position" value={form.position} onChange={handleChange} placeholder="Position" />
+          </div>
+        </div>
 
-      <input name="tone" value={form.tone} onChange={handleChange} placeholder="Tone" className="input" />
-      <textarea name="description" value={form.description} onChange={handleChange} rows={3} className="textarea" placeholder="Job description (optional)"></textarea>
-      <textarea name="content" value={form.content} onChange={handleChange} rows={12} className="textarea" placeholder="Generated content"></textarea>
+        <div className="space-y-2">
+          <Label htmlFor="tone">Tone</Label>
+          <Input id="tone" name="tone" value={form.tone} onChange={handleChange} placeholder="Tone" />
+        </div>
 
-      <div className="flex gap-3 justify-end">
-        <button type="button" onClick={handleRegenerate} className="btn" disabled={generating}>
-          {generating ? "Regenerating..." : "✨ AI Regenerate"}
-        </button>
-        <button type="button" onClick={handleDownloadPdf} className="btn outline">📄 Download PDF</button>
-        <button type="submit" className="btn primary">💾 Save</button>
-      </div>
-    </motion.form>
+        <div className="space-y-2">
+          <Label htmlFor="description">Job description (optional)</Label>
+          <Textarea id="description" name="description" value={form.description} onChange={handleChange} rows={3} placeholder="Job description (optional)" />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="content">Letter content</Label>
+          <Textarea id="content" name="content" value={form.content} onChange={handleChange} rows={12} placeholder="Generated content" />
+        </div>
+
+        <div className="flex flex-wrap justify-end gap-3">
+          <Button type="button" variant="outline" onClick={handleRegenerate} disabled={generating}>
+            <Sparkles className="h-4 w-4" />
+            {generating ? "Regenerating..." : "AI Regenerate"}
+          </Button>
+          <Button type="button" variant="outline" onClick={handleDownloadPdf}>
+            <Download className="h-4 w-4" />
+            Download PDF
+          </Button>
+          <Button type="submit">
+            <Save className="h-4 w-4" />
+            Save
+          </Button>
+        </div>
+      </motion.form>
+    </div>
   );
 }
