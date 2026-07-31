@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 type Settings = {
   profile: { name?: string; email?: string; company?: string };
@@ -228,21 +229,42 @@ export default function SettingsPage() {
             <CardDescription>Connect external accounts and services.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Input
-              placeholder="Meta token"
-              value={settings.integrations.meta_token || ""}
-              onChange={(e) => update("integrations", "meta_token", e.target.value)}
-            />
-            <Input
-              placeholder="TikTok token"
-              value={settings.integrations.tiktok_token || ""}
-              onChange={(e) => update("integrations", "tiktok_token", e.target.value)}
-            />
-            <Input
-              placeholder="Google refresh token"
-              value={settings.integrations.google_refresh || ""}
-              onChange={(e) => update("integrations", "google_refresh", e.target.value)}
-            />
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
+                Meta token
+                <InfoTooltip text="Used to cross-post application updates to Meta-connected tools, if you use them." />
+              </Label>
+              <Input
+                type="password"
+                placeholder="Meta token"
+                value={settings.integrations.meta_token || ""}
+                onChange={(e) => update("integrations", "meta_token", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
+                TikTok token
+                <InfoTooltip text="Used for TikTok-connected creator tools, if you use them." />
+              </Label>
+              <Input
+                type="password"
+                placeholder="TikTok token"
+                value={settings.integrations.tiktok_token || ""}
+                onChange={(e) => update("integrations", "tiktok_token", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
+                Google refresh token
+                <InfoTooltip text="Used to keep a connected Google account (e.g. Calendar reminders) authorized without re-logging in." />
+              </Label>
+              <Input
+                type="password"
+                placeholder="Google refresh token"
+                value={settings.integrations.google_refresh || ""}
+                onChange={(e) => update("integrations", "google_refresh", e.target.value)}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>

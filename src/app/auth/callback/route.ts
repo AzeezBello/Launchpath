@@ -9,7 +9,24 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createServerSupabaseClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+
     if (!error) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data } = await supabase
+          .from("user_settings")
+          .select("data")
+          .eq("user_id", user.id)
+          .maybeSingle<{ data: { onboarding?: { completed?: boolean } } | null }>();
+
+        if (!data?.data?.onboarding?.completed) {
+          return NextResponse.redirect(`${origin}/onboarding`);
+        }
+      }
+
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

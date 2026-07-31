@@ -7,7 +7,7 @@ type Props = {
   onChange?: (value: PersonalInfo) => void;
 };
 
-const EMPTY: PersonalInfo = { name: "", email: "", phone: "" };
+const EMPTY: PersonalInfo = { name: "", email: "", phone: "", summary: "" };
 
 export default function PersonalInfoForm({ onChange, initialData }: Props) {
   const [info, setInfo] = useState<PersonalInfo>(initialData || EMPTY);
@@ -20,7 +20,7 @@ export default function PersonalInfoForm({ onChange, initialData }: Props) {
     onChange?.(info);
   }, [info, onChange]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setInfo({ ...info, [e.target.name]: e.target.value });
   };
 
@@ -46,6 +46,14 @@ export default function PersonalInfoForm({ onChange, initialData }: Props) {
         name="phone"
         placeholder="Phone"
         value={info.phone}
+        onChange={handleChange}
+      />
+      <textarea
+        className="border p-2 rounded w-full"
+        name="summary"
+        placeholder="Professional summary (2-3 sentences about your experience and goals)"
+        rows={3}
+        value={info.summary || ""}
         onChange={handleChange}
       />
     </div>

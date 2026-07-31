@@ -21,7 +21,7 @@ export function Navbar() {
     <nav className="sticky top-0 z-40 border-b border-border/70 bg-background/70 backdrop-blur-2xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-3 text-foreground">
-          <span className="flex size-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(45,212,191,0.9),rgba(14,165,233,0.9))] text-sm font-bold text-slate-950 shadow-[0_14px_36px_-18px_rgba(20,184,166,0.9)]">
+          <span className="flex size-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(59,130,246,0.9),rgba(16,185,129,0.9))] text-sm font-bold text-slate-950 shadow-[0_14px_36px_-18px_rgba(59,130,246,0.9)]">
             LP
           </span>
           <span>

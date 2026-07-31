@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const TONE_STYLES: Record<string, string> = {
-  success: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300",
-  info: "bg-sky-500/15 text-sky-600 dark:text-sky-300",
-  danger: "bg-red-500/15 text-red-600 dark:text-red-300",
+  success: "bg-success/15 text-success",
+  info: "bg-info/15 text-info",
+  danger: "bg-destructive/15 text-destructive",
   neutral: "bg-muted text-muted-foreground",
 };
 
@@ -21,9 +21,9 @@ function toneForStatus(status: string): keyof typeof TONE_STYLES {
 
 function IconForStatus({ status }: { status: string }) {
   const tone = toneForStatus(status);
-  if (tone === "success") return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
-  if (tone === "danger") return <XCircle className="h-4 w-4 text-red-500" />;
-  if (tone === "info") return <Clock className="h-4 w-4 text-sky-500" />;
+  if (tone === "success") return <CheckCircle2 className="h-4 w-4 text-success" />;
+  if (tone === "danger") return <XCircle className="h-4 w-4 text-destructive" />;
+  if (tone === "info") return <Clock className="h-4 w-4 text-info" />;
   return <Clock className="h-4 w-4 text-muted-foreground" />;
 }
 

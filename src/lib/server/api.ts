@@ -97,6 +97,19 @@ export function normalizeQuery(raw: string | null, maxLength = 120) {
   return (raw || "").trim().toLowerCase().slice(0, maxLength);
 }
 
+// Cheap, IP-keyed gate applied BEFORE requireApiUser() on authenticated routes.
+// Prevents unauthenticated/garbage-token traffic from hammering Supabase's
+// auth.getUser() with unlimited requests before the per-user limit (which
+// needs a resolved user id) ever gets a chance to apply.
+export function applyPreAuthRateLimit(request: Request, route: string) {
+  return applyRateLimit({
+    request,
+    route: `${route}:preauth`,
+    limit: 60,
+    windowMs: 60 * 1000,
+  });
+}
+
 export async function requireApiUser() {
   const supabase = await createServerSupabaseClient();
   const {

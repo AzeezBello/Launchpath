@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { OpportunityCard, OpportunityGridSkeleton } from "@/components/opportunities/OpportunityCard";
 import { useOpportunitySearch } from "@/lib/hooks/useOpportunitySearch";
+import { useOpportunityActions } from "@/lib/hooks/useOpportunityActions";
 
 interface Scholarship {
   id: string;
@@ -25,6 +26,7 @@ export default function ScholarshipsPage() {
     []
   );
   const { items, loading, error, search } = useOpportunitySearch<Scholarship>(buildUrl);
+  const { isSaved, isApplied, isPending, toggleSave, applyToOpportunity } = useOpportunityActions();
 
   const handleSearch = () => search({ query: query.trim() });
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -80,6 +82,24 @@ export default function ScholarshipsPage() {
                 { label: "Country", value: sch.country },
                 ...(sch.deadline ? [{ label: "Deadline", value: sch.deadline }] : []),
               ]}
+              saved={isSaved(sch.id, "scholarship")}
+              applied={isApplied(sch.id, "scholarship")}
+              pending={isPending(sch.id, "scholarship")}
+              onToggleSave={() =>
+                toggleSave({
+                  opportunityId: sch.id,
+                  opportunityType: "scholarship",
+                  title: sch.title,
+                  meta: { provider: sch.provider, country: sch.country, deadline: sch.deadline || "", href: sch.link },
+                })
+              }
+              onApply={() =>
+                applyToOpportunity({
+                  opportunityId: sch.id,
+                  opportunityType: "scholarship",
+                  title: sch.title,
+                })
+              }
             />
           ))}
         </div>

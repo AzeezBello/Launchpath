@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { CalendarClock, Plus } from "lucide-react";
+import { CalendarClock, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,6 +58,44 @@ export default function InterviewPage() {
     }
     fetchInterviews();
   }, [page, refreshToken]);
+
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const updateInterviewStatus = async (id: string, nextStatus: string) => {
+    setUpdatingId(id);
+    const previous = interviews;
+    setInterviews((prev) => prev.map((i) => (i.id === id ? { ...i, status: nextStatus } : i)));
+
+    try {
+      const res = await fetch(`/api/interview/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+    } catch (err) {
+      console.error(err);
+      setInterviews(previous);
+      toast.error("Could not update status");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const deleteInterview = async (id: string) => {
+    const previous = interviews;
+    setInterviews((prev) => prev.filter((i) => i.id !== id));
+
+    try {
+      const res = await fetch(`/api/interview/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete interview");
+      toast.success("Interview removed");
+    } catch (err) {
+      console.error(err);
+      setInterviews(previous);
+      toast.error("Could not delete interview");
+    }
+  };
 
   const addInterview = async () => {
     if (!candidate.trim() || !position.trim()) {
@@ -151,6 +189,10 @@ export default function InterviewPage() {
           icon={CalendarClock}
           title="No interviews yet"
           description="Add one above to start prepping."
+          tips={[
+            "Log interviews as soon as they're scheduled so nothing slips through.",
+            "Update the status once it's completed to keep your history accurate.",
+          ]}
         />
       ) : (
         <div className="grid gap-4">
@@ -168,7 +210,29 @@ export default function InterviewPage() {
                     <p className="text-sm text-muted-foreground">Role: {interview.position}</p>
                     <p className="mt-1 text-xs text-muted-foreground">Date: {interview.date}</p>
                   </div>
-                  <StatusBadge status={interview.status} />
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={interview.status}
+                      disabled={updatingId === interview.id}
+                      onChange={(e) => updateInterviewStatus(interview.id, e.target.value)}
+                      className="h-9 rounded-xl border border-input bg-background/60 px-2.5 text-xs text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring"
+                    >
+                      {STATUS_OPTIONS.map((option) => (
+                        <option key={option} value={option} className="bg-background text-foreground">
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                    <StatusBadge status={interview.status} />
+                    <button
+                      type="button"
+                      aria-label="Delete interview"
+                      onClick={() => deleteInterview(interview.id)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

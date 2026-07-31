@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { OpportunityCard, OpportunityGridSkeleton } from "@/components/opportunities/OpportunityCard";
 import { useOpportunitySearch } from "@/lib/hooks/useOpportunitySearch";
+import { useOpportunityActions } from "@/lib/hooks/useOpportunityActions";
 
 interface Grant {
   id: string;
@@ -25,6 +26,7 @@ export default function GrantsPage() {
     []
   );
   const { items, loading, error, search } = useOpportunitySearch<Grant>(buildUrl);
+  const { isSaved, isApplied, isPending, toggleSave, applyToOpportunity } = useOpportunityActions();
 
   const handleSearch = () => search({ query: query.trim() });
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -76,6 +78,29 @@ export default function GrantsPage() {
                 ...(grant.amount ? [{ label: "Amount", value: grant.amount }] : []),
                 { label: "Country", value: grant.country },
               ]}
+              saved={isSaved(grant.id, "grant")}
+              applied={isApplied(grant.id, "grant")}
+              pending={isPending(grant.id, "grant")}
+              onToggleSave={() =>
+                toggleSave({
+                  opportunityId: grant.id,
+                  opportunityType: "grant",
+                  title: grant.title,
+                  meta: {
+                    organization: grant.organization,
+                    amount: grant.amount || "",
+                    country: grant.country,
+                    href: grant.link,
+                  },
+                })
+              }
+              onApply={() =>
+                applyToOpportunity({
+                  opportunityId: grant.id,
+                  opportunityType: "grant",
+                  title: grant.title,
+                })
+              }
             />
           ))}
         </div>

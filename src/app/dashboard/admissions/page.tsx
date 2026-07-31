@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { OpportunityCard, OpportunityGridSkeleton } from "@/components/opportunities/OpportunityCard";
 import { useOpportunitySearch } from "@/lib/hooks/useOpportunitySearch";
+import { useOpportunityActions } from "@/lib/hooks/useOpportunityActions";
 
 interface Admission {
   id: string;
@@ -26,6 +27,7 @@ export default function AdmissionsPage() {
     []
   );
   const { items, loading, error, search } = useOpportunitySearch<Admission>(buildUrl);
+  const { isSaved, isApplied, isPending, toggleSave, applyToOpportunity } = useOpportunityActions();
 
   const handleSearch = () => search({ country, field });
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -84,6 +86,24 @@ export default function AdmissionsPage() {
                 { label: "Country", value: u.country },
                 { label: "Field", value: u.field },
               ]}
+              saved={isSaved(u.id, "admission")}
+              applied={isApplied(u.id, "admission")}
+              pending={isPending(u.id, "admission")}
+              onToggleSave={() =>
+                toggleSave({
+                  opportunityId: u.id,
+                  opportunityType: "admission",
+                  title: u.name,
+                  meta: { country: u.country, field: u.field, href: u.website },
+                })
+              }
+              onApply={() =>
+                applyToOpportunity({
+                  opportunityId: u.id,
+                  opportunityType: "admission",
+                  title: u.name,
+                })
+              }
             />
           ))}
         </div>

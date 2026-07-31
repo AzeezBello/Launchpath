@@ -1,8 +1,9 @@
 import { jobData } from "@/data/opportunities";
+import { fetchRemotiveJobs } from "@/lib/providers/remotiveJobs";
 import { getCache, setCache } from "@/lib/cache";
 import { apiSuccess, applyRateLimit, mergeHeaders, normalizeQuery } from "@/lib/server/api";
 
-const CACHE_KEY_PREFIX = "jobs";
+const CACHE_KEY_PREFIX = "jobs:query";
 
 export async function GET(req: Request) {
   const rateLimit = applyRateLimit({
@@ -17,17 +18,20 @@ export async function GET(req: Request) {
   const query = normalizeQuery(searchParams.get("query"), 80);
   const cacheKey = `${CACHE_KEY_PREFIX}:${query}`;
 
-  const cached = getCache<typeof jobData>(cacheKey);
+  const cached = getCache<Array<Record<string, unknown>>>(cacheKey);
   if (cached) {
     return apiSuccess(cached, { status: 200, headers: mergeHeaders(rateLimit.headers) }, { cached: true, total: cached.length });
   }
+
+  const externalJobs = await fetchRemotiveJobs();
+  const allJobs = [...externalJobs, ...jobData];
 
   const matches = (value: string | undefined) => value?.toLowerCase().includes(query);
 
   const results =
     query.length === 0
-      ? jobData
-      : jobData.filter(
+      ? allJobs
+      : allJobs.filter(
           (item) =>
             matches(item.title) || matches(item.company) || matches(item.location) || matches(item.type)
         );
@@ -36,6 +40,6 @@ export async function GET(req: Request) {
   return apiSuccess(
     results,
     { status: 200, headers: mergeHeaders(rateLimit.headers) },
-    { cached: false, total: results.length }
+    { cached: false, total: results.length, live: externalJobs.length > 0 }
   );
 }

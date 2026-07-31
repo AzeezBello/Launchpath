@@ -31,13 +31,13 @@ export function AuthShell({
 }: AuthShellProps) {
   return (
     <div className="relative isolate min-h-screen overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.14),transparent_24%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.14),transparent_24%)]" />
 
       <div className="mx-auto grid min-h-screen max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
         <div className="hidden flex-col justify-between py-6 lg:flex">
           <div>
             <Link href="/" className="inline-flex items-center gap-3">
-              <span className="flex size-11 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(45,212,191,0.9),rgba(14,165,233,0.85))] text-sm font-bold text-slate-950 shadow-[0_14px_36px_-18px_rgba(20,184,166,0.8)]">
+              <span className="flex size-11 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(59,130,246,0.9),rgba(16,185,129,0.85))] text-sm font-bold text-slate-950 shadow-[0_14px_36px_-18px_rgba(59,130,246,0.8)]">
                 LP
               </span>
               <div>
@@ -95,7 +95,7 @@ export function AuthShell({
         <div className="flex items-center justify-center">
           <div className="surface-panel w-full max-w-md p-7 sm:p-9">
             <Link href="/" className="mb-8 inline-flex items-center gap-3 lg:hidden">
-              <span className="flex size-10 items-center justify-center rounded-[1.2rem] bg-[linear-gradient(135deg,rgba(45,212,191,0.9),rgba(14,165,233,0.85))] text-sm font-bold text-slate-950">
+              <span className="flex size-10 items-center justify-center rounded-[1.2rem] bg-[linear-gradient(135deg,rgba(59,130,246,0.9),rgba(16,185,129,0.85))] text-sm font-bold text-slate-950">
                 LP
               </span>
               <span className="text-sm font-semibold">LaunchPath</span>

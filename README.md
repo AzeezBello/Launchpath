@@ -92,27 +92,44 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 OPENAI_API_KEY=your_openai_api_key_optional
+COLLEGE_SCORECARD_API_KEY=your_college_scorecard_api_key_optional
+ENCRYPTION_KEY=your_random_secret_optional_but_recommended
 ```
 
 ### Notes
 
 - `OPENAI_API_KEY` is optional. If missing, cover letters use deterministic fallback templates.
+- `COLLEGE_SCORECARD_API_KEY` is optional. If missing, `/api/admissions` serves the static dataset only (see [Live Data Sources](#live-data-sources)). Get a free key at https://api.data.gov/signup/.
+- `ENCRYPTION_KEY` is optional but strongly recommended in production. It encrypts the integration tokens (`meta_token`, `tiktok_token`, `google_refresh`) stored in `user_settings` and the settings cookie. Without it, those fields are stored in plaintext (today's behavior). Use any long random string (e.g. `openssl rand -base64 32`) — it's hashed internally, so it doesn't need a specific format or length.
 - `NEXT_PUBLIC_BASE_URL` is used for signup email redirect URL generation.
 - On Vercel, ensure `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set for each target environment (`Production`, `Preview`, and `Development`) before deploying.
 
+## Live Data Sources
+
+`/api/jobs`, `/api/grants`, and `/api/admissions` blend live third-party data with the static seed lists in `src/data/opportunities.ts`. Each source degrades gracefully to static-only data if the upstream call fails or times out, so these endpoints never hard-fail.
+
+| Endpoint | Live source | Key required | Notes |
+|---|---|---|---|
+| `/api/jobs` | [Remotive](https://remotive.com) | No | Remotive asks for at most ~4 requests/day against their API, so results are cached server-side for 6 hours. |
+| `/api/grants` | [Grants.gov Search2](https://api.grants.gov) | No | U.S. federal grant opportunities only; cached for 6 hours. |
+| `/api/admissions` | [College Scorecard](https://collegescorecard.ed.gov/data/api-documentation/) | Yes (`COLLEGE_SCORECARD_API_KEY`) | U.S. institutions only, and only used to supplement "United States" searches without a field-of-study filter — Scorecard doesn't support free-text field search. |
+| `/api/scholarships` | Static only | — | No credible free/public scholarships API exists (established providers like Scholarship Owl/Fastweb don't offer open APIs). If you have access to a specific provider's API, it can be wired in the same way as the others. |
+
 ## Database Setup (Supabase)
 
-Run the migration:
+Run the migrations, in order:
 
 - `supabase/migrations/20260223_saas_core.sql`
+- `supabase/migrations/20260730_bookmarks_and_opportunity_links.sql`
 
-This migration creates and secures:
+These create and secure:
 
 - `user_settings`
 - `resumes`
 - `cover_letters`
-- `applications`
+- `applications` (plus `opportunity_id`/`opportunity_type` link columns)
 - `interviews`
+- `saved_opportunities`
 
 ## Scripts
 
@@ -170,9 +187,22 @@ These endpoints serve curated datasets and support filtering.
 
 - `GET /api/applications?page=1&limit=20`
 - `POST /api/applications`
-  - Body: `{ program, status?, date? }`
+  - Body: `{ program, status?, date?, opportunityId?, opportunityType? }`
+  - `opportunityId`/`opportunityType` are optional and link the application back to the opportunity it was created from (via the "Apply" action). Re-applying to the same opportunity returns the existing row instead of erroring.
+- `GET /api/applications/linked`
+  - Returns `{ opportunity_id, opportunity_type, status }[]` for every opportunity-linked application (unpaginated, capped at 500) — used to render "Applied" state on opportunity cards.
 
 Requires authenticated user and returns only caller-owned records.
+
+### Saved Opportunities (bookmarks)
+
+- `GET /api/bookmarks?page=1&limit=60`
+- `POST /api/bookmarks`
+  - Body: `{ opportunityId, opportunityType, title, meta? }` where `opportunityType` is one of `scholarship | grant | job | admission`
+  - Saving an already-saved opportunity is idempotent (returns the existing row).
+- `DELETE /api/bookmarks?id=` or `DELETE /api/bookmarks?opportunityId=&opportunityType=`
+
+Requires authenticated user and returns only caller-owned records. Backed by the `saved_opportunities` table.
 
 ### Interviews
 
@@ -236,10 +266,10 @@ Important: current limiter is in-memory and process-local. For multi-instance pr
 ### Deployment Checklist
 
 1. Set all required environment variables in your host.
-2. Run SQL migration: `supabase/migrations/20260223_saas_core.sql`.
+2. Run SQL migrations in `supabase/migrations/` in order.
 3. Verify Supabase Auth providers (email/password, Google if used).
 4. Confirm RLS policies are enabled and active.
-5. Test critical flows: login, resume save, cover letter generation, settings update, applications/interviews create.
+5. Test critical flows: login, resume save, cover letter generation, settings update, applications/interviews create, saving/applying to an opportunity.
 
 ## Troubleshooting
 

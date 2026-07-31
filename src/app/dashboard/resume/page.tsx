@@ -6,15 +6,18 @@ import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText, Plus } from "lucide-react";
+import { Download, FileText, Plus } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
+import { downloadResumeAsPdf } from "@/components/resume/downloadResumePdf";
+import type { ResumeFormData } from "@/types/resume";
 
 interface Resume {
   id: string;
   title: string;
   created_at: string;
+  data: ResumeFormData;
 }
 
 export default function ResumePage() {
@@ -78,6 +81,10 @@ export default function ResumePage() {
           icon={FileText}
           title="No resumes yet"
           description="Create one to get started."
+          tips={[
+            "Add your work experience and skills for a stronger resume score.",
+            "You can create multiple versions tailored to different roles.",
+          ]}
           action={
             <Button asChild variant="outline">
               <Link href="/dashboard/resume/new">Create your first resume</Link>
@@ -99,10 +106,20 @@ export default function ResumePage() {
                     <FileText className="h-5 w-5 text-primary" /> {resume.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex items-center justify-between">
-                  <Link href={`/dashboard/resume/${resume.id}`}>
-                    <Button variant="secondary">Edit</Button>
-                  </Link>
+                <CardContent className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Link href={`/dashboard/resume/${resume.id}`}>
+                      <Button variant="secondary">Edit</Button>
+                    </Link>
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      aria-label="Download PDF"
+                      onClick={() => downloadResumeAsPdf(resume.title || "resume", resume.data)}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
                   <Button
                     variant="destructive"
                     onClick={async () => {

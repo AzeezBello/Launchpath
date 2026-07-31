@@ -80,6 +80,10 @@ export default function CoverLetterHistoryPage() {
           icon={FileStack}
           title="No saved letters yet"
           description="Generate a cover letter and save it to see it here."
+          tips={[
+            "Generate a draft, tweak the tone, then save it to keep a copy here.",
+            "Each saved letter keeps its own company and role details for later.",
+          ]}
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

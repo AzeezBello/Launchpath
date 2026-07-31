@@ -1,10 +1,19 @@
 import { cookies } from "next/headers";
-import { apiError, apiSuccess, applyRateLimit, mergeHeaders, requireApiUser } from "@/lib/server/api";
+import {
+  apiError,
+  apiSuccess,
+  applyPreAuthRateLimit,
+  applyRateLimit,
+  mergeHeaders,
+  requireApiUser,
+} from "@/lib/server/api";
 import {
   DEFAULT_SETTINGS,
   ONE_YEAR_SECONDS,
   SETTINGS_COOKIE_KEY,
+  decryptSettingsForClient,
   deepMerge,
+  encryptSettingsForStorage,
   isLikelyMissingTable,
   sanitizeSettingsPatch,
   type Settings,
@@ -40,6 +49,9 @@ async function writeSettingsCookie(value: Settings) {
 }
 
 export async function GET(req: Request) {
+  const preAuth = applyPreAuthRateLimit(req, "settings:get");
+  if (!preAuth.ok) return preAuth.response;
+
   const { supabase, user, errorResponse } = await requireApiUser();
   if (errorResponse) return errorResponse;
 
@@ -69,11 +81,14 @@ export async function GET(req: Request) {
     );
   }
 
+  // `resolved` holds the "storage" representation (integration tokens encrypted,
+  // when ENCRYPTION_KEY is configured) — write it to the DB/cookie as-is, and
+  // only decrypt the copy that goes back to the client.
   const resolved = data?.data ? deepMerge(DEFAULT_SETTINGS, data.data) : fallback;
   await writeSettingsCookie(resolved);
 
   return apiSuccess(
-    resolved,
+    decryptSettingsForClient(resolved),
     { status: 200, headers: mergeHeaders(rateLimit.headers) },
     {
       source: error ? "cookie-fallback" : "supabase",
@@ -82,6 +97,9 @@ export async function GET(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  const preAuth = applyPreAuthRateLimit(req, "settings:patch");
+  if (!preAuth.ok) return preAuth.response;
+
   const { supabase, user, errorResponse } = await requireApiUser();
   if (errorResponse) return errorResponse;
 
@@ -123,16 +141,20 @@ export async function PATCH(req: Request) {
     );
   }
 
-  const current = currentResult.data?.data
+  // Decrypt before merging with the (plaintext) incoming patch, so unchanged
+  // fields don't get double-encrypted, then re-encrypt just before persisting.
+  const currentStorage = currentResult.data?.data
     ? deepMerge(DEFAULT_SETTINGS, currentResult.data.data)
     : fallback;
+  const current = decryptSettingsForClient(currentStorage);
   const merged = deepMerge(current, patch);
+  const mergedForStorage = encryptSettingsForStorage(merged);
 
   if (!isLikelyMissingTable(currentResult.error)) {
     const upsert = await supabase.from("user_settings").upsert(
       {
         user_id: user.id,
-        data: merged,
+        data: mergedForStorage,
       },
       {
         onConflict: "user_id",
@@ -148,7 +170,7 @@ export async function PATCH(req: Request) {
     }
   }
 
-  await writeSettingsCookie(merged);
+  await writeSettingsCookie(mergedForStorage);
   return apiSuccess(
     merged,
     { status: 200, headers: mergeHeaders(rateLimit.headers) },

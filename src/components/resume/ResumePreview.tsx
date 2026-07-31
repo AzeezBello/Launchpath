@@ -25,6 +25,13 @@ export default function ResumePreview({
         <p>{personalInfo.phone}</p>
       </div>
 
+      {personalInfo.summary && (
+        <div>
+          <h3 className="font-semibold text-lg">📝 Summary</h3>
+          <p>{personalInfo.summary}</p>
+        </div>
+      )}
+
       <div>
         <h3 className="font-semibold text-lg">🎓 Education</h3>
         <ul>

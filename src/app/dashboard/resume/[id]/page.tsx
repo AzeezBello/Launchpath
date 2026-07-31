@@ -9,7 +9,8 @@ import type { ResumeFormData } from "@/types/resume";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { StepProgress } from "@/components/resume/StepProgress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText } from "lucide-react";
+import { Download, FileText } from "lucide-react";
+import { downloadResumeAsPdf } from "@/components/resume/downloadResumePdf";
 
 // Lazy load form components for better performance
 const PersonalInfoForm = lazy(() => import("@/components/resume/forms/PersonalInfoForm"));
@@ -116,7 +117,22 @@ export default function EditResumePage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
-      <PageHeader icon={FileText} title="Edit Resume" description="Update any section and save your changes." />
+      <PageHeader
+        icon={FileText}
+        title="Edit Resume"
+        description="Update any section and save your changes."
+        action={
+          <Button
+            variant="outline"
+            onClick={() =>
+              downloadResumeAsPdf(resumeData.title || "resume", resumeData)
+            }
+          >
+            <Download className="h-4 w-4" />
+            Download PDF
+          </Button>
+        }
+      />
 
       <div className="surface-panel space-y-6 p-6 sm:p-8">
         <StepProgress step={step} totalSteps={totalSteps} />

@@ -1,5 +1,9 @@
+import { decryptSecret, encryptSecret } from "@/lib/server/crypto";
+
 export const SETTINGS_COOKIE_KEY = "launchpath_settings";
 export const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
+
+export type OnboardingFocus = "scholarship" | "grant" | "job" | "admission";
 
 export type Settings = {
   profile: {
@@ -20,6 +24,11 @@ export type Settings = {
     theme?: "light" | "dark" | "system";
     accent?: "violet" | "indigo" | "fuchsia" | "emerald" | "cyan";
   };
+  onboarding: {
+    completed?: boolean;
+    focus?: OnboardingFocus[];
+    tourCompletedAt?: string;
+  };
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -27,6 +36,7 @@ export const DEFAULT_SETTINGS: Settings = {
   integrations: { meta_token: "", tiktok_token: "", google_refresh: "" },
   security: { twofa: false, session_alerts: false },
   appearance: { theme: "light", accent: "indigo" },
+  onboarding: { completed: false, focus: [] },
 };
 
 type DeepPartial<T> = {
@@ -35,6 +45,7 @@ type DeepPartial<T> = {
 
 const VALID_THEMES = new Set(["light", "dark", "system"]);
 const VALID_ACCENTS = new Set(["violet", "indigo", "fuchsia", "emerald", "cyan"]);
+const VALID_FOCUS = new Set<OnboardingFocus>(["scholarship", "grant", "job", "admission"]);
 
 function normalizeText(value: unknown, maxLength: number) {
   if (typeof value !== "string") return "";
@@ -122,7 +133,59 @@ export function sanitizeSettingsPatch(input: unknown): DeepPartial<Settings> | n
     if (Object.keys(appearancePatch).length > 0) sanitized.appearance = appearancePatch;
   }
 
+  const onboarding = patch.onboarding;
+  if (onboarding && typeof onboarding === "object") {
+    const onboardingRecord = onboarding as Record<string, unknown>;
+    const onboardingPatch: Settings["onboarding"] = {};
+
+    if ("completed" in onboardingRecord) {
+      onboardingPatch.completed = Boolean(onboardingRecord.completed);
+    }
+
+    if ("focus" in onboardingRecord && Array.isArray(onboardingRecord.focus)) {
+      onboardingPatch.focus = Array.from(
+        new Set(
+          onboardingRecord.focus.filter(
+            (value): value is OnboardingFocus =>
+              typeof value === "string" && VALID_FOCUS.has(value as OnboardingFocus)
+          )
+        )
+      ).slice(0, 4);
+    }
+
+    if ("tourCompletedAt" in onboardingRecord) {
+      onboardingPatch.tourCompletedAt = normalizeText(onboardingRecord.tourCompletedAt, 40) || undefined;
+    }
+
+    if (Object.keys(onboardingPatch).length > 0) sanitized.onboarding = onboardingPatch;
+  }
+
   return sanitized;
+}
+
+// Integration tokens are the only secrets in Settings — encrypt/decrypt just
+// that section when moving between "storage" (DB row / cookie) and "client"
+// (API response body) representations. See src/lib/server/crypto.ts.
+export function encryptSettingsForStorage(settings: Settings): Settings {
+  return {
+    ...settings,
+    integrations: {
+      meta_token: encryptSecret(settings.integrations.meta_token),
+      tiktok_token: encryptSecret(settings.integrations.tiktok_token),
+      google_refresh: encryptSecret(settings.integrations.google_refresh),
+    },
+  };
+}
+
+export function decryptSettingsForClient(settings: Settings): Settings {
+  return {
+    ...settings,
+    integrations: {
+      meta_token: decryptSecret(settings.integrations.meta_token),
+      tiktok_token: decryptSecret(settings.integrations.tiktok_token),
+      google_refresh: decryptSecret(settings.integrations.google_refresh),
+    },
+  };
 }
 
 export function isLikelyMissingTable(error: unknown) {

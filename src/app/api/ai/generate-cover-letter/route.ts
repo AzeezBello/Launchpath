@@ -1,9 +1,19 @@
-import { apiError, apiSuccess, applyRateLimit, mergeHeaders, requireApiUser } from "@/lib/server/api";
+import {
+  apiError,
+  apiSuccess,
+  applyPreAuthRateLimit,
+  applyRateLimit,
+  mergeHeaders,
+  requireApiUser,
+} from "@/lib/server/api";
 import { generateCoverLetter, sanitizeCoverLetterPrompt } from "@/lib/server/cover-letter";
 
 const HOURLY_LIMIT = 20;
 
 export async function POST(req: Request) {
+  const preAuth = applyPreAuthRateLimit(req, "cover-letter:generate");
+  if (!preAuth.ok) return preAuth.response;
+
   const { user, errorResponse } = await requireApiUser();
   if (errorResponse) return errorResponse;
 

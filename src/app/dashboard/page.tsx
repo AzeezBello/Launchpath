@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { ResumeScoreCard } from "@/components/dashboard/ResumeScoreCard";
 import { RecommendedJobs } from "@/components/dashboard/RecommendedJobs";
 import { RecentApplications } from "@/components/dashboard/RecentApplications";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { scholarshipData, grantData, jobData, admissionData } from "@/data/opportunities";
 
 type UsagePayload = {
@@ -99,16 +100,21 @@ function UsageRow({
   used,
   limit,
   pct,
+  hint,
 }: {
   label: string;
   used: number;
   limit: number;
   pct: number;
+  hint?: string;
 }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">{label}</span>
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          {label}
+          {hint && <InfoTooltip text={hint} />}
+        </span>
         <span className="font-medium text-foreground">
           {used} / {limit}
         </span>
@@ -196,24 +202,28 @@ export default function OverviewPage() {
       used: usage.usage.resumes,
       limit: usage.limits.resumes,
       pct: usage.usagePct.resumes,
+      hint: "Total resumes saved to your account on your current plan.",
     },
     {
       label: "Applications",
       used: usage.usage.applications,
       limit: usage.limits.applications,
       pct: usage.usagePct.applications,
+      hint: "Total applications you're tracking, including ones created via Apply.",
     },
     {
       label: "Interviews",
       used: usage.usage.interviews,
       limit: usage.limits.interviews,
       pct: usage.usagePct.interviews,
+      hint: "Total interviews logged in Interview Prep.",
     },
     {
       label: "Cover letters",
       used: usage.usage.coverLetters,
       limit: usage.limits.coverLettersPerMonth,
       pct: usage.usagePct.coverLetters,
+      hint: "AI cover letter generations this month. Resets at the start of each month.",
     },
   ];
 

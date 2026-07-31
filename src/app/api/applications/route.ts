@@ -1,41 +1,30 @@
-import { apiError, apiSuccess, applyRateLimit, clampInt, mergeHeaders, requireApiUser } from "@/lib/server/api";
+import {
+  apiError,
+  apiSuccess,
+  applyPreAuthRateLimit,
+  applyRateLimit,
+  clampInt,
+  mergeHeaders,
+  requireApiUser,
+} from "@/lib/server/api";
 import { isLikelyMissingTable } from "@/lib/server/settings";
-
-type ApplicationStatus = "Pending Review" | "Accepted" | "Rejected" | "In Review";
-
-type ApplicationRow = {
-  id: string;
-  user_id: string;
-  program: string;
-  status: ApplicationStatus;
-  date: string;
-};
-
-const ALLOWED_STATUS = new Set<ApplicationStatus>([
-  "Pending Review",
-  "Accepted",
-  "Rejected",
-  "In Review",
-]);
-
-function sanitizeProgram(value: unknown) {
-  if (typeof value !== "string") return "";
-  return value.trim().slice(0, 160);
-}
-
-function sanitizeStatus(value: unknown): ApplicationStatus {
-  if (typeof value !== "string") return "Pending Review";
-  const normalized = value.trim() as ApplicationStatus;
-  return ALLOWED_STATUS.has(normalized) ? normalized : "Pending Review";
-}
-
-function sanitizeDate(value: unknown) {
-  if (typeof value !== "string") return new Date().toISOString().slice(0, 10);
-  const trimmed = value.trim().slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? trimmed : new Date().toISOString().slice(0, 10);
-}
+import {
+  isUniqueViolation,
+  sanitizeOpportunityId,
+  sanitizeOpportunityType,
+} from "@/lib/server/opportunities";
+import {
+  APPLICATION_SELECT_COLUMNS as SELECT_COLUMNS,
+  type ApplicationRow,
+  sanitizeApplicationDate as sanitizeDate,
+  sanitizeApplicationProgram as sanitizeProgram,
+  sanitizeApplicationStatus as sanitizeStatus,
+} from "@/lib/server/applications";
 
 export async function GET(req: Request) {
+  const preAuth = applyPreAuthRateLimit(req, "applications:get");
+  if (!preAuth.ok) return preAuth.response;
+
   const { supabase, user, errorResponse } = await requireApiUser();
   if (errorResponse) return errorResponse;
 
@@ -57,7 +46,7 @@ export async function GET(req: Request) {
 
   const { data, error, count } = await supabase
     .from("applications")
-    .select("id, user_id, program, status, date", { count: "exact" })
+    .select(SELECT_COLUMNS, { count: "exact" })
     .eq("user_id", user.id)
     .order("date", { ascending: false })
     .range(from, to);
@@ -93,6 +82,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const preAuth = applyPreAuthRateLimit(req, "applications:post");
+  if (!preAuth.ok) return preAuth.response;
+
   const { supabase, user, errorResponse } = await requireApiUser();
   if (errorResponse) return errorResponse;
 
@@ -117,8 +109,21 @@ export async function POST(req: Request) {
   const status = sanitizeStatus(body.status);
   const date = sanitizeDate(body.date);
 
+  // Optional: links this application back to the opportunity it came from
+  // (set when created via the "Apply" action on a job/scholarship/grant/admission card).
+  const opportunityId = body.opportunityId != null ? sanitizeOpportunityId(body.opportunityId) : "";
+  const opportunityType = body.opportunityType != null ? sanitizeOpportunityType(body.opportunityType) : null;
+  const hasOpportunityLink = Boolean(opportunityId && opportunityType);
+
   if (!program) {
     return apiError("Program is required", { status: 422, headers: mergeHeaders(rateLimit.headers) });
+  }
+
+  if ((opportunityId || opportunityType) && !hasOpportunityLink) {
+    return apiError(
+      "opportunityId and a valid opportunityType must both be provided",
+      { status: 422, headers: mergeHeaders(rateLimit.headers) }
+    );
   }
 
   const { data, error } = await supabase
@@ -128,8 +133,10 @@ export async function POST(req: Request) {
       program,
       status,
       date,
+      opportunity_id: hasOpportunityLink ? opportunityId : null,
+      opportunity_type: hasOpportunityLink ? opportunityType : null,
     })
-    .select("id, user_id, program, status, date")
+    .select(SELECT_COLUMNS)
     .single();
 
   if (error) {
@@ -139,6 +146,26 @@ export async function POST(req: Request) {
         { status: 501, headers: mergeHeaders(rateLimit.headers) }
       );
     }
+
+    if (hasOpportunityLink && isUniqueViolation(error)) {
+      // Already applied to this opportunity — return the existing row instead of erroring.
+      const { data: existing } = await supabase
+        .from("applications")
+        .select(SELECT_COLUMNS)
+        .eq("user_id", user.id)
+        .eq("opportunity_id", opportunityId)
+        .eq("opportunity_type", opportunityType)
+        .maybeSingle();
+
+      if (existing) {
+        return apiSuccess(
+          existing as ApplicationRow,
+          { status: 200, headers: mergeHeaders(rateLimit.headers) },
+          { alreadyApplied: true }
+        );
+      }
+    }
+
     return apiError(
       "Failed to create application",
       { status: 500, headers: mergeHeaders(rateLimit.headers) },

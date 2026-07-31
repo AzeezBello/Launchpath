@@ -106,8 +106,8 @@ export default function Home() {
     <div className="space-y-16 pb-6 md:space-y-24">
       <section className="surface-panel relative overflow-hidden px-6 py-8 sm:px-10 sm:py-12 lg:px-12 lg:py-14">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-emerald-400/20 blur-3xl" />
-          <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-sky-400/15 blur-3xl" />
+          <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+          <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-success/15 blur-3xl" />
         </div>
 
         <div className="relative grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -174,17 +174,17 @@ export default function Home() {
                   {
                     label: "Scholarships with fit score",
                     value: "124 matches",
-                    accent: "bg-emerald-400/14 text-emerald-600 dark:text-emerald-300",
+                    accent: "bg-success/15 text-success",
                   },
                   {
                     label: "Applications due this week",
                     value: "7 deadlines",
-                    accent: "bg-sky-400/14 text-sky-600 dark:text-sky-300",
+                    accent: "bg-info/15 text-info",
                   },
                   {
                     label: "Draft cover letters ready",
                     value: "4 saved drafts",
-                    accent: "bg-amber-400/14 text-amber-600 dark:text-amber-300",
+                    accent: "bg-warning/15 text-warning",
                   },
                 ].map((item) => (
                   <div
@@ -315,7 +315,7 @@ export default function Home() {
                 key={plan.name}
                 className={`rounded-[1.75rem] border p-6 ${
                   plan.featured
-                    ? "border-primary/30 bg-primary/10 shadow-[0_20px_55px_-36px_rgba(20,184,166,0.45)]"
+                    ? "border-primary/30 bg-primary/10 shadow-[0_20px_55px_-36px_rgba(59,130,246,0.45)]"
                     : "border-border/80 bg-background/45"
                 }`}
               >

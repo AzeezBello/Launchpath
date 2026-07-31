@@ -38,7 +38,7 @@ export function RecommendedJobs() {
             </div>
             <Badge
               variant="secondary"
-              className="bg-sky-500/15 text-sky-600 dark:text-sky-300"
+              className="bg-info/15 text-info"
             >
               {job.type}
             </Badge>

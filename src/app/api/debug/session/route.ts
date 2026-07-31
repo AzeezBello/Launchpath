@@ -1,6 +1,14 @@
-import { apiSuccess, applyRateLimit, mergeHeaders, requireApiUser } from "@/lib/server/api";
+import { apiError, apiSuccess, applyPreAuthRateLimit, applyRateLimit, mergeHeaders, requireApiUser } from "@/lib/server/api";
 
 export async function GET(req: Request) {
+  // Dev-only sanity-check endpoint — not meant to be reachable in production.
+  if (process.env.NODE_ENV === "production") {
+    return apiError("Not found", { status: 404 });
+  }
+
+  const preAuth = applyPreAuthRateLimit(req, "debug:session:get");
+  if (!preAuth.ok) return preAuth.response;
+
   const { user, errorResponse } = await requireApiUser();
   if (errorResponse) return errorResponse;
 

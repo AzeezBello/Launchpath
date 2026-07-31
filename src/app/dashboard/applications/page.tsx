@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Briefcase, Plus } from "lucide-react";
+import { Briefcase, Plus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,44 @@ export default function ApplicationsPage() {
   useEffect(() => {
     fetchApplications(1);
   }, [fetchApplications]);
+
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const updateStatus = async (id: string, nextStatus: string) => {
+    setUpdatingId(id);
+    const previous = applications;
+    setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status: nextStatus } : a)));
+
+    try {
+      const res = await fetch(`/api/applications/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+    } catch (err) {
+      console.error(err);
+      setApplications(previous);
+      toast.error("Could not update status");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const deleteApplication = async (id: string) => {
+    const previous = applications;
+    setApplications((prev) => prev.filter((a) => a.id !== id));
+
+    try {
+      const res = await fetch(`/api/applications/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete application");
+      toast.success("Application removed");
+    } catch (err) {
+      console.error(err);
+      setApplications(previous);
+      toast.error("Could not delete application");
+    }
+  };
 
   const addApplication = async () => {
     if (!program.trim()) {
@@ -144,6 +182,10 @@ export default function ApplicationsPage() {
           icon={Briefcase}
           title="No applications yet"
           description="Add your first one above to start tracking it."
+          tips={[
+            "Applying from a job, scholarship, or grant card adds it here automatically.",
+            "Update the status as you hear back to keep your pipeline current.",
+          ]}
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -155,12 +197,32 @@ export default function ApplicationsPage() {
               transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.4) }}
             >
               <Card className="h-full">
-                <CardHeader>
+                <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
                   <CardTitle className="text-base">{app.program}</CardTitle>
+                  <button
+                    type="button"
+                    aria-label="Delete application"
+                    onClick={() => deleteApplication(app.id)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-3">
                   <StatusBadge status={app.status} />
                   <p className="text-sm text-muted-foreground">Date: {app.date}</p>
+                  <select
+                    value={app.status}
+                    disabled={updatingId === app.id}
+                    onChange={(e) => updateStatus(app.id, e.target.value)}
+                    className="h-9 w-full rounded-xl border border-input bg-background/60 px-3 text-xs text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring"
+                  >
+                    {STATUS_OPTIONS.map((option) => (
+                      <option key={option} value={option} className="bg-background text-foreground">
+                        {option}
+                      </option>
+                    ))}
+                  </select>
                 </CardContent>
               </Card>
             </motion.div>

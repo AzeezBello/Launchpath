@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
+  Bookmark,
   Briefcase,
   ClipboardList,
   FileText,
@@ -22,10 +23,12 @@ type DashboardLink = {
   href: string;
   icon: LucideIcon;
   description?: string;
+  tourId?: string;
 };
 
 type DashboardGroup = {
   label: string;
+  tourId?: string;
   links: DashboardLink[];
 };
 
@@ -35,22 +38,26 @@ const PRIMARY_LINKS: DashboardLink[] = [
     href: "/dashboard",
     icon: LayoutDashboard,
     description: "Monitor your workspace in one place.",
+    tourId: "nav-overview",
   },
 ];
 
 const DASHBOARD_GROUPS: DashboardGroup[] = [
   {
     label: "Career Workspace",
+    tourId: "nav-career",
     links: [
       { label: "Resume", href: "/dashboard/resume", icon: FileText },
       { label: "Cover Letters", href: "/dashboard/cover-letter", icon: BookOpen },
       { label: "Applications", href: "/dashboard/applications", icon: ClipboardList },
       { label: "Interview Prep", href: "/dashboard/interview-prep", icon: Users },
       { label: "Jobs", href: "/dashboard/jobs", icon: Briefcase },
+      { label: "Saved", href: "/dashboard/saved", icon: Bookmark, tourId: "nav-saved" },
     ],
   },
   {
     label: "Academic Pipeline",
+    tourId: "nav-academic",
     links: [
       { label: "Scholarships", href: "/dashboard/scholarships", icon: GraduationCap },
       { label: "Grants", href: "/dashboard/grants", icon: HandCoins },
@@ -86,10 +93,11 @@ function DashboardNavItem({
     <Link
       href={link.href}
       onClick={onNavigate}
+      data-tour={link.tourId}
       className={cn(
         "group flex items-center gap-3 rounded-[1.3rem] border px-3.5 py-3",
         active
-          ? "border-primary/25 bg-primary/10 text-foreground shadow-[0_18px_40px_-30px_rgba(20,184,166,0.45)]"
+          ? "border-primary/25 bg-primary/10 text-foreground shadow-[0_18px_40px_-30px_rgba(59,130,246,0.45)]"
           : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-accent/65 hover:text-foreground"
       )}
       >
@@ -137,7 +145,7 @@ export function DashboardNavigation({
       </div>
 
       {DASHBOARD_GROUPS.map((group) => (
-        <div key={group.label} className="space-y-2">
+        <div key={group.label} data-tour={group.tourId} className="space-y-2">
           <p className="px-3 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
             {group.label}
           </p>
@@ -171,8 +179,8 @@ export function DashboardNavigation({
 export function DashboardSidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-[302px] flex-col border-r border-border/70 bg-background/45 px-4 py-5 backdrop-blur-2xl lg:flex">
-      <div className="flex items-center gap-3 px-3">
-        <span className="flex size-11 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(45,212,191,0.9),rgba(14,165,233,0.85))] text-sm font-bold text-slate-950 shadow-[0_14px_36px_-18px_rgba(20,184,166,0.8)]">
+      <div data-tour="sidebar-brand" className="flex items-center gap-3 px-3">
+        <span className="flex size-11 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(59,130,246,0.9),rgba(16,185,129,0.85))] text-sm font-bold text-slate-950 shadow-[0_14px_36px_-18px_rgba(59,130,246,0.8)]">
           LP
         </span>
         <div>

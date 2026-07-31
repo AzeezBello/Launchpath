@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { useSupabase } from "@/providers/SupabaseProvider";
 import type { ResumeFormData } from "@/types/resume";
 
@@ -65,6 +66,7 @@ export function ResumeScoreCard() {
         <CardTitle className="flex items-center gap-2 text-lg font-semibold">
           <FileText className="h-5 w-5 text-primary" />
           Resume Score
+          <InfoTooltip text="Checks whether your latest resume has contact info, a summary, education, experience, and skills filled in." />
         </CardTitle>
         <CardDescription>
           A quick quality signal based on your most recently updated resume.

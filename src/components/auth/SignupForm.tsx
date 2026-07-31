@@ -39,7 +39,7 @@ export default function SignupForm() {
     if (payload.data?.session) {
       await refreshSession();
       toast.success("Account created successfully");
-      router.push("/dashboard");
+      router.push("/onboarding");
       router.refresh();
     } else {
       toast.success("Account created! Check your email to confirm before signing in.");

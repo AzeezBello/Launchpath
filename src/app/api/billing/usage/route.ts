@@ -1,4 +1,11 @@
-import { apiError, apiSuccess, applyRateLimit, mergeHeaders, requireApiUser } from "@/lib/server/api";
+import {
+  apiError,
+  apiSuccess,
+  applyPreAuthRateLimit,
+  applyRateLimit,
+  mergeHeaders,
+  requireApiUser,
+} from "@/lib/server/api";
 import { isLikelyMissingTable } from "@/lib/server/settings";
 
 type PlanKey = "starter" | "pro" | "team";
@@ -52,6 +59,9 @@ async function countOwnedRows(
 }
 
 export async function GET(req: Request) {
+  const preAuth = applyPreAuthRateLimit(req, "billing:usage:get");
+  if (!preAuth.ok) return preAuth.response;
+
   const { supabase, user, errorResponse } = await requireApiUser();
   if (errorResponse) return errorResponse;
 

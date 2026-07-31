@@ -41,3 +41,15 @@ export interface Grant {
   sector: string;
   country: string;
 }
+
+export type OpportunityType = "scholarship" | "grant" | "job" | "admission";
+
+export interface SavedOpportunityRow {
+  id: string;
+  user_id: string;
+  opportunity_id: string;
+  opportunity_type: OpportunityType;
+  title: string;
+  meta: Record<string, string>;
+  created_at: string;
+}

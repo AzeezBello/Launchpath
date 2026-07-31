@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import { useSupabase } from "@/providers/SupabaseProvider";
+import { ProductTour } from "@/components/tour/ProductTour";
 
 export default function DashboardClient({
   children,
@@ -40,6 +41,7 @@ export default function DashboardClient({
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto">{children}</div>
+      <ProductTour />
     </div>
   );
 }

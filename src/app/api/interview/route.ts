@@ -1,37 +1,27 @@
-import { apiError, apiSuccess, applyRateLimit, clampInt, mergeHeaders, requireApiUser } from "@/lib/server/api";
+import {
+  apiError,
+  apiSuccess,
+  applyPreAuthRateLimit,
+  applyRateLimit,
+  clampInt,
+  mergeHeaders,
+  requireApiUser,
+} from "@/lib/server/api";
 import { isLikelyMissingTable } from "@/lib/server/settings";
-
-type InterviewStatus = "Scheduled" | "Completed" | "Pending";
-
-type InterviewRow = {
-  id: string;
-  user_id: string;
-  candidate: string;
-  position: string;
-  date: string;
-  status: InterviewStatus;
-};
-
-const ALLOWED_STATUS = new Set<InterviewStatus>(["Scheduled", "Completed", "Pending"]);
-
-function sanitizeText(value: unknown, maxLength: number) {
-  if (typeof value !== "string") return "";
-  return value.trim().slice(0, maxLength);
-}
-
-function sanitizeStatus(value: unknown): InterviewStatus {
-  if (typeof value !== "string") return "Pending";
-  const status = value.trim() as InterviewStatus;
-  return ALLOWED_STATUS.has(status) ? status : "Pending";
-}
-
-function sanitizeDate(value: unknown) {
-  if (typeof value !== "string") return new Date().toISOString().slice(0, 10);
-  const trimmed = value.trim().slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? trimmed : new Date().toISOString().slice(0, 10);
-}
+import {
+  INTERVIEW_ALLOWED_STATUS as ALLOWED_STATUS,
+  INTERVIEW_SELECT_COLUMNS,
+  type InterviewRow,
+  type InterviewStatus,
+  sanitizeInterviewDate as sanitizeDate,
+  sanitizeInterviewStatus as sanitizeStatus,
+  sanitizeInterviewText as sanitizeText,
+} from "@/lib/server/interviews";
 
 export async function GET(req: Request) {
+  const preAuth = applyPreAuthRateLimit(req, "interview:get");
+  if (!preAuth.ok) return preAuth.response;
+
   const { supabase, user, errorResponse } = await requireApiUser();
   if (errorResponse) return errorResponse;
 
@@ -59,7 +49,7 @@ export async function GET(req: Request) {
 
   let query = supabase
     .from("interviews")
-    .select("id, user_id, candidate, position, date, status", { count: "exact" })
+    .select(INTERVIEW_SELECT_COLUMNS, { count: "exact" })
     .eq("user_id", user.id)
     .order("date", { ascending: true })
     .range(from, to);
@@ -101,6 +91,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const preAuth = applyPreAuthRateLimit(req, "interview:post");
+  if (!preAuth.ok) return preAuth.response;
+
   const { supabase, user, errorResponse } = await requireApiUser();
   if (errorResponse) return errorResponse;
 
@@ -139,7 +132,7 @@ export async function POST(req: Request) {
       date,
       status,
     })
-    .select("id, user_id, candidate, position, date, status")
+    .select(INTERVIEW_SELECT_COLUMNS)
     .single();
 
   if (error) {

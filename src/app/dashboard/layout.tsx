@@ -9,7 +9,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="relative min-h-screen text-foreground">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.1),transparent_22%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.1),transparent_22%)]" />
 
       <div className="relative flex min-h-screen">
         <DashboardSidebar />

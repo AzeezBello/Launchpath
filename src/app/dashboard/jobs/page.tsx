@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { OpportunityCard, OpportunityGridSkeleton } from "@/components/opportunities/OpportunityCard";
 import { useOpportunitySearch } from "@/lib/hooks/useOpportunitySearch";
+import { useOpportunityActions } from "@/lib/hooks/useOpportunityActions";
 
 interface Job {
   id: string;
@@ -16,6 +17,7 @@ interface Job {
   location: string;
   type: string;
   link: string;
+  source?: string;
 }
 
 export default function JobsPage() {
@@ -25,6 +27,7 @@ export default function JobsPage() {
     []
   );
   const { items, loading, error, search } = useOpportunitySearch<Job>(buildUrl);
+  const { isSaved, isApplied, isPending, toggleSave, applyToOpportunity } = useOpportunityActions();
 
   const handleSearch = () => search({ query: query.trim() });
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -75,7 +78,26 @@ export default function JobsPage() {
                 { label: "Company", value: job.company },
                 { label: "Location", value: job.location },
                 { label: "Type", value: job.type },
+                ...(job.source ? [{ label: "Source", value: job.source }] : []),
               ]}
+              saved={isSaved(job.id, "job")}
+              applied={isApplied(job.id, "job")}
+              pending={isPending(job.id, "job")}
+              onToggleSave={() =>
+                toggleSave({
+                  opportunityId: job.id,
+                  opportunityType: "job",
+                  title: job.title,
+                  meta: { company: job.company, location: job.location, type: job.type, href: job.link },
+                })
+              }
+              onApply={() =>
+                applyToOpportunity({
+                  opportunityId: job.id,
+                  opportunityType: "job",
+                  title: `${job.title} @ ${job.company}`,
+                })
+              }
             />
           ))}
         </div>
