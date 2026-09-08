@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { updateLetter } from "@/utils/coverLetterHelpers";
 
 export default function EditCoverLetterPage() {
   const { supabase, user } = useSupabase();
@@ -70,21 +71,16 @@ export default function EditCoverLetterPage() {
       toast.error("You are not authorized to update this draft");
       return;
     }
-    const { error } = await supabase
-      .from("cover_letters")
-      .update({
-        company_name: form.company_name,
-        position: form.position,
-        tone: form.tone,
-        description: form.description,
-        content: form.content,
-      })
-      .eq("id", id)
-      .eq("user_id", user.id);
+    const { error } = await updateLetter(id, {
+      company_name: form.company_name,
+      position: form.position,
+      tone: form.tone,
+      description: form.description,
+      content: form.content,
+    });
 
     if (error) {
-      console.error(error);
-      toast.error("Save failed");
+      toast.error(error);
     } else {
       toast.success("Saved");
     }

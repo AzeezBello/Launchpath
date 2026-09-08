@@ -24,6 +24,21 @@ const ROUTE_META = [
     description: "Practice answers, key stories, and talking points before interviews.",
   },
   {
+    path: "/dashboard/recommenders",
+    title: "Recommenders",
+    description: "Who is writing your reference letters, when they are due, and what is still outstanding.",
+  },
+  {
+    path: "/dashboard/essays",
+    title: "Essays",
+    description: "Draft personal statements and scholarship essays against their prompts and word limits.",
+  },
+  {
+    path: "/dashboard/opportunities",
+    title: "Opportunity",
+    description: "Everything we know about this opportunity, and the actions to take on it.",
+  },
+  {
     path: "/dashboard/scholarships",
     title: "Scholarships",
     description: "Track fit, deadlines, and requirements for your best funding options.",

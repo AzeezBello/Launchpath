@@ -1,32 +1,47 @@
-// src/app/dashboard/cover-letter/utils/coverLetterHelpers.ts
-import type { SupabaseClient } from "@supabase/supabase-js";
+// Client helpers for cover-letter persistence. Writes go through the API so
+// plan limits and input bounds are enforced server-side; reads can still use
+// the Supabase client directly (RLS scopes them to the caller).
+
+import { handlePlanLimit } from "@/lib/plan-limit";
 
 export type CoverLetterPayload = {
-  user_id: string;
   company_name: string;
   position: string;
   tone?: string;
   description?: string;
   content: string;
+  source?: string;
 };
 
-export async function saveLetter(supabase: SupabaseClient, payload: CoverLetterPayload) {
-  const { error, data } = await supabase.from("cover_letters").insert([payload]).select().single();
-  return { error, data };
+export type SavedCoverLetter = CoverLetterPayload & { id: string; created_at: string };
+
+type Result<T> = { data: T | null; error: string | null; planLimited?: boolean };
+
+export async function saveLetter(payload: CoverLetterPayload): Promise<Result<SavedCoverLetter>> {
+  const res = await fetch("/api/cover-letters", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const body = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    const planLimited = handlePlanLimit(res.status, body);
+    return { data: null, error: body?.error || "Failed to save cover letter", planLimited };
+  }
+  return { data: body?.data as SavedCoverLetter, error: null };
 }
 
-export async function updateLetter(
-  supabase: SupabaseClient,
-  id: string,
-  userId: string,
-  patch: Partial<CoverLetterPayload>
-) {
-  const { error, data } = await supabase
-    .from("cover_letters")
-    .update(patch)
-    .eq("id", id)
-    .eq("user_id", userId)
-    .select()
-    .single();
-  return { error, data };
+export async function updateLetter(id: string, patch: Partial<CoverLetterPayload>): Promise<Result<SavedCoverLetter>> {
+  const res = await fetch(`/api/cover-letters/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  const body = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    return { data: null, error: body?.error || "Failed to update cover letter" };
+  }
+  return { data: body?.data as SavedCoverLetter, error: null };
 }
