@@ -8,6 +8,7 @@ import { OpportunityCard, OpportunityGridSkeleton } from "@/components/opportuni
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useOpportunityActions } from "@/lib/hooks/useOpportunityActions";
 import type { OpportunityType, SavedOpportunityRow } from "@/lib/types";
+import { opportunityDetailHref } from "@/lib/opportunity-links";
 
 const FILTERS: { value: OpportunityType | "all"; label: string }[] = [
   { value: "all", label: "All" },
@@ -135,6 +136,8 @@ export default function SavedOpportunitiesPage() {
                   title={row.title}
                   href={row.meta?.href || "#"}
                   linkLabel={LINK_LABEL[row.opportunity_type]}
+                  detailHref={opportunityDetailHref(row.opportunity_type, row.opportunity_id)}
+                  deadline={row.meta?.deadline}
                   meta={metaRowsFor(row)}
                   saved
                   applied={isApplied(row.opportunity_id, row.opportunity_type)}
@@ -145,6 +148,8 @@ export default function SavedOpportunitiesPage() {
                       opportunityId: row.opportunity_id,
                       opportunityType: row.opportunity_type,
                       title: row.title,
+                      deadline: row.meta?.deadline,
+                      url: row.meta?.href,
                     })
                   }
                 />

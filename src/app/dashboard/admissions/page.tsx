@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { OpportunityCard, OpportunityGridSkeleton } from "@/components/opportunities/OpportunityCard";
 import { useOpportunitySearch } from "@/lib/hooks/useOpportunitySearch";
 import { useOpportunityActions } from "@/lib/hooks/useOpportunityActions";
+import { opportunityDetailHref } from "@/lib/opportunity-links";
 
 interface Admission {
   id: string;
@@ -82,6 +83,7 @@ export default function AdmissionsPage() {
               title={u.name}
               href={u.website}
               linkLabel="Visit website"
+              detailHref={opportunityDetailHref("admission", u.id)}
               meta={[
                 { label: "Country", value: u.country },
                 { label: "Field", value: u.field },
@@ -102,6 +104,7 @@ export default function AdmissionsPage() {
                   opportunityId: u.id,
                   opportunityType: "admission",
                   title: u.name,
+                  url: u.website,
                 })
               }
             />

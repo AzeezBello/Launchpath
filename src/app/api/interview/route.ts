@@ -7,12 +7,14 @@ import {
   mergeHeaders,
   requireApiUser,
 } from "@/lib/server/api";
+import { PLAN_LIMIT_ERROR_CODE, checkPlanLimit } from "@/lib/server/plans";
 import { isLikelyMissingTable } from "@/lib/server/settings";
 import {
   INTERVIEW_ALLOWED_STATUS as ALLOWED_STATUS,
   INTERVIEW_SELECT_COLUMNS,
   type InterviewRow,
   type InterviewStatus,
+  sanitizeInterviewApplicationRef as sanitizeApplicationRef,
   sanitizeInterviewDate as sanitizeDate,
   sanitizeInterviewStatus as sanitizeStatus,
   sanitizeInterviewText as sanitizeText,
@@ -118,9 +120,22 @@ export async function POST(req: Request) {
   const position = sanitizeText(body.position, 120);
   const date = sanitizeDate(body.date);
   const status = sanitizeStatus(body.status);
+  const applicationId = sanitizeApplicationRef(body.applicationId);
+  const notes = sanitizeText(body.notes, 4000);
+  const location = sanitizeText(body.location, 200);
 
   if (!candidate || !position) {
-    return apiError("Candidate and position are required", { status: 422, headers: mergeHeaders(rateLimit.headers) });
+    return apiError("Company and position are required", { status: 422, headers: mergeHeaders(rateLimit.headers) });
+  }
+
+  const planCheck = await checkPlanLimit(supabase, user, "interviews");
+  if (!planCheck.ok) {
+    return apiError(planCheck.message, { status: 402, headers: mergeHeaders(rateLimit.headers) }, {
+      code: PLAN_LIMIT_ERROR_CODE,
+      plan: planCheck.plan,
+      used: planCheck.used,
+      limit: planCheck.limit,
+    });
   }
 
   const { data, error } = await supabase
@@ -131,6 +146,9 @@ export async function POST(req: Request) {
       position,
       date,
       status,
+      application_id: applicationId,
+      notes,
+      location,
     })
     .select(INTERVIEW_SELECT_COLUMNS)
     .single();

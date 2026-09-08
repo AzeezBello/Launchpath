@@ -9,6 +9,7 @@ import {
 import {
   INTERVIEW_SELECT_COLUMNS,
   type InterviewRow,
+  sanitizeInterviewApplicationRef,
   sanitizeInterviewDate,
   sanitizeInterviewStatus,
   sanitizeInterviewText,
@@ -47,13 +48,16 @@ export async function PATCH(req: Request, { params }: RouteContext) {
   if ("position" in body) update.position = sanitizeInterviewText(body.position, 120);
   if ("date" in body) update.date = sanitizeInterviewDate(body.date);
   if ("status" in body) update.status = sanitizeInterviewStatus(body.status);
+  if ("applicationId" in body) update.application_id = sanitizeInterviewApplicationRef(body.applicationId);
+  if ("notes" in body) update.notes = sanitizeInterviewText(body.notes, 4000);
+  if ("location" in body) update.location = sanitizeInterviewText(body.location, 200);
 
   if (Object.keys(update).length === 0) {
     return apiError("No valid fields to update", { status: 422, headers: mergeHeaders(rateLimit.headers) });
   }
 
   if (update.candidate === "" || update.position === "") {
-    return apiError("Candidate and position cannot be empty", {
+    return apiError("Company and position cannot be empty", {
       status: 422,
       headers: mergeHeaders(rateLimit.headers),
     });

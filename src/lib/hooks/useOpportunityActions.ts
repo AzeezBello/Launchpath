@@ -3,12 +3,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { OpportunityType, SavedOpportunityRow } from "@/lib/types";
+import { parseDeadline, toIsoDate } from "@/lib/deadlines";
+import { handlePlanLimit } from "@/lib/plan-limit";
 
 export type OpportunityRef = {
   opportunityId: string;
   opportunityType: OpportunityType;
   title: string;
   meta?: Record<string, string>;
+  /** Free-text or ISO deadline from the opportunity feed; copied onto the application when parseable. */
+  deadline?: string | null;
+  /** Source URL; stored on the application so it can be reopened from the pipeline. */
+  url?: string | null;
 };
 
 type LinkedApplication = {
@@ -119,6 +125,8 @@ export function useOpportunityActions() {
       const key = keyFor(item.opportunityId, item.opportunityType);
       if (appliedKeys.has(key)) return Promise.resolve();
 
+      const parsedDeadline = parseDeadline(item.deadline);
+
       return withPending(key, async () => {
         try {
           const res = await fetch("/api/applications", {
@@ -128,10 +136,15 @@ export function useOpportunityActions() {
               program: item.title,
               opportunityId: item.opportunityId,
               opportunityType: item.opportunityType,
+              ...(parsedDeadline ? { deadline: toIsoDate(parsedDeadline) } : {}),
+              ...(item.url ? { url: item.url } : {}),
             }),
           });
           const payload = await res.json();
-          if (!res.ok) throw new Error(payload?.error || "Failed to apply");
+          if (!res.ok) {
+            if (handlePlanLimit(res.status, payload)) return;
+            throw new Error(payload?.error || "Failed to apply");
+          }
 
           setAppliedKeys((prev) => new Set(prev).add(key));
           toast.success(
