@@ -4,7 +4,6 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabaseClient";
 import type { ResumeFormData } from "@/types/resume";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { StepProgress } from "@/components/resume/StepProgress";
@@ -24,7 +23,7 @@ export default function EditResumePage() {
   const id = typeof params.id === "string" ? params.id : Array.isArray(params.id) ? params.id[0] : "";
   const [step, setStep] = useState(1);
   const [resumeData, setResumeData] = useState<ResumeFormData | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
@@ -37,42 +36,31 @@ export default function EditResumePage() {
         return;
       }
 
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+      try {
+        const res = await fetch(`/api/resumes/${id}`, { cache: "no-store" });
+        const payload = await res.json().catch(() => null);
+        if (!res.ok) throw new Error(payload?.error || "Unable to load resume");
 
-      if (userError || !user) {
-        toast.error("You must be logged in");
+        const row = payload?.data as { title?: string; data?: ResumeFormData & { work?: ResumeFormData["experience"] } };
+        const normalized: ResumeFormData = {
+          personalInfo: row?.data?.personalInfo || { name: "", email: "", phone: "" },
+          education: row?.data?.education || [],
+          skills: row?.data?.skills || [],
+          experience: row?.data?.experience || row?.data?.work || [],
+          achievements: row?.data?.achievements || [],
+          title: row?.data?.title || row?.title || "",
+        };
+        setResumeData(normalized);
+        setLoaded(true);
+      } catch (err) {
+        console.error(err);
+        toast.error(err instanceof Error ? err.message : "Unable to load resume");
+      } finally {
         setLoading(false);
-        return;
       }
-
-      setUserId(user.id);
-      const { data, error } = await supabase
-        .from("resumes")
-        .select("*")
-        .eq("id", id)
-        .eq("user_id", user.id)
-        .single();
-      if (error) {
-        toast.error("Unable to load resume");
-      }
-
-      const normalized: ResumeFormData = {
-        personalInfo: data?.data?.personalInfo || { name: "", email: "", phone: "" },
-        education: data?.data?.education || [],
-        skills: data?.data?.skills || [],
-        experience: data?.data?.experience || data?.data?.work || [],
-        achievements: data?.data?.achievements || [],
-        title: data?.data?.title || data?.title || "",
-      };
-
-      setResumeData(normalized);
-      setLoading(false);
     };
     fetchResume();
-  }, [id, supabase]);
+  }, [id]);
 
   const updateSection = <K extends keyof ResumeFormData>(
     key: K,
@@ -90,27 +78,29 @@ export default function EditResumePage() {
     );
 
   const updateResume = async () => {
-    if (!resumeData) return;
-    if (!userId || !id) {
-      toast.error("Unauthorized");
+    if (!resumeData || !id || !loaded) {
+      toast.error("Nothing to save yet");
       return;
     }
 
     setSaving(true);
-    const { error } = await supabase
-      .from("resumes")
-      .update({ data: resumeData })
-      .eq("id", id)
-      .eq("user_id", userId);
-    setSaving(false);
+    try {
+      const res = await fetch(`/api/resumes/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: resumeData, ...(resumeData.title ? { title: resumeData.title } : {}) }),
+      });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(payload?.error || "Failed to update resume");
 
-    if (error) {
-      toast.error("Failed to update resume");
-      return;
+      toast.success("Resume updated");
+      router.push("/dashboard/resume");
+    } catch (err) {
+      console.error(err);
+      toast.error(err instanceof Error ? err.message : "Failed to update resume");
+    } finally {
+      setSaving(false);
     }
-
-    toast.success("Resume updated");
-    router.push("/dashboard/resume");
   };
 
   const totalSteps = 5;
@@ -138,7 +128,7 @@ export default function EditResumePage() {
         <StepProgress step={step} totalSteps={totalSteps} />
 
         {step === 1 && (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Skeleton className="h-64 w-full" />}>
             <PersonalInfoForm
               initialData={resumeData.personalInfo}
               onChange={(data) => updateSection("personalInfo", data)}
@@ -146,7 +136,7 @@ export default function EditResumePage() {
           </Suspense>
         )}
         {step === 2 && (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Skeleton className="h-64 w-full" />}>
             <EducationForm
               initialData={resumeData.education}
               onChange={(data) => updateSection("education", data)}
@@ -154,7 +144,7 @@ export default function EditResumePage() {
           </Suspense>
         )}
         {step === 3 && (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Skeleton className="h-64 w-full" />}>
             <SkillsForm
               initialData={resumeData.skills}
               onChange={(data) => updateSection("skills", data)}
@@ -162,7 +152,7 @@ export default function EditResumePage() {
           </Suspense>
         )}
         {step === 4 && (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Skeleton className="h-64 w-full" />}>
             <WorkExperienceForm
               initialData={resumeData.experience}
               onChange={(data) => updateSection("experience", data)}
@@ -170,7 +160,7 @@ export default function EditResumePage() {
           </Suspense>
         )}
         {step === 5 && (
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<Skeleton className="h-64 w-full" />}>
             <AchievementsForm
               initialData={resumeData.achievements}
               onChange={(data) => updateSection("achievements", data)}

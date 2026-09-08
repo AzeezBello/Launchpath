@@ -40,8 +40,17 @@ export default function LoginForm() {
     }
 
     await refreshSession();
-    toast.success("Logged in");
     const redirectTo = searchParams.get("redirectedFrom") || "/dashboard";
+
+    // Accounts with two-factor auth turned on must verify a code before the
+    // session reaches aal2; the middleware enforces this on every dashboard hit.
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+      router.push(`/mfa?redirectedFrom=${encodeURIComponent(redirectTo)}`);
+      return;
+    }
+
+    toast.success("Logged in");
     router.push(redirectTo);
     router.refresh();
   };

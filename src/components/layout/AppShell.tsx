@@ -17,6 +17,7 @@ const BARE_ROUTE_PREFIXES = [
   "/forgot-password",
   "/reset-password",
   "/onboarding",
+  "/mfa",
 ];
 
 /**

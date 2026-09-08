@@ -1,83 +1,148 @@
 "use client";
-import { useEffect, useState } from "react";
 
-import { Experience } from "@/types/resume";
+import { useEffect, useState } from "react";
+import { Briefcase, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import type { Experience } from "@/types/resume";
+import { EntryActions, moveItem, removeItem, replaceItem } from "./EntryActions";
 
 interface WorkExperienceFormProps {
   initialData?: Experience[];
   onChange?: (value: Experience[]) => void;
 }
 
+const EMPTY: Experience = { company: "", role: "", duration: "", description: "" };
 
-export default function WorkExperienceForm({
-  onChange, initialData,
-}: WorkExperienceFormProps) {
+export default function WorkExperienceForm({ onChange, initialData }: WorkExperienceFormProps) {
   const [work, setWork] = useState<Experience[]>(initialData || []);
-  const [form, setForm] = useState<Experience>({
-    company: "",
-    role: "",
-    duration: "",
-    description: "",
-  });
-
-  const handleAdd = () => {
-    if (!form.company || !form.role) return;
-    const updated = [...work, form];
-    setWork(updated);
-    setForm({ company: "", role: "", duration: "", description: "" });
-    onChange?.(updated);
-  };
+  const [form, setForm] = useState<Experience>(EMPTY);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   useEffect(() => {
     setWork(initialData || []);
   }, [initialData]);
 
-  useEffect(() => {
-    onChange?.(work);
-  }, [work, onChange]);
+  const commit = (next: Experience[]) => {
+    setWork(next);
+    onChange?.(next);
+  };
+
+  const resetForm = () => {
+    setForm(EMPTY);
+    setEditingIndex(null);
+  };
+
+  const handleSubmit = () => {
+    if (!form.company.trim() || !form.role.trim()) return;
+    const entry: Experience = {
+      company: form.company.trim(),
+      role: form.role.trim(),
+      duration: form.duration.trim(),
+      description: form.description?.trim() || "",
+    };
+    commit(editingIndex === null ? [...work, entry] : replaceItem(work, editingIndex, entry));
+    resetForm();
+  };
+
+  const startEdit = (index: number) => {
+    setEditingIndex(index);
+    setForm({ ...EMPTY, ...work[index] });
+  };
 
   return (
-    <div className="glass-card p-4 rounded-xl shadow-md space-y-3">
-      <h3 className="text-lg font-semibold">💼 Work Experience</h3>
-      <input
-        placeholder="Company"
-        className="border rounded p-2 w-full"
-        value={form.company}
-        onChange={(e) => setForm({ ...form, company: e.target.value })}
-      />
-      <input
-        placeholder="Role"
-        className="border rounded p-2 w-full"
-        value={form.role}
-        onChange={(e) => setForm({ ...form, role: e.target.value })}
-      />
-      <input
-        placeholder="Duration (e.g. 2020 - 2024)"
-        className="border rounded p-2 w-full"
-        value={form.duration}
-        onChange={(e) => setForm({ ...form, duration: e.target.value })}
-      />
-      <textarea
-        placeholder="Description"
-        className="border rounded p-2 w-full"
-        value={form.description}
-        onChange={(e) => setForm({ ...form, description: e.target.value })}
-      />
-      <button
-        onClick={handleAdd}
-        className="px-4 py-2 bg-primary text-white rounded hover:opacity-90"
-      >
-        Add Experience
-      </button>
-      <ul className="space-y-2">
-        {work.map((exp, i) => (
-          <li key={i} className="border rounded p-2">
-            <strong>{exp.company}</strong> – {exp.role} <br />
-            <span className="text-sm text-gray-500">{exp.duration}</span>
-            <p>{exp.description}</p>
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Briefcase className="h-4 w-4 text-primary" />
+        <h3 className="text-lg font-semibold">Work experience</h3>
+      </div>
+
+      <div className="space-y-3 rounded-[1.25rem] border border-border/80 bg-background/45 p-4">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="exp-company">Company</Label>
+            <Input
+              id="exp-company"
+              placeholder="Acme Inc."
+              value={form.company}
+              onChange={(e) => setForm({ ...form, company: e.target.value })}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="exp-role">Role</Label>
+            <Input
+              id="exp-role"
+              placeholder="Product Design Intern"
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+            />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="exp-duration">Duration</Label>
+          <Input
+            id="exp-duration"
+            placeholder="Jun 2024 – Present"
+            value={form.duration}
+            onChange={(e) => setForm({ ...form, duration: e.target.value })}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="exp-description">What you did</Label>
+          <Textarea
+            id="exp-description"
+            rows={3}
+            placeholder="Lead with outcomes: shipped X, grew Y by Z%, owned ..."
+            value={form.description || ""}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+        </div>
+        <div className="flex justify-end gap-2">
+          {editingIndex !== null && (
+            <Button type="button" variant="outline" onClick={resetForm}>
+              Cancel
+            </Button>
+          )}
+          <Button type="button" onClick={handleSubmit}>
+            <Plus className="h-4 w-4" />
+            {editingIndex !== null ? "Save changes" : "Add experience"}
+          </Button>
+        </div>
+      </div>
+
+      {work.length > 0 && (
+        <ul className="space-y-2">
+          {work.map((exp, i) => (
+            <li
+              key={`${exp.company}-${i}`}
+              className="flex items-start justify-between gap-3 rounded-[1.25rem] border border-border/80 bg-card/70 p-4"
+            >
+              <div className="min-w-0">
+                <p className="font-medium">
+                  {exp.role} <span className="text-muted-foreground">at</span> {exp.company}
+                </p>
+                {exp.duration && <p className="text-xs text-muted-foreground">{exp.duration}</p>}
+                {exp.description && (
+                  <p className="mt-1.5 whitespace-pre-line text-sm text-muted-foreground">{exp.description}</p>
+                )}
+              </div>
+              <EntryActions
+                index={i}
+                count={work.length}
+                editing={editingIndex === i}
+                onEdit={() => startEdit(i)}
+                onMove={(dir) => commit(moveItem(work, i, dir))}
+                onDelete={() => {
+                  commit(removeItem(work, i));
+                  if (editingIndex === i) resetForm();
+                }}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

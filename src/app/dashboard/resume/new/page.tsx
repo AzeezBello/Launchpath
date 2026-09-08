@@ -3,11 +3,12 @@
 import { useState, lazy, Suspense } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabaseClient";
+import { handlePlanLimit } from "@/lib/plan-limit";
 import { useRouter } from "next/navigation";
 import { ResumeFormData } from "@/types/resume";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { StepProgress } from "@/components/resume/StepProgress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FileText } from "lucide-react";
 
 // Lazy load form components for better performance
@@ -41,7 +42,7 @@ export default function NewResumePage() {
     {
       id: 1,
       content: (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
           <PersonalInfoForm
             initialData={formData.personalInfo}
             onChange={(data) => updateSection("personalInfo", data)}
@@ -52,7 +53,7 @@ export default function NewResumePage() {
     {
       id: 2,
       content: (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
           <EducationForm
             initialData={formData.education}
             onChange={(data) => updateSection("education", data)}
@@ -63,7 +64,7 @@ export default function NewResumePage() {
     {
       id: 3,
       content: (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
           <SkillsForm
             initialData={formData.skills}
             onChange={(data) => updateSection("skills", data)}
@@ -74,7 +75,7 @@ export default function NewResumePage() {
     {
       id: 4,
       content: (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
           <WorkExperienceForm
             initialData={formData.experience}
             onChange={(data) => updateSection("experience", data)}
@@ -85,7 +86,7 @@ export default function NewResumePage() {
     {
       id: 5,
       content: (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
           <AchievementsForm
             initialData={formData.achievements}
             onChange={(data) => updateSection("achievements", data)}
@@ -102,37 +103,26 @@ export default function NewResumePage() {
     }
 
     setSaving(true);
+    try {
+      const res = await fetch("/api/resumes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: formData.title || undefined, data: formData }),
+      });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) {
+        if (!handlePlanLimit(res.status, payload)) toast.error(payload?.error || "Failed to save resume");
+        return;
+      }
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError || !user) {
-      setSaving(false);
-      toast.error("You must be logged in to save your resume.");
-      return;
-    }
-
-    const title =
-      formData.title ||
-      (formData.personalInfo?.name
-        ? `${formData.personalInfo.name}'s Resume`
-        : "Untitled Resume");
-
-    const { error } = await supabase.from("resumes").insert({
-      user_id: user.id,
-      title,
-      data: formData,
-    });
-    setSaving(false);
-
-    if (error) {
+      toast.success("Resume saved");
+      router.push("/dashboard/resume");
+    } catch (err) {
+      console.error(err);
       toast.error("Failed to save resume");
-      return;
+    } finally {
+      setSaving(false);
     }
-
-    toast.success("Resume saved");
-    router.push("/dashboard/resume");
   };
 
   const totalSteps = steps.length;

@@ -29,6 +29,10 @@ export type Settings = {
     focus?: OnboardingFocus[];
     tourCompletedAt?: string;
   };
+  notifications: {
+    /** Daily email when an open application is 7/3/1/0 days from its deadline. Defaults on. */
+    deadlineReminders?: boolean;
+  };
 };
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -37,6 +41,7 @@ export const DEFAULT_SETTINGS: Settings = {
   security: { twofa: false, session_alerts: false },
   appearance: { theme: "light", accent: "indigo" },
   onboarding: { completed: false, focus: [] },
+  notifications: { deadlineReminders: true },
 };
 
 type DeepPartial<T> = {
@@ -158,6 +163,16 @@ export function sanitizeSettingsPatch(input: unknown): DeepPartial<Settings> | n
     }
 
     if (Object.keys(onboardingPatch).length > 0) sanitized.onboarding = onboardingPatch;
+  }
+
+  const notifications = patch.notifications;
+  if (notifications && typeof notifications === "object") {
+    const notificationsRecord = notifications as Record<string, unknown>;
+    const notificationsPatch: Settings["notifications"] = {};
+    if ("deadlineReminders" in notificationsRecord) {
+      notificationsPatch.deadlineReminders = Boolean(notificationsRecord.deadlineReminders);
+    }
+    if (Object.keys(notificationsPatch).length > 0) sanitized.notifications = notificationsPatch;
   }
 
   return sanitized;

@@ -34,24 +34,38 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isProtected =
-    request.nextUrl.pathname.startsWith("/dashboard") ||
-    request.nextUrl.pathname.startsWith("/onboarding")
-  const isAuthPage = request.nextUrl.pathname.startsWith("/login")
+  const pathname = request.nextUrl.pathname
+  const isProtected = pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding")
+  const isAuthPage = pathname.startsWith("/login")
+  const isMfaPage = pathname === "/mfa"
 
-  if (!user && isProtected) {
+  if (!user && (isProtected || isMfaPage)) {
     const redirectUrl = new URL("/login", request.url)
-    redirectUrl.searchParams.set("redirectedFrom", request.nextUrl.pathname)
+    redirectUrl.searchParams.set("redirectedFrom", pathname)
     return NextResponse.redirect(redirectUrl)
   }
 
-  if (user && isAuthPage) {
-    return NextResponse.redirect(new URL("/dashboard", request.url))
+  if (user) {
+    // Accounts with a verified TOTP factor must complete the challenge (aal2)
+    // before reaching the app. getAuthenticatorAssuranceLevel reads the JWT
+    // claims and the user's factors, so it costs no extra round trip here.
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    const needsMfa = aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2"
+
+    if (needsMfa && (isProtected || isAuthPage)) {
+      const redirectUrl = new URL("/mfa", request.url)
+      if (isProtected) redirectUrl.searchParams.set("redirectedFrom", pathname)
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    if (!needsMfa && (isAuthPage || isMfaPage)) {
+      return NextResponse.redirect(new URL("/dashboard", request.url))
+    }
   }
 
   return response
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding", "/login"],
+  matcher: ["/dashboard/:path*", "/onboarding", "/login", "/mfa"],
 }
