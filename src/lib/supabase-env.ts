@@ -1,24 +1,21 @@
-const FALLBACK_SUPABASE_URL = "https://placeholder.supabase.co";
-const FALLBACK_SUPABASE_ANON_KEY = "public-anon-key-placeholder";
-
-export function getSupabasePublicEnv() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const configured = Boolean(url && anonKey);
-
+export function getNeonEnv() {
+  const databaseUrl =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL_UNPOOLED ||
+    "";
   return {
-    configured,
-    url: url || FALLBACK_SUPABASE_URL,
-    anonKey: anonKey || FALLBACK_SUPABASE_ANON_KEY,
+    databaseUrl,
+    isConfigured: Boolean(databaseUrl),
   };
 }
 
-export function requireSupabasePublicEnv(context: string) {
-  const env = getSupabasePublicEnv();
-  if (!env.configured) {
-    throw new Error(
-      `[${context}] Missing Supabase environment variables. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.`
-    );
-  }
-  return env;
+// Legacy aliases kept so any existing imports continue to work seamlessly
+export function getSupabasePublicEnv() {
+  return getNeonEnv();
+}
+
+export function requireSupabasePublicEnv(context?: string) {
+  void context;
+  return getNeonEnv();
 }

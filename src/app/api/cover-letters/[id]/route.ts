@@ -10,6 +10,41 @@ import { COVER_LETTER_SELECT_COLUMNS, type CoverLetterRow, sanitizeCoverLetter }
 
 type RouteContext = { params: Promise<{ id: string }> };
 
+export async function GET(req: Request, { params }: RouteContext) {
+  const { id } = await params;
+
+  const preAuth = applyPreAuthRateLimit(req, "cover-letters:get-one");
+  if (!preAuth.ok) return preAuth.response;
+
+  const { supabase, user, errorResponse } = await requireApiUser();
+  if (errorResponse) return errorResponse;
+
+  const rateLimit = applyRateLimit({
+    request: req,
+    route: "cover-letters:get-one",
+    userId: user.id,
+    limit: 120,
+    windowMs: 60 * 1000,
+  });
+  if (!rateLimit.ok) return rateLimit.response;
+
+  const { data, error } = await supabase
+    .from("cover_letters")
+    .select(COVER_LETTER_SELECT_COLUMNS)
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error) {
+    return apiError("Failed to load cover letter", { status: 500, headers: mergeHeaders(rateLimit.headers) }, error.message);
+  }
+  if (!data) {
+    return apiError("Cover letter not found", { status: 404, headers: mergeHeaders(rateLimit.headers) });
+  }
+
+  return apiSuccess(data as CoverLetterRow, { status: 200, headers: mergeHeaders(rateLimit.headers) });
+}
+
 export async function PATCH(req: Request, { params }: RouteContext) {
   const { id } = await params;
 

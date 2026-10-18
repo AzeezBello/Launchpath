@@ -1,4 +1,5 @@
-import type { SupabaseClient, User } from "@supabase/supabase-js";
+import type { User } from "@/lib/auth-token";
+import type { NeonServerClient } from "@/lib/server/neon-db";
 import { isLikelyMissingTable } from "@/lib/server/settings";
 
 export type PlanKey = "starter" | "pro" | "team";
@@ -37,8 +38,17 @@ export const PLAN_LABELS: Record<PlanKey, string> = {
   team: "Team",
 };
 
-/** Plan lives in app_metadata (set by the Stripe webhook); user_metadata is a legacy fallback. */
-export function resolvePlan(user: Pick<User, "app_metadata" | "user_metadata">): PlanKey {
+/** Plan lives in app_metadata (set by Stripe webhook or superadmin provisioning); user_metadata is a fallback. */
+export function resolvePlan(
+  user: Pick<User, "app_metadata" | "user_metadata"> & { role?: string }
+): PlanKey {
+  if (
+    user.role === "superadmin" ||
+    user.app_metadata?.role === "superadmin" ||
+    user.app_metadata?.is_superadmin === true
+  ) {
+    return "team";
+  }
   const value = user.app_metadata?.plan ?? user.user_metadata?.plan;
   if (typeof value !== "string") return "starter";
   const plan = value.trim().toLowerCase();
@@ -52,7 +62,7 @@ function startOfMonthIso() {
 }
 
 export async function countOwnedRows(
-  supabase: SupabaseClient,
+  supabase: Pick<NeonServerClient, "from">,
   table: string,
   userId: string,
   options?: { since?: string }
@@ -69,7 +79,10 @@ export async function countOwnedRows(
 }
 
 /** Cover letters are a monthly allowance; everything else is a running total. */
-export async function countCoverLettersThisMonth(supabase: SupabaseClient, userId: string) {
+export async function countCoverLettersThisMonth(
+  supabase: Pick<NeonServerClient, "from">,
+  userId: string
+) {
   return countOwnedRows(supabase, "cover_letters", userId, { since: startOfMonthIso() });
 }
 
@@ -91,7 +104,7 @@ const LIMIT_LABEL: Record<LimitKey, string> = {
  * `key` would exceed the caller's plan. Routes turn that into a 402.
  */
 export async function checkPlanLimit(
-  supabase: SupabaseClient,
+  supabase: Pick<NeonServerClient, "from">,
   user: User,
   key: LimitKey
 ): Promise<PlanLimitCheck> {

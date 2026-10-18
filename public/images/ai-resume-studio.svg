@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 440" fill="none">
+  <defs>
+    <linearGradient id="studioBg" x1="0" y1="0" x2="640" y2="440" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#1E293B" />
+    </linearGradient>
+    <linearGradient id="scoreRing" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+  </defs>
+
+  <rect width="640" height="440" rx="24" fill="url(#studioBg)" />
+  <rect x="1" y="1" width="638" height="438" rx="23" stroke="#334155" stroke-opacity="0.7" stroke-width="1.5" />
+
+  <!-- Left Document Sheet -->
+  <rect x="28" y="28" width="356" height="384" rx="16" fill="#F8FAFC" />
+  <rect x="52" y="52" width="140" height="16" rx="6" fill="#0F172A" />
+  <rect x="52" y="76" width="210" height="10" rx="5" fill="#64748B" />
+
+  <line x1="52" y1="104" x2="360" y2="104" stroke="#E2E8F0" stroke-width="1.5" />
+
+  <!-- Highlighted Resume Bullet 1 -->
+  <rect x="46" y="120" width="320" height="68" rx="10" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.2" />
+  <rect x="58" y="132" width="120" height="10" rx="5" fill="#1D4ED8" />
+  <rect x="58" y="150" width="284" height="8" rx="4" fill="#475569" />
+  <rect x="58" y="166" width="230" height="8" rx="4" fill="#475569" />
+
+  <!-- Highlighted Resume Bullet 2 -->
+  <rect x="46" y="202" width="320" height="68" rx="10" fill="#ECFDF5" stroke="#A7F3D0" stroke-width="1.2" />
+  <rect x="58" y="214" width="144" height="10" rx="5" fill="#047857" />
+  <rect x="58" y="232" width="276" height="8" rx="4" fill="#475569" />
+  <rect x="58" y="248" width="248" height="8" rx="4" fill="#475569" />
+
+  <!-- Standard Resume Section -->
+  <rect x="52" y="290" width="110" height="10" rx="5" fill="#0F172A" />
+  <rect x="52" y="310" width="290" height="8" rx="4" fill="#94A3B8" />
+  <rect x="52" y="326" width="260" height="8" rx="4" fill="#94A3B8" />
+  <rect x="52" y="352" width="84" height="24" rx="12" fill="#E2E8F0" />
+  <rect x="144" y="352" width="96" height="24" rx="12" fill="#E2E8F0" />
+  <rect x="248" y="352" width="76" height="24" rx="12" fill="#E2E8F0" />
+
+  <!-- Right AI Inspector Panel -->
+  <rect x="404" y="28" width="208" height="182" rx="16" fill="#0F172A" fill-opacity="0.85" stroke="#334155" stroke-width="1.2" />
+  <text x="426" y="56" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">ROLE ALIGNMENT SCORE</text>
+  <circle cx="508" cy="126" r="46" stroke="#1E293B" stroke-width="10" />
+  <circle cx="508" cy="126" r="46" stroke="url(#scoreRing)" stroke-width="10" stroke-dasharray="265 290" stroke-linecap="round" transform="rotate(-90 508 126)" />
+  <text x="484" y="134" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700">94%</text>
+  <text x="454" y="192" fill="#34D399" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">✓ Ready for submission</text>
+
+  <!-- Right Bottom AI Citation Card -->
+  <rect x="404" y="226" width="208" height="186" rx="16" fill="#0F172A" fill-opacity="0.85" stroke="#334155" stroke-width="1.2" />
+  <text x="424" y="254" fill="#60A5FA" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="700">✦ AI CITATION ENGINE</text>
+  <text x="424" y="280" fill="#E2E8F0" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">Matched Keywords</text>
+  <rect x="424" y="294" width="76" height="22" rx="11" fill="#1E3A8A" fill-opacity="0.7" />
+  <text x="436" y="309" fill="#93C5FD" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">Distributed</text>
+  <rect x="508" y="294" width="84" height="22" rx="11" fill="#065F46" fill-opacity="0.7" />
+  <text x="520" y="309" fill="#6EE7B7" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">TypeScript</text>
+  <rect x="424" y="324" width="110" height="22" rx="11" fill="#1E293B" />
+  <text x="436" y="339" fill="#CBD5E1" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500">Grant Proposal</text>
+  <rect x="424" y="364" width="168" height="30" rx="15" fill="#2563EB" />
+  <text x="458" y="383" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">Export Tailored PDF</text>
+</svg>

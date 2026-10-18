@@ -105,7 +105,7 @@ export async function POST(req: Request) {
 
   if (error) {
     if (isLikelyMissingTable(error)) {
-      return apiError("Recommenders table is missing. Run supabase/migrations/20260908_recommenders.sql.", {
+      return apiError("Recommenders table is missing. Run neon/migrations/0001_neon_full_schema.sql.", {
         status: 501,
         headers: mergeHeaders(rateLimit.headers),
       });

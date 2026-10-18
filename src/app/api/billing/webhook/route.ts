@@ -17,7 +17,7 @@ async function setPlan(
   extra: { customerId?: string | null; subscriptionId?: string | null }
 ) {
   const admin = getSupabaseAdminClient();
-  if (!admin) throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
+  if (!admin) throw new Error("DATABASE_URL is not configured");
 
   const { data: current } = await admin.auth.admin.getUserById(userId);
   const existing = (current?.user?.app_metadata || {}) as Record<string, unknown>;

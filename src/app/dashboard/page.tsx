@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -302,47 +303,65 @@ export default function OverviewPage() {
     countsLoading ? <span className="inline-block h-8 w-16 animate-pulse rounded-md bg-muted/70" /> : value;
 
   return (
-    <div className="space-y-8">
-      <section className="surface-panel relative overflow-hidden p-6 sm:p-8">
-        <div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+    <div className="space-y-12 pb-8">
+      <section className="surface-panel relative overflow-hidden p-8 sm:p-10 lg:p-12">
+        <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
 
-        <div className="relative flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-2xl space-y-4">
+        <div className="relative grid gap-10 xl:grid-cols-[1.15fr_0.85fr] xl:items-center">
+          <div className="space-y-6">
             <Badge variant="outline" className="w-fit">
               <Sparkles className="h-3.5 w-3.5" />
               Workspace overview
             </Badge>
-            <div>
-              <h2 className="text-balance text-3xl font-semibold sm:text-4xl">
+            <div className="space-y-3">
+              <h2 className="text-balance text-3xl font-semibold sm:text-4xl lg:text-[2.6rem] lg:leading-[1.12]">
                 Keep every opportunity moving with less friction.
               </h2>
-              <p className="mt-3 text-base leading-relaxed text-muted-foreground sm:text-lg">
-                The overview pulls your best next actions, plan usage, and pipeline
-                signal into one place so you can decide quickly and keep momentum.
+              <p className="max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                Your command center brings together live opportunity counts, deadline
+                signals, and AI writing tools with room to focus.
               </p>
+            </div>
+
+            <div className="grid gap-4 pt-2 sm:grid-cols-3">
+              <div className="rounded-[1.5rem] border border-border/80 bg-background/55 px-5 py-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Current plan
+                </p>
+                <p className="mt-2.5 text-2xl font-semibold">{formatPlanLabel(usage.plan)}</p>
+              </div>
+              <div className="rounded-[1.5rem] border border-border/80 bg-background/55 px-5 py-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Jobs available
+                </p>
+                <p className="mt-2.5 text-2xl font-semibold">{countValue(counts.job)}</p>
+              </div>
+              <div className="rounded-[1.5rem] border border-border/80 bg-background/55 px-5 py-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Funding leads
+                </p>
+                <p className="mt-2.5 text-2xl font-semibold">
+                  {countValue(counts.scholarship + counts.grant)}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-[1.35rem] border border-border/80 bg-background/45 px-4 py-4">
-              <p className="text-sm text-muted-foreground">Current plan</p>
-              <p className="mt-2 text-2xl font-semibold">{formatPlanLabel(usage.plan)}</p>
-            </div>
-            <div className="rounded-[1.35rem] border border-border/80 bg-background/45 px-4 py-4">
-              <p className="text-sm text-muted-foreground">Jobs available</p>
-              <p className="mt-2 text-2xl font-semibold">{countValue(counts.job)}</p>
-            </div>
-            <div className="rounded-[1.35rem] border border-border/80 bg-background/45 px-4 py-4">
-              <p className="text-sm text-muted-foreground">Funding leads</p>
-              <p className="mt-2 text-2xl font-semibold">
-                {countValue(counts.scholarship + counts.grant)}
-              </p>
+          <div className="mockup-frame overflow-hidden p-2.5">
+            <div className="overflow-hidden rounded-[1.25rem] border border-slate-800/80 bg-slate-950">
+              <Image
+                src="/images/pipeline-analytics.svg"
+                alt="Pipeline velocity and upcoming milestone radar"
+                width={640}
+                height={440}
+                className="h-auto w-full object-cover"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         {resourceCards.map((card) => {
           const Icon = card.icon;
           const isFocus = focus.includes(card.type);
@@ -350,9 +369,9 @@ export default function OverviewPage() {
           return (
             <Link key={card.type} href={card.href} className="group">
               <Card className="hover-card h-full">
-                <CardContent className="flex h-full flex-col gap-5 p-6">
+                <CardContent className="flex h-full flex-col justify-between gap-6 p-7">
                   <div className="flex items-center justify-between">
-                    <span className="flex size-11 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                    <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/12 text-primary">
                       <Icon className="h-5 w-5" />
                     </span>
                     <span className="flex items-center gap-2">
@@ -366,7 +385,7 @@ export default function OverviewPage() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">{card.title}</p>
-                    <p className="mt-2 text-3xl font-semibold">{countValue(counts[card.type])}</p>
+                    <p className="mt-2.5 text-3xl font-semibold">{countValue(counts[card.type])}</p>
                     <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                       {card.note}
                     </p>
@@ -378,8 +397,8 @@ export default function OverviewPage() {
         })}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="grid gap-6 lg:grid-cols-2">
+      <section className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="grid gap-8 lg:grid-cols-2">
           <UpcomingDeadlines />
           <ResumeScoreCard />
         </div>
@@ -391,7 +410,7 @@ export default function OverviewPage() {
               Track how much of the workspace you have used this cycle.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-5">
+          <CardContent className="space-y-6">
             {usageLoading ? (
               <div className="space-y-3">
                 {[0, 1, 2, 3].map((item) => (
@@ -405,7 +424,7 @@ export default function OverviewPage() {
               usageSummary.map((item) => <UsageRow key={item.label} {...item} />)
             )}
 
-            <div className="rounded-[1.35rem] border border-border/80 bg-background/45 p-4">
+            <div className="rounded-[1.5rem] border border-border/80 bg-background/55 p-5">
               <p className="text-sm font-semibold">
                 Plan: {formatPlanLabel(usage.plan)}
               </p>
@@ -423,12 +442,12 @@ export default function OverviewPage() {
         </Card>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <section className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
         <PipelineStats />
         <RecentApplications />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-2">
+      <section className="grid gap-8 xl:grid-cols-2">
         <RecommendedJobs />
         <Card>
           <CardHeader>
@@ -437,11 +456,11 @@ export default function OverviewPage() {
               Keep the pipeline moving with small, high-leverage updates.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {QUICK_ACTIONS.map((action) => (
               <div
                 key={action.title}
-                className="rounded-[1.25rem] border border-border/80 bg-background/45 p-4"
+                className="rounded-[1.35rem] border border-border/80 bg-background/55 p-5"
               >
                 <p className="font-semibold">{action.title}</p>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">

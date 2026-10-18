@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,15 +10,22 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useSupabase } from "@/providers/SupabaseProvider";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [linkValid, setLinkValid] = useState<boolean | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") || "";
   const { supabase } = useSupabase();
 
   useEffect(() => {
     let cancelled = false;
+
+    if (token) {
+      setLinkValid(true);
+      return;
+    }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!cancelled) setLinkValid(Boolean(session));
@@ -27,13 +34,13 @@ export default function ResetPasswordPage() {
     return () => {
       cancelled = true;
     };
-  }, [supabase]);
+  }, [supabase, token]);
 
   async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await supabase.auth.updateUser({ password });
+    const { error } = await supabase.auth.updateUser({ password, token: token || undefined });
 
     setLoading(false);
 
@@ -64,10 +71,7 @@ export default function ResetPasswordPage() {
           This reset link is invalid or has expired. Request a new one above.
         </p>
       ) : (
-        <form
-          onSubmit={handleResetPassword}
-          className="space-y-5"
-        >
+        <form onSubmit={handleResetPassword} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="new-password">New password</Label>
             <Input
@@ -81,15 +85,19 @@ export default function ResetPasswordPage() {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading || linkValid !== true}
-          >
+          <Button type="submit" className="w-full" disabled={loading || linkValid !== true}>
             {loading ? "Updating..." : "Update Password"}
           </Button>
         </form>
       )}
     </AuthShell>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

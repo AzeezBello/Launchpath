@@ -50,7 +50,7 @@ export async function GET(req: Request) {
 
   const admin = getSupabaseAdminClient();
   if (!admin) {
-    return apiError("SUPABASE_SERVICE_ROLE_KEY is not configured", 501);
+    return apiError("DATABASE_URL is not configured", 501);
   }
 
   const appUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
