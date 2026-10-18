@@ -8,11 +8,13 @@ import {
   Briefcase,
   ClipboardList,
   FileText,
+  PenLine,
   GraduationCap,
   HandCoins,
   LayoutDashboard,
   Rocket,
   Settings,
+  UserCheck,
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -62,6 +64,8 @@ const DASHBOARD_GROUPS: DashboardGroup[] = [
       { label: "Scholarships", href: "/dashboard/scholarships", icon: GraduationCap },
       { label: "Grants", href: "/dashboard/grants", icon: HandCoins },
       { label: "Admissions", href: "/dashboard/admissions", icon: Rocket },
+      { label: "Essays", href: "/dashboard/essays", icon: PenLine },
+      { label: "Recommenders", href: "/dashboard/recommenders", icon: UserCheck },
     ],
   },
 ];

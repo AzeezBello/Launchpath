@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="960" y2="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="55%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <linearGradient id="accentBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+    <linearGradient id="accentEmerald" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <radialGradient id="glowTop" cx="0.2" cy="0.15" r="0.5">
+      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glowBottom" cx="0.85" cy="0.85" r="0.45">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.24" />
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0" />
+    </radialGradient>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#020617" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Outer Window Frame -->
+  <rect width="960" height="640" rx="28" fill="url(#bgGrad)" />
+  <rect width="960" height="640" rx="28" fill="url(#glowTop)" />
+  <rect width="960" height="640" rx="28" fill="url(#glowBottom)" />
+  <rect x="1" y="1" width="958" height="638" rx="27" stroke="#334155" stroke-opacity="0.65" stroke-width="2" />
+
+  <!-- Browser Top Bar -->
+  <rect x="0" y="0" width="960" height="54" rx="28" fill="#0B1120" fill-opacity="0.75" />
+  <line x1="0" y1="54" x2="960" y2="54" stroke="#1E293B" stroke-width="1.5" />
+  <circle cx="30" cy="27" r="6.5" fill="#EF4444" fill-opacity="0.85" />
+  <circle cx="50" cy="27" r="6.5" fill="#F59E0B" fill-opacity="0.85" />
+  <circle cx="70" cy="27" r="6.5" fill="#10B981" fill-opacity="0.85" />
+
+  <!-- Address Pill -->
+  <rect x="280" y="13" width="400" height="28" rx="14" fill="#1E293B" stroke="#334155" stroke-width="1" />
+  <circle cx="302" cy="27" r="4" fill="#10B981" />
+  <text x="316" y="31" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="500">app.launchpath.io/dashboard/pipeline</text>
+
+  <!-- Left Sidebar -->
+  <rect x="20" y="74" width="190" height="546" rx="18" fill="#0F172A" fill-opacity="0.8" stroke="#1E293B" stroke-width="1.5" />
+  <rect x="38" y="96" width="32" height="32" rx="10" fill="url(#accentBlue)" />
+  <text x="46" y="117" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="700">LP</text>
+  <text x="80" y="110" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600">LaunchPath</text>
+  <text x="80" y="125" fill="#64748B" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="500">NEON WORKSPACE</text>
+
+  <!-- Sidebar Nav Items -->
+  <rect x="34" y="152" width="162" height="36" rx="10" fill="#1E293B" />
+  <circle cx="52" cy="170" r="5" fill="#3B82F6" />
+  <text x="68" y="174" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">Overview</text>
+
+  <circle cx="52" cy="212" r="4" fill="#475569" />
+  <text x="68" y="216" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="500">Scholarships</text>
+  <rect x="156" y="203" width="28" height="18" rx="9" fill="#1E293B" />
+  <text x="163" y="215" fill="#60A5FA" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">42</text>
+
+  <circle cx="52" cy="250" r="4" fill="#475569" />
+  <text x="68" y="254" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="500">Jobs &amp; Roles</text>
+
+  <circle cx="52" cy="288" r="4" fill="#475569" />
+  <text x="68" y="292" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="500">Grants &amp; Fellowships</text>
+
+  <circle cx="52" cy="326" r="4" fill="#475569" />
+  <text x="68" y="330" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="500">AI Cover Letters</text>
+
+  <circle cx="52" cy="364" r="4" fill="#475569" />
+  <text x="68" y="368" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="500">Resume Builder</text>
+
+  <!-- Sidebar Bottom Card -->
+  <rect x="34" y="510" width="162" height="94" rx="14" fill="#1E293B" fill-opacity="0.7" stroke="#334155" stroke-width="1" />
+  <text x="48" y="534" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="500">ATS Match Score</text>
+  <text x="48" y="560" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="700">94%</text>
+  <text x="102" y="558" fill="#34D399" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">+12% wk</text>
+  <rect x="48" y="576" width="134" height="6" rx="3" fill="#0F172A" />
+  <rect x="48" y="576" width="118" height="6" rx="3" fill="url(#accentEmerald)" />
+
+  <!-- Main Workspace Area -->
+  <!-- Header Row -->
+  <text x="236" y="104" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="700">Active Application Pipeline</text>
+  <text x="236" y="126" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="13">Synced with Neon Postgres • 3 deadlines approaching this week</text>
+
+  <rect x="786" y="84" width="150" height="38" rx="19" fill="url(#accentBlue)" />
+  <text x="816" y="108" fill="#FFFFFF" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">+ New Application</text>
+
+  <!-- Metric Summary Strip -->
+  <g filter="url(#cardShadow)">
+    <rect x="236" y="150" width="220" height="92" rx="18" fill="#1E293B" fill-opacity="0.85" stroke="#334155" stroke-width="1.2" />
+    <text x="258" y="178" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="500">Matched Opportunities</text>
+    <text x="258" y="216" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="700">128</text>
+    <rect x="372" y="196" width="66" height="24" rx="12" fill="#065F46" fill-opacity="0.6" />
+    <text x="385" y="212" fill="#34D399" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">96% fit</text>
+
+    <rect x="476" y="150" width="220" height="92" rx="18" fill="#1E293B" fill-opacity="0.85" stroke="#334155" stroke-width="1.2" />
+    <text x="498" y="178" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="500">In Review &amp; Interviews</text>
+    <text x="498" y="216" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="700">14</text>
+    <rect x="606" y="196" width="72" height="24" rx="12" fill="#1E3A8A" fill-opacity="0.7" />
+    <text x="618" y="212" fill="#60A5FA" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">4 this wk</text>
+
+    <rect x="716" y="150" width="220" height="92" rx="18" fill="#1E293B" fill-opacity="0.85" stroke="#334155" stroke-width="1.2" />
+    <text x="738" y="178" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="500">Funding &amp; Offers</text>
+    <text x="738" y="216" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="700">$48,500</text>
+    <rect x="852" y="196" width="66" height="24" rx="12" fill="#065F46" fill-opacity="0.6" />
+    <text x="866" y="212" fill="#34D399" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">Active</text>
+  </g>
+
+  <!-- Kanban / Pipeline Columns -->
+  <!-- Column 1: Drafting -->
+  <rect x="236" y="266" width="220" height="354" rx="20" fill="#0F172A" fill-opacity="0.75" stroke="#1E293B" stroke-width="1.5" />
+  <circle cx="258" cy="292" r="5" fill="#F59E0B" />
+  <text x="272" y="296" fill="#E2E8F0" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600">Drafting Materials</text>
+  <text x="426" y="296" fill="#64748B" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">3</text>
+
+  <g filter="url(#cardShadow)">
+    <rect x="250" y="314" width="192" height="128" rx="14" fill="#1E293B" stroke="#334155" stroke-width="1" />
+    <rect x="264" y="328" width="68" height="20" rx="10" fill="#1E3A8A" fill-opacity="0.6" />
+    <text x="274" y="342" fill="#93C5FD" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">Fellowship</text>
+    <text x="264" y="368" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600">Knight-Hennessy</text>
+    <text x="264" y="386" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="11">Stanford University</text>
+    <rect x="264" y="404" width="164" height="5" rx="2.5" fill="#0F172A" />
+    <rect x="264" y="404" width="128" height="5" rx="2.5" fill="#3B82F6" />
+    <text x="264" y="428" fill="#64748B" font-family="system-ui, -apple-system, sans-serif" font-size="10">Essay 2/2 • Due Oct 24</text>
+
+    <rect x="250" y="456" width="192" height="114" rx="14" fill="#1E293B" stroke="#334155" stroke-width="1" />
+    <rect x="264" y="470" width="52" height="20" rx="10" fill="#065F46" fill-opacity="0.6" />
+    <text x="275" y="484" fill="#6EE7B7" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">Grant</text>
+    <text x="264" y="510" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600">Emergent Ventures</text>
+    <text x="264" y="528" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="11">Mercatus Center • $25,000</text>
+    <text x="264" y="554" fill="#34D399" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">AI Proposal Ready</text>
+  </g>
+
+  <!-- Column 2: Submitted -->
+  <rect x="476" y="266" width="220" height="354" rx="20" fill="#0F172A" fill-opacity="0.75" stroke="#1E293B" stroke-width="1.5" />
+  <circle cx="498" cy="292" r="5" fill="#3B82F6" />
+  <text x="512" y="296" fill="#E2E8F0" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600">Submitted &amp; Active</text>
+  <text x="666" y="296" fill="#64748B" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">5</text>
+
+  <g filter="url(#cardShadow)">
+    <rect x="490" y="314" width="192" height="128" rx="14" fill="#1E293B" stroke="#3B82F6" stroke-opacity="0.5" stroke-width="1.2" />
+    <rect x="504" y="328" width="64" height="20" rx="10" fill="#1E3A8A" fill-opacity="0.6" />
+    <text x="515" y="342" fill="#93C5FD" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">Product</text>
+    <text x="504" y="368" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600">Stripe — New Grad PM</text>
+    <text x="504" y="386" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="11">San Francisco / Remote</text>
+    <text x="504" y="420" fill="#60A5FA" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">● Technical Screen Scheduled</text>
+
+    <rect x="490" y="456" width="192" height="114" rx="14" fill="#1E293B" stroke="#334155" stroke-width="1" />
+    <rect x="504" y="470" width="76" height="20" rx="10" fill="#312E81" fill-opacity="0.7" />
+    <text x="514" y="484" fill="#C7D2FE" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">Scholarship</text>
+    <text x="504" y="510" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600">Generation Google</text>
+    <text x="504" y="528" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="11">$10,000 Tuition Award</text>
+    <text x="504" y="554" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="10">Recommenders: 2/2 Received</text>
+  </g>
+
+  <!-- Column 3: AI Copilot & Finalists -->
+  <rect x="716" y="266" width="220" height="354" rx="20" fill="#0F172A" fill-opacity="0.75" stroke="#1E293B" stroke-width="1.5" />
+  <circle cx="738" cy="292" r="5" fill="#10B981" />
+  <text x="752" y="296" fill="#E2E8F0" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600">Finalist &amp; Awarded</text>
+  <text x="906" y="296" fill="#64748B" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">2</text>
+
+  <g filter="url(#cardShadow)">
+    <rect x="730" y="314" width="192" height="142" rx="14" fill="#1E293B" stroke="#10B981" stroke-opacity="0.45" stroke-width="1.2" />
+    <rect x="744" y="328" width="68" height="20" rx="10" fill="#065F46" fill-opacity="0.7" />
+    <text x="754" y="342" fill="#6EE7B7" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">Awarded</text>
+    <text x="744" y="368" fill="#F8FAFC" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="600">NSF GRFP Fellowship</text>
+    <text x="744" y="386" fill="#94A3B8" font-family="system-ui, -apple-system, sans-serif" font-size="11">$37,000 Annual Stipend</text>
+    <rect x="744" y="404" width="164" height="34" rx="8" fill="#0F172A" />
+    <text x="756" y="425" fill="#34D399" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">✓ Acceptance Verified</text>
+
+    <rect x="730" y="470" width="192" height="130" rx="14" fill="#1E293B" stroke="#334155" stroke-width="1" />
+    <text x="744" y="496" fill="#60A5FA" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600">✦ AI Cover Letter Studio</text>
+    <text x="744" y="518" fill="#E2E8F0" font-family="system-ui, -apple-system, sans-serif" font-size="11">&ldquo;Tailored impact metrics from</text>
+    <text x="744" y="534" fill="#E2E8F0" font-family="system-ui, -apple-system, sans-serif" font-size="11">your Systems Research role...&rdquo;</text>
+    <rect x="744" y="556" width="110" height="26" rx="13" fill="#3B82F6" fill-opacity="0.2" />
+    <text x="758" y="573" fill="#93C5FD" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="600">Insert into Draft →</text>
+  </g>
+</svg>

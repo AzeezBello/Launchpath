@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useSupabase } from "@/providers/SupabaseProvider";
+import { ArrowRight } from "lucide-react";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -40,21 +41,17 @@ export default function LoginForm() {
     }
 
     await refreshSession();
-    toast.success("Logged in");
     const redirectTo = searchParams.get("redirectedFrom") || "/dashboard";
+
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+      router.push(`/mfa?redirectedFrom=${encodeURIComponent(redirectTo)}`);
+      return;
+    }
+
+    toast.success("Logged in");
     router.push(redirectTo);
     router.refresh();
-  };
-
-  const handleGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
-    });
-
-    if (error) {
-      toast.error("Google sign-in failed");
-    }
   };
 
   return (
@@ -64,6 +61,7 @@ export default function LoginForm() {
         <Input
           id="login-email"
           type="email"
+          inputMode="email"
           placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -90,13 +88,10 @@ export default function LoginForm() {
         />
       </div>
 
-      <div className="flex flex-col gap-3">
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </Button>
-
-        <Button type="button" variant="outline" className="w-full" onClick={handleGoogle} disabled={loading}>
-          Continue with Google
+      <div className="pt-1">
+        <Button type="submit" className="w-full" size="lg" disabled={loading}>
+          {loading ? "Signing in..." : "Sign in to workspace"}
+          {!loading && <ArrowRight className="h-4 w-4" />}
         </Button>
       </div>
     </form>

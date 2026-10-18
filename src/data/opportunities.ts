@@ -6,6 +6,10 @@ export const scholarshipData = [
     country: "United Kingdom",
     deadline: "Nov 7, 2025",
     link: "https://www.chevening.org/scholarships/",
+    amount: "Fully funded (tuition, stipend, travel)",
+    level: "Postgraduate",
+    fields: ["Any"],
+    description: "UK government scholarship for one-year master's degrees at any UK university, aimed at emerging leaders with at least two years of work experience.",
   },
   {
     id: "sch-2",
@@ -14,6 +18,10 @@ export const scholarshipData = [
     country: "Germany",
     deadline: "Oct 31, 2025",
     link: "https://www.daad.de/en/study-and-research-in-germany/scholarships/",
+    amount: "Tuition waiver + monthly stipend",
+    level: "Postgraduate",
+    fields: ["Development", "Engineering", "Economics", "Public Health"],
+    description: "German Academic Exchange Service funding for professionals from developing countries to take development-related master's and PhD programmes in Germany.",
   },
   {
     id: "sch-3",
@@ -22,6 +30,10 @@ export const scholarshipData = [
     country: "Pan-Africa",
     deadline: "Rolling",
     link: "https://mastercardfdn.org/all/scholars/",
+    amount: "Fully funded",
+    level: "All",
+    fields: ["Any"],
+    description: "Comprehensive scholarships for academically talented young Africans with financial need, delivered through partner universities in Africa and worldwide.",
   },
   {
     id: "sch-4",
@@ -30,6 +42,10 @@ export const scholarshipData = [
     country: "United Kingdom",
     deadline: "Dec 3, 2025",
     link: "https://www.gatescambridge.org/",
+    amount: "Fully funded + stipend",
+    level: "Postgraduate",
+    fields: ["Any"],
+    description: "Full-cost scholarship for outstanding applicants from outside the UK to pursue a postgraduate degree at the University of Cambridge.",
   },
   {
     id: "sch-5",
@@ -38,6 +54,10 @@ export const scholarshipData = [
     country: "United States",
     deadline: "Varies by country",
     link: "https://foreign.fulbrightonline.org/",
+    amount: "Fully funded",
+    level: "Postgraduate",
+    fields: ["Any"],
+    description: "US government programme for graduate study or research in the United States; applications go through the Fulbright commission or US embassy in your home country.",
   },
   {
     id: "sch-6",
@@ -46,6 +66,10 @@ export const scholarshipData = [
     country: "Japan",
     deadline: "May 2025",
     link: "https://www.nitori-shougakuzaidan.com/",
+    amount: "Monthly stipend",
+    level: "All",
+    fields: ["Any"],
+    description: "Scholarship for international students enrolled at Japanese universities, funded by the Nitori International Scholarship Foundation.",
   },
   {
     id: "sch-7",
@@ -54,6 +78,10 @@ export const scholarshipData = [
     country: "United Kingdom",
     deadline: "July 31, 2025",
     link: "https://www.rhodeshouse.ox.ac.uk/",
+    amount: "Fully funded + stipend",
+    level: "Postgraduate",
+    fields: ["Any"],
+    description: "Postgraduate award for study at the University of Oxford, selected on academic excellence, character, leadership, and commitment to service.",
   },
   {
     id: "sch-8",
@@ -62,6 +90,10 @@ export const scholarshipData = [
     country: "Global",
     deadline: "Feb 2026",
     link: "https://buildyourfuture.withgoogle.com/scholarships",
+    amount: "Varies by region",
+    level: "All",
+    fields: ["Computer Science", "Engineering", "Technology"],
+    description: "Google scholarship for women studying computer science, engineering, or a closely related field, offered across several regions.",
   },
 ];
 
@@ -73,6 +105,8 @@ export const grantData = [
     amount: "$100,000",
     country: "Global",
     link: "https://foundation.mozilla.org",
+    sector: "Technology / Open source",
+    description: "Funds open-source technology projects that advance a healthier internet, with a focus on trustworthy AI and public-interest infrastructure.",
   },
   {
     id: "gr-2",
@@ -81,6 +115,8 @@ export const grantData = [
     amount: "£50,000 - £2M",
     country: "United Kingdom",
     link: "https://www.gov.uk/government/organisations/innovate-uk",
+    sector: "Innovation / R&D",
+    description: "UK grants for game-changing, commercially viable R&D projects from UK-registered businesses of any size.",
   },
   {
     id: "gr-3",
@@ -89,6 +125,8 @@ export const grantData = [
     amount: "$250,000",
     country: "Africa",
     link: "https://www.afdb.org",
+    sector: "Development",
+    description: "Concessional funding window of the African Development Bank for projects in low-income African countries.",
   },
   {
     id: "gr-4",
@@ -97,6 +135,8 @@ export const grantData = [
     amount: "$500,000",
     country: "Global",
     link: "https://ai.google/social-good/",
+    sector: "AI for good",
+    description: "Google.org funding and technical support for nonprofits and social enterprises applying AI to social and environmental problems.",
   },
   {
     id: "gr-5",
@@ -105,6 +145,8 @@ export const grantData = [
     amount: "$275,000",
     country: "United States",
     link: "https://seedfund.nsf.gov",
+    sector: "Deep tech startups",
+    description: "Non-dilutive seed funding from the US National Science Foundation for early-stage startups developing science-based technology.",
   },
   {
     id: "gr-6",
@@ -113,6 +155,8 @@ export const grantData = [
     amount: "$100,000",
     country: "Global South",
     link: "https://www.cjrfund.org/",
+    sector: "Climate",
+    description: "Grants supporting climate resilience for women, youth, and Indigenous peoples in the Global South.",
   },
   {
     id: "gr-7",
@@ -121,6 +165,8 @@ export const grantData = [
     amount: "$150,000",
     country: "Asia",
     link: "https://www.jica.go.jp/",
+    sector: "Startups",
+    description: "Japan International Cooperation Agency programme backing innovative startups tackling development challenges in emerging markets.",
   },
   {
     id: "gr-8",
@@ -129,6 +175,8 @@ export const grantData = [
     amount: "$300,000",
     country: "Global",
     link: "https://www.ifc.org",
+    sector: "Health / Climate tech",
+    description: "International Finance Corporation programme matching emerging-market companies with tech pilots in health and climate.",
   },
 ];
 

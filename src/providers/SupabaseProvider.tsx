@@ -1,68 +1,70 @@
 "use client";
 
 import { useState, createContext, useContext, useEffect, useCallback } from "react";
-import { createBrowserClient } from "@supabase/ssr";
-import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { ThemeProvider, type ThemeProviderProps } from "next-themes";
-import { getSupabasePublicEnv } from "@/lib/supabase-env";
+import type { User } from "@/lib/auth-token";
+import { createNeonBrowserClient, notifyAuthListeners, type NeonBrowserClient } from "@/lib/supabaseClient";
 
 type Props = ThemeProviderProps & { children: React.ReactNode };
 
-type SupabaseContextType = {
-  supabase: SupabaseClient;
+type AuthContextType = {
+  supabase: NeonBrowserClient;
   user: User | null;
   loading: boolean;
   refreshSession: () => Promise<void>;
 };
 
-const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
- * Supabase provider using modern @supabase/ssr
+ * Auth & Workspace provider backed by Neon Postgres session API
  */
 export function SupabaseProvider({ children, ...themeProps }: Props) {
-  const env = getSupabasePublicEnv();
-  const [supabaseClient] = useState<SupabaseClient>(() => createBrowserClient(env.url, env.anonKey));
+  const [client] = useState<NeonBrowserClient>(() => createNeonBrowserClient());
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
+    let active = true;
+
     const getSession = async () => {
-      const { data: { session } } = await supabaseClient.auth.getSession();
+      const { data: { session } } = await client.auth.getSession();
+      if (!active) return;
       setUser(session?.user ?? null);
       setLoading(false);
     };
 
     getSession();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
+    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-    return () => subscription.unsubscribe();
-  }, [supabaseClient]);
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [client]);
 
   const refreshSession = useCallback(async () => {
-    const { data: { session } } = await supabaseClient.auth.getSession();
+    const { data: { session } } = await client.auth.getSession();
     setUser(session?.user ?? null);
-  }, [supabaseClient]);
+    notifyAuthListeners("TOKEN_REFRESHED", session ?? null);
+  }, [client]);
 
   return (
     <ThemeProvider {...themeProps}>
-      <SupabaseContext.Provider value={{ supabase: supabaseClient, user, loading, refreshSession }}>
+      <AuthContext.Provider value={{ supabase: client, user, loading, refreshSession }}>
         {children}
-      </SupabaseContext.Provider>
+      </AuthContext.Provider>
     </ThemeProvider>
   );
 }
 
 export function useSupabase() {
-  const context = useContext(SupabaseContext);
+  const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useSupabase must be used inside SupabaseProvider");
   }

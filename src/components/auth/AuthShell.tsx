@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -11,15 +12,9 @@ type AuthShellProps = {
 };
 
 const BENEFITS = [
-  "Track jobs, scholarships, grants, and admissions together.",
-  "Generate resumes and cover letters without losing context.",
-  "Keep deadlines, drafts, and next actions visible in one dashboard.",
-];
-
-const STATS = [
-  { label: "Opportunity types", value: "6" },
-  { label: "Hours saved monthly", value: "12+" },
-  { label: "One shared workspace", value: "1" },
+  "Track jobs, scholarships, grants, and admissions in one shared pipeline.",
+  "Generate tailored resumes and cover letters with role-alignment scoring.",
+  "Keep deadlines, recommenders, and next actions visible with Neon Cloud sync.",
 ];
 
 export function AuthShell({
@@ -31,13 +26,13 @@ export function AuthShell({
 }: AuthShellProps) {
   return (
     <div className="relative isolate min-h-screen overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.14),transparent_24%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_12%,rgba(59,130,246,0.12),transparent_32%),radial-gradient(circle_at_85%_88%,rgba(16,185,129,0.1),transparent_28%)]" />
 
-      <div className="mx-auto grid min-h-screen max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
-        <div className="hidden flex-col justify-between py-6 lg:flex">
-          <div>
-            <Link href="/" className="inline-flex items-center gap-3">
-              <span className="flex size-11 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(59,130,246,0.9),rgba(16,185,129,0.85))] text-sm font-bold text-slate-950 shadow-[0_14px_36px_-18px_rgba(59,130,246,0.8)]">
+      <div className="mx-auto grid min-h-screen max-w-7xl gap-14 px-6 py-12 sm:px-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:px-14 lg:py-16">
+        <div className="hidden flex-col justify-between gap-10 lg:flex">
+          <div className="space-y-10">
+            <Link href="/" className="inline-flex items-center gap-3.5">
+              <span className="flex size-11 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(59,130,246,0.92),rgba(16,185,129,0.88))] text-sm font-bold text-slate-950 shadow-[0_14px_36px_-18px_rgba(59,130,246,0.8)]">
                 LP
               </span>
               <div>
@@ -48,42 +43,39 @@ export function AuthShell({
               </div>
             </Link>
 
-            <div className="mt-14 space-y-5">
+            <div className="space-y-5">
               <Badge variant="outline" className="w-fit">
                 <Sparkles className="h-3.5 w-3.5" />
-                Cleaner application workflow
+                Calm application operating system
               </Badge>
-              <h1 className="text-balance max-w-xl text-5xl font-semibold leading-tight">
-                One calmer workspace for every application path.
+              <h1 className="text-balance max-w-xl text-4xl font-semibold leading-[1.12] xl:text-5xl">
+                One spacious workspace for every application path.
               </h1>
-              <p className="max-w-lg text-lg leading-relaxed text-muted-foreground">
-                LaunchPath helps you discover opportunities, write stronger materials,
-                and keep deadlines visible without juggling a dozen tabs.
+              <p className="max-w-lg text-base leading-relaxed text-muted-foreground xl:text-lg">
+                Discover opportunities, draft stronger materials, and stay ahead of
+                deadlines without juggling scattered tabs.
               </p>
             </div>
           </div>
 
-          <div className="space-y-8">
-            <div className="grid gap-3 sm:grid-cols-3">
-              {STATS.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-[1.5rem] border border-border/80 bg-card/80 p-4"
-                >
-                  <p className="text-2xl font-semibold">{stat.value}</p>
-                  <p className="mt-2 text-sm text-muted-foreground">{stat.label}</p>
-                </div>
-              ))}
+          <div className="space-y-6">
+            <div className="mockup-frame overflow-hidden p-2.5">
+              <div className="overflow-hidden rounded-[1.25rem] border border-slate-800/80 bg-slate-950">
+                <Image
+                  src="/images/workspace-hero-mockup.svg"
+                  alt="LaunchPath workspace preview"
+                  width={960}
+                  height={640}
+                  className="h-auto w-full object-cover"
+                />
+              </div>
             </div>
 
-            <div className="rounded-[1.75rem] border border-border/80 bg-card/82 p-6">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                Why teams keep it open
-              </p>
-              <div className="mt-4 space-y-4">
+            <div className="rounded-[1.75rem] border border-border/80 bg-card/85 p-6">
+              <div className="grid gap-3.5">
                 {BENEFITS.map((benefit) => (
                   <div key={benefit} className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                     <p className="text-sm leading-relaxed text-muted-foreground">{benefit}</p>
                   </div>
                 ))}
@@ -93,7 +85,7 @@ export function AuthShell({
         </div>
 
         <div className="flex items-center justify-center">
-          <div className="surface-panel w-full max-w-md p-7 sm:p-9">
+          <div className="surface-panel w-full max-w-md p-8 sm:p-11">
             <Link href="/" className="mb-8 inline-flex items-center gap-3 lg:hidden">
               <span className="flex size-10 items-center justify-center rounded-[1.2rem] bg-[linear-gradient(135deg,rgba(59,130,246,0.9),rgba(16,185,129,0.85))] text-sm font-bold text-slate-950">
                 LP
@@ -104,14 +96,14 @@ export function AuthShell({
             <Badge variant="outline" className="w-fit">
               {eyebrow}
             </Badge>
-            <h2 className="mt-4 text-3xl font-semibold">{title}</h2>
+            <h2 className="mt-5 text-3xl font-semibold tracking-tight">{title}</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
               {description}
             </p>
 
-            <div className="mt-8">{children}</div>
+            <div className="mt-9">{children}</div>
 
-            {footer ? <div className="mt-6 text-sm text-muted-foreground">{footer}</div> : null}
+            {footer ? <div className="mt-8 text-sm text-muted-foreground">{footer}</div> : null}
           </div>
         </div>
       </div>

@@ -17,6 +17,7 @@ const BARE_ROUTE_PREFIXES = [
   "/forgot-password",
   "/reset-password",
   "/onboarding",
+  "/mfa",
 ];
 
 /**
@@ -34,7 +35,7 @@ export function AppShell({ children }: Props) {
         className={cn(
           "relative flex-1",
           !isBareRoute &&
-            "mx-auto w-full max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8 lg:pb-24 lg:pt-10"
+            "mx-auto w-full max-w-7xl px-5 pb-24 pt-10 sm:px-8 lg:px-12 lg:pb-36 lg:pt-16"
         )}
       >
         {children}

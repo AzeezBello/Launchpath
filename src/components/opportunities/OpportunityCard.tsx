@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Bookmark, BookmarkCheck, Check, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { DeadlineBadge } from "@/components/dashboard/DeadlineBadge";
 
 export type OpportunityMeta = { label: string; value: string };
 
@@ -16,6 +18,8 @@ export function OpportunityCard({
   href,
   linkLabel = "View details",
   index = 0,
+  deadline,
+  detailHref,
   saved,
   applied,
   pending,
@@ -27,6 +31,10 @@ export function OpportunityCard({
   href: string;
   linkLabel?: string;
   index?: number;
+  /** Free-text or ISO deadline; rendered as a due-soon / passed chip. */
+  deadline?: string | null;
+  /** In-app detail page; when set, the title becomes a link. */
+  detailHref?: string;
   saved?: boolean;
   applied?: boolean;
   pending?: boolean;
@@ -42,7 +50,15 @@ export function OpportunityCard({
     >
       <Card className="hover-card h-full">
         <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
-          <CardTitle className="text-lg leading-snug">{title}</CardTitle>
+          <CardTitle className="text-lg leading-snug">
+            {detailHref ? (
+              <Link href={detailHref} className="hover:text-primary hover:underline">
+                {title}
+              </Link>
+            ) : (
+              title
+            )}
+          </CardTitle>
           {onToggleSave && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -68,12 +84,18 @@ export function OpportunityCard({
           )}
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
+          {deadline ? <DeadlineBadge value={deadline} className="mb-1" /> : null}
           {meta.map((row) => (
             <p key={row.label}>
               <span className="font-medium text-foreground">{row.label}:</span> {row.value}
             </p>
           ))}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
+            {detailHref && (
+              <Link href={detailHref} className="font-medium text-foreground hover:text-primary hover:underline">
+                Details
+              </Link>
+            )}
             <a
               href={href}
               target="_blank"

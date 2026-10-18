@@ -11,8 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { useSupabase } from "@/providers/SupabaseProvider";
-import { ChevronDown, Compass, LogOut, Settings } from "lucide-react";
+import { ChevronDown, Compass, LogOut, Settings, ShieldCheck } from "lucide-react";
 import { START_TOUR_EVENT } from "@/components/tour/ProductTour";
 
 export function UserDropdown() {
@@ -20,10 +21,12 @@ export function UserDropdown() {
   const { supabase, user } = useSupabase();
   const initials = user?.email?.[0]?.toUpperCase() || "U";
   const email = user?.email || "Workspace user";
+  const isSuperadmin =
+    user?.role === "superadmin" ||
+    user?.app_metadata?.role === "superadmin" ||
+    user?.app_metadata?.is_superadmin === true;
 
   const handleLogout = async () => {
-    // Hits the server so the httpOnly settings cookie gets cleared too — the
-    // client-only signOut() below can't reach an httpOnly cookie by itself.
     const res = await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
     const { error } = await supabase.auth.signOut();
 
@@ -50,18 +53,35 @@ export function UserDropdown() {
           </Avatar>
 
           <div className="hidden text-left sm:block">
-            <p className="max-w-[180px] truncate text-sm font-semibold">{email}</p>
-            <p className="text-xs text-muted-foreground">Workspace account</p>
+            <div className="flex items-center gap-2">
+              <p className="max-w-[160px] truncate text-sm font-semibold">{email}</p>
+              {isSuperadmin && (
+                <Badge variant="default" className="h-5 gap-1 px-2 text-[10px]">
+                  <ShieldCheck className="h-3 w-3" />
+                  Superadmin
+                </Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {isSuperadmin ? "Superadmin workspace" : "Workspace account"}
+            </p>
           </div>
 
           <ChevronDown className="hidden h-4 w-4 text-muted-foreground sm:block" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[220px]">
+      <DropdownMenuContent align="end" className="min-w-[240px]">
         <DropdownMenuLabel className="space-y-1">
-          <p className="text-sm font-semibold">{email}</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="truncate text-sm font-semibold">{email}</p>
+            {isSuperadmin && (
+              <Badge variant="default" className="h-5 px-2 text-[10px]">
+                Superadmin
+              </Badge>
+            )}
+          </div>
           <p className="text-xs font-normal text-muted-foreground">
-            Signed in to LaunchPath
+            Connected to Neon Postgres
           </p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

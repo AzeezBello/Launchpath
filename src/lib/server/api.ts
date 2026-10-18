@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { User } from "@supabase/supabase-js";
+import type { User } from "@/lib/auth-token";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 
 type JsonInit = number | ResponseInit;

@@ -7,6 +7,7 @@ import {
   mergeHeaders,
   requireApiUser,
 } from "@/lib/server/api";
+import { PLAN_LIMIT_ERROR_CODE, checkPlanLimit } from "@/lib/server/plans";
 import { isLikelyMissingTable } from "@/lib/server/settings";
 import {
   isUniqueViolation,
@@ -14,13 +15,30 @@ import {
   sanitizeOpportunityType,
 } from "@/lib/server/opportunities";
 import {
+  APPLICATION_ALLOWED_STATUS,
+  APPLICATION_OPEN_STATUSES,
   APPLICATION_SELECT_COLUMNS as SELECT_COLUMNS,
   type ApplicationRow,
+  type ApplicationStatus,
   sanitizeApplicationDate as sanitizeDate,
+  sanitizeApplicationDeadline as sanitizeDeadline,
+  sanitizeApplicationNotes as sanitizeNotes,
   sanitizeApplicationProgram as sanitizeProgram,
+  sanitizeApplicationRef as sanitizeRef,
   sanitizeApplicationStatus as sanitizeStatus,
+  sanitizeApplicationUrl as sanitizeUrl,
 } from "@/lib/server/applications";
 
+type SortKey = "date" | "deadline";
+
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// GET /api/applications?page=&limit=&status=&sort=date|deadline&upcoming=1
+//   status   filter to one status (exact match)
+//   sort     "date" (newest first, default) or "deadline" (soonest first, nulls last)
+//   upcoming only open-status rows with a deadline on/after today, soonest first
 export async function GET(req: Request) {
   const preAuth = applyPreAuthRateLimit(req, "applications:get");
   if (!preAuth.ok) return preAuth.response;
@@ -40,16 +58,36 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const page = clampInt(searchParams.get("page"), 1, 1, 1000);
   const limit = clampInt(searchParams.get("limit"), 20, 1, 100);
+  const rawStatus = searchParams.get("status");
+  const upcoming = searchParams.get("upcoming") === "1";
+  const sort: SortKey = searchParams.get("sort") === "deadline" || upcoming ? "deadline" : "date";
+
+  if (rawStatus && !APPLICATION_ALLOWED_STATUS.has(rawStatus as ApplicationStatus)) {
+    return apiError("Invalid status filter", { status: 422, headers: mergeHeaders(rateLimit.headers) });
+  }
 
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  const { data, error, count } = await supabase
+  let query = supabase
     .from("applications")
     .select(SELECT_COLUMNS, { count: "exact" })
-    .eq("user_id", user.id)
-    .order("date", { ascending: false })
-    .range(from, to);
+    .eq("user_id", user.id);
+
+  if (rawStatus) {
+    query = query.eq("status", rawStatus);
+  }
+
+  if (upcoming) {
+    query = query.in("status", APPLICATION_OPEN_STATUSES).gte("deadline", todayIso());
+  }
+
+  query =
+    sort === "deadline"
+      ? query.order("deadline", { ascending: true, nullsFirst: false }).order("date", { ascending: false })
+      : query.order("date", { ascending: false }).order("created_at", { ascending: false });
+
+  const { data, error, count } = await query.range(from, to);
 
   if (error) {
     if (isLikelyMissingTable(error)) {
@@ -77,6 +115,7 @@ export async function GET(req: Request) {
       page,
       totalPages,
       total,
+      sort,
     }
   );
 }
@@ -108,6 +147,11 @@ export async function POST(req: Request) {
   const program = sanitizeProgram(body.program);
   const status = sanitizeStatus(body.status);
   const date = sanitizeDate(body.date);
+  const deadline = sanitizeDeadline(body.deadline);
+  const notes = sanitizeNotes(body.notes);
+  const url = sanitizeUrl(body.url);
+  const resumeId = sanitizeRef(body.resumeId);
+  const coverLetterId = sanitizeRef(body.coverLetterId);
 
   // Optional: links this application back to the opportunity it came from
   // (set when created via the "Apply" action on a job/scholarship/grant/admission card).
@@ -126,6 +170,16 @@ export async function POST(req: Request) {
     );
   }
 
+  const planCheck = await checkPlanLimit(supabase, user, "applications");
+  if (!planCheck.ok) {
+    return apiError(planCheck.message, { status: 402, headers: mergeHeaders(rateLimit.headers) }, {
+      code: PLAN_LIMIT_ERROR_CODE,
+      plan: planCheck.plan,
+      used: planCheck.used,
+      limit: planCheck.limit,
+    });
+  }
+
   const { data, error } = await supabase
     .from("applications")
     .insert({
@@ -133,6 +187,11 @@ export async function POST(req: Request) {
       program,
       status,
       date,
+      deadline,
+      notes,
+      url,
+      resume_id: resumeId,
+      cover_letter_id: coverLetterId,
       opportunity_id: hasOpportunityLink ? opportunityId : null,
       opportunity_type: hasOpportunityLink ? opportunityType : null,
     })

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -5,6 +6,8 @@ import {
   ArrowRight,
   BriefcaseBusiness,
   CheckCircle2,
+  ChevronDown,
+  Database,
   FolderKanban,
   GraduationCap,
   HandCoins,
@@ -16,9 +19,21 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { label: "Active opportunities", value: "1,200+" },
-  { label: "Hours saved monthly", value: "12 hrs" },
-  { label: "Teams and students", value: "3.4k" },
+  {
+    label: "Active opportunities indexed",
+    value: "1,200+",
+    detail: "Scholarships, fellowships, grants, and early-career roles.",
+  },
+  {
+    label: "Hours saved every month",
+    value: "12 hrs",
+    detail: "Automated resume tailoring, cover letters, and deadline alerts.",
+  },
+  {
+    label: "Applicants & teams on LaunchPath",
+    value: "3.4k",
+    detail: "Running high-volume career and academic pipelines.",
+  },
 ];
 
 const featureTiles = [
@@ -33,13 +48,13 @@ const featureTiles = [
     Icon: WandSparkles,
   },
   {
-    title: "A calmer dashboard",
-    body: "See what is due, what is active, and what needs attention from one clean command center.",
+    title: "A calmer command center",
+    body: "See what is due, what is active, and what needs attention from one spacious, distraction-free dashboard.",
     Icon: FolderKanban,
   },
   {
-    title: "Production-ready foundation",
-    body: "Supabase auth, API fallbacks, theme support, and structured data make this more than a mockup.",
+    title: "Neon Postgres foundation",
+    body: "Serverless Neon Postgres persistence, TOTP MFA security, and AI fallbacks make this production-ready out of the box.",
     Icon: ShieldCheck,
   },
 ];
@@ -47,18 +62,18 @@ const featureTiles = [
 const workflow = [
   {
     step: "01",
-    title: "Track every path",
-    body: "Scholarships, grants, jobs, and admissions live in a single pipeline instead of scattered tabs.",
+    title: "Track every path in one view",
+    body: "Scholarships, grants, jobs, and admissions live in a unified pipeline instead of scattered spreadsheets and browser tabs.",
   },
   {
     step: "02",
-    title: "Create faster",
-    body: "Use AI support and saved profile data to draft stronger materials without starting from zero.",
+    title: "Draft tailored materials faster",
+    body: "Use AI citation engines and saved resume versions to craft high-converting essays and cover letters in minutes.",
   },
   {
     step: "03",
-    title: "Stay application-ready",
-    body: "Know what is next, where you are stuck, and which opportunities deserve attention today.",
+    title: "Stay ahead of every deadline",
+    body: "Know what is due next, where recommenders stand, and which applications deserve your focus today.",
   },
 ];
 
@@ -66,8 +81,12 @@ const plans = [
   {
     name: "Starter",
     price: "$0",
-    detail: "For solo applicants getting organized fast.",
-    perks: ["Unlimited searches", "Usage tracking", "AI cover letter fallback"],
+    detail: "For solo applicants getting organized with zero friction.",
+    perks: [
+      "Unlimited opportunity searches",
+      "5 tailored resumes & 50 tracked applications",
+      "20 AI cover letters per month",
+    ],
     href: "/signup",
     cta: "Start free",
     featured: false,
@@ -75,202 +94,274 @@ const plans = [
   {
     name: "Pro",
     price: "$18",
-    detail: "For teams and serious applicants managing more volume.",
-    perks: ["Saved resumes and letters", "Workspace profiles", "Priority support"],
-    href: "/contact",
-    cta: "Talk to us",
+    detail: "For ambitious applicants and teams managing high volume.",
+    perks: [
+      "100 resumes & 1,000 tracked applications",
+      "250 AI cover letters per month",
+      "Automated deadline reminders & priority support",
+    ],
+    href: "/signup",
+    cta: "Start Pro",
     featured: true,
   },
 ];
 
 const faqs = [
   {
-    question: "Does it work without third-party APIs?",
+    question: "Does LaunchPath work without third-party AI or job APIs configured?",
     answer:
-      "Yes. Opportunity data and cover-letter generation have fallbacks so the product remains usable even when external services are unavailable.",
+      "Yes. Opportunity feeds, resume scoring, and cover-letter generation include built-in deterministic fallbacks so your workspace remains fast and functional at all times.",
   },
   {
-    question: "Can I use it for both school and career applications?",
+    question: "Can I use it for both academic funding and career applications?",
     answer:
-      "That is the core model. Scholarships, grants, admissions, interviews, jobs, resumes, and cover letters all share the same workspace.",
+      "That is the core architecture. Scholarships, research grants, graduate admissions, interviews, jobs, resumes, and recommenders all share the same calm workspace.",
   },
   {
-    question: "Is this a starter or a finished product shell?",
+    question: "How is my application data stored and secured?",
     answer:
-      "It is much closer to a product shell. Auth, dashboard routing, settings, and persistence are already in place so you can extend rather than rebuild.",
+      "All workspace records are persisted in serverless Neon Postgres with encrypted integration secrets, scrypt password hashing, and native TOTP multi-factor authentication.",
   },
 ];
 
 export default function Home() {
   return (
-    <div className="space-y-16 pb-6 md:space-y-24">
-      <section className="surface-panel relative overflow-hidden px-6 py-8 sm:px-10 sm:py-12 lg:px-12 lg:py-14">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
-          <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-success/15 blur-3xl" />
+    <div className="space-y-28 pb-12 md:space-y-40">
+      {/* Hero Section with generous negative space & layered product mockup */}
+      <section className="relative pt-4 lg:pt-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <div className="inline-flex items-center gap-2.5 rounded-full border border-border/80 bg-card/85 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground shadow-xs backdrop-blur-md">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span>Calm Opportunity Operating System</span>
+            <span className="h-1 w-1 rounded-full bg-primary/60" />
+            <span className="text-primary">Neon Cloud Live</span>
+          </div>
+
+          <h1 className="text-balance mx-auto mt-8 max-w-4xl text-4xl font-semibold leading-[1.08] tracking-tight sm:text-6xl lg:text-[4.25rem]">
+            Run scholarships, jobs, grants, and admissions with room to think.
+          </h1>
+
+          <p className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
+            LaunchPath brings opportunity discovery, AI-assisted writing, and deadline
+            tracking into one spacious workspace—replacing tab chaos with clear momentum.
+          </p>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <Button size="lg" className="h-12 px-8 text-base" asChild>
+              <Link href="/signup">
+                Start for free
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" className="h-12 px-8 text-base" asChild>
+              <Link href="/dashboard">Explore live workspace</Link>
+            </Button>
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              Serverless Neon Postgres
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              AI resume &amp; cover letter studio
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              Zero credit card required
+            </span>
+          </div>
         </div>
 
-        <div className="relative grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div className="space-y-6">
-            <Badge variant="outline" className="w-fit">
-              <Sparkles className="h-3.5 w-3.5" />
-              Opportunity workspace
-            </Badge>
+        {/* Hero Visual Mockup Stage */}
+        <div className="relative mx-auto mt-16 max-w-6xl lg:mt-20">
+          <div className="pointer-events-none absolute -inset-x-8 -top-10 -bottom-10 -z-10 rounded-[3rem] bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.16),transparent_60%),radial-gradient(circle_at_85%_80%,rgba(16,185,129,0.14),transparent_55%)] blur-2xl" />
 
-            <div className="space-y-4">
-              <h1 className="text-balance max-w-3xl text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
-                A cleaner way to run scholarships, jobs, grants, and admissions.
-              </h1>
-              <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-                LaunchPath keeps discovery, application writing, and progress tracking
-                in one calm workspace so you can move faster without feeling scattered.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <Button size="lg" asChild>
-                <Link href="/signup">
-                  Start for free
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/dashboard">Explore the dashboard</Link>
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/45 px-3 py-2">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                Responsive dashboard shell
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/45 px-3 py-2">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                Auth and settings included
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/45 px-3 py-2">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                AI with graceful fallbacks
-              </span>
+          <div className="mockup-frame relative overflow-hidden p-3 sm:p-5 lg:p-6">
+            <div className="overflow-hidden rounded-[1.35rem] border border-slate-800/80 bg-slate-950 shadow-2xl">
+              <Image
+                src="/images/workspace-hero-mockup.svg"
+                alt="LaunchPath Command Center mockup showing Kanban application pipeline, ATS match score, and funding tracker"
+                width={960}
+                height={640}
+                priority
+                className="h-auto w-full object-cover"
+              />
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="rounded-[1.75rem] border border-border/80 bg-background/50 p-5 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.45)] backdrop-blur-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.24em] text-muted-foreground">
-                    Today
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold">Your application pulse</h2>
-                </div>
-                <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                  Live
-                </span>
+          {/* Floating Callout Cards on Desktop */}
+          <div className="mt-6 grid gap-4 sm:grid-cols-3 lg: -mt-12 lg:px-8">
+            <div className="surface-panel relative z-10 flex items-center justify-between p-5 backdrop-blur-xl">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Fit Intelligence
+                </p>
+                <p className="mt-1.5 text-lg font-semibold">94% Resume Alignment</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Auto-scored against role requirements
+                </p>
               </div>
-
-              <div className="mt-6 space-y-3">
-                {[
-                  {
-                    label: "Scholarships with fit score",
-                    value: "124 matches",
-                    accent: "bg-success/15 text-success",
-                  },
-                  {
-                    label: "Applications due this week",
-                    value: "7 deadlines",
-                    accent: "bg-info/15 text-info",
-                  },
-                  {
-                    label: "Draft cover letters ready",
-                    value: "4 saved drafts",
-                    accent: "bg-warning/15 text-warning",
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center justify-between rounded-[1.35rem] border border-border/80 bg-card/85 px-4 py-4"
-                  >
-                    <div>
-                      <p className="text-sm text-muted-foreground">{item.label}</p>
-                      <p className="mt-1 text-lg font-semibold">{item.value}</p>
-                    </div>
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${item.accent}`}>
-                      Active
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-success/15 text-sm font-bold text-success">
+                A+
+              </span>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[1.5rem] border border-border/80 bg-card/80 p-4">
-                <p className="text-sm text-muted-foreground">Built for</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-background/60 px-3 py-2 text-sm">
-                    <GraduationCap className="h-4 w-4 text-primary" />
+            <div className="surface-panel relative z-10 flex items-center justify-between p-5 backdrop-blur-xl">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Multi-Track Coverage
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                    <GraduationCap className="h-3.5 w-3.5" />
                     Scholarships
                   </span>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-background/60 px-3 py-2 text-sm">
-                    <BriefcaseBusiness className="h-4 w-4 text-primary" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                    <BriefcaseBusiness className="h-3.5 w-3.5" />
                     Jobs
                   </span>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-background/60 px-3 py-2 text-sm">
-                    <HandCoins className="h-4 w-4 text-primary" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                    <HandCoins className="h-3.5 w-3.5" />
                     Grants
                   </span>
                 </div>
               </div>
-              <div className="rounded-[1.5rem] border border-border/80 bg-card/80 p-4">
-                <p className="text-sm text-muted-foreground">What teams notice</p>
-                <p className="mt-3 text-lg font-semibold">
-                  Clearer status, less tab fatigue, and fewer missed deadlines.
+            </div>
+
+            <div className="surface-panel relative z-10 flex items-center justify-between p-5 backdrop-blur-xl">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Cloud Persistence
+                </p>
+                <p className="mt-1.5 text-lg font-semibold">Neon Serverless DB</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Instant sync across essays &amp; deadlines
                 </p>
               </div>
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                <Database className="h-5 w-5" />
+              </span>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="product" className="grid gap-4 sm:grid-cols-3">
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="hover-card rounded-[1.5rem] border border-border/80 bg-card/80 p-6 shadow-[0_18px_45px_-34px_rgba(15,23,42,0.45)]"
-          >
-            <p className="text-3xl font-semibold">{stat.value}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{stat.label}</p>
-          </div>
-        ))}
+      {/* Spacious Metrics Bar */}
+      <section id="product" className="mx-auto max-w-6xl">
+        <div className="grid gap-8 sm:grid-cols-3">
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="hover-card rounded-[2rem] border border-border/75 bg-card/85 p-8 sm:p-10"
+            >
+              <p className="text-4xl font-semibold tracking-tight sm:text-5xl">{stat.value}</p>
+              <p className="mt-4 text-base font-semibold text-foreground">{stat.label}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{stat.detail}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
-      <section className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-        <div className="space-y-4">
+      {/* Visual Product Tour / Mockup Bento Grid */}
+      <section className="space-y-16">
+        <div className="mx-auto max-w-3xl text-center">
           <Badge variant="outline" className="w-fit">
             <LineChart className="h-3.5 w-3.5" />
-            Why it feels cleaner
+            Designed for clarity
           </Badge>
-          <h2 className="text-balance text-3xl font-semibold sm:text-4xl">
-            Less clutter, better context, and a clearer path from search to submission.
+          <h2 className="text-balance mt-5 text-3xl font-semibold sm:text-5xl">
+            Every tool you need, framed with generous breathing room.
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            Instead of cramming dozens of noisy widgets onto one screen, LaunchPath
+            separates discovery, drafting, and deadline tracking into calm, focused studios.
+          </p>
+        </div>
+
+        <div className="grid gap-10 lg:grid-cols-2">
+          {/* Mockup Card 1: AI Resume & Cover Letter Studio */}
+          <div className="surface-panel flex flex-col justify-between overflow-hidden p-8 sm:p-10 lg:p-12">
+            <div className="space-y-4">
+              <Badge variant="outline" className="w-fit">
+                AI Writing &amp; ATS Studio
+              </Badge>
+              <h3 className="text-2xl font-semibold sm:text-3xl">
+                Tailor resumes and cover letters with live role-alignment scoring.
+              </h3>
+              <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
+                See exactly which achievements match the target scholarship or job
+                description, insert AI-drafted paragraphs, and export clean PDFs in one click.
+              </p>
+            </div>
+
+            <div className="mt-10 overflow-hidden rounded-[1.5rem] border border-slate-800/80 bg-slate-950 shadow-xl">
+              <Image
+                src="/images/ai-resume-studio.svg"
+                alt="AI Resume and Cover Letter Studio mockup with 94% role alignment score"
+                width={640}
+                height={440}
+                className="h-auto w-full object-cover"
+              />
+            </div>
+          </div>
+
+          {/* Mockup Card 2: Deadline Radar & Velocity */}
+          <div className="surface-panel flex flex-col justify-between overflow-hidden p-8 sm:p-10 lg:p-12">
+            <div className="space-y-4">
+              <Badge variant="outline" className="w-fit">
+                Deadline Radar &amp; Recommenders
+              </Badge>
+              <h3 className="text-2xl font-semibold sm:text-3xl">
+                Spot upcoming milestones before they become last-minute emergencies.
+              </h3>
+              <p className="max-w-xl text-base leading-relaxed text-muted-foreground">
+                Automated milestone tracking keeps essays, recommendation letters, and
+                interview rounds visible across your entire semester or job search.
+              </p>
+            </div>
+
+            <div className="mt-10 overflow-hidden rounded-[1.5rem] border border-slate-800/80 bg-slate-950 shadow-xl">
+              <Image
+                src="/images/pipeline-analytics.svg"
+                alt="Pipeline Analytics and Deadline Radar mockup showing submission velocity"
+                width={640}
+                height={440}
+                className="h-auto w-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Workflow & Feature Architecture */}
+      <section className="grid gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+        <div className="space-y-6">
+          <Badge variant="outline" className="w-fit">
+            How LaunchPath works
+          </Badge>
+          <h2 className="text-balance text-3xl font-semibold sm:text-4xl lg:text-5xl">
+            A three-step cadence from first search to final submission.
           </h2>
           <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            The product now leans into clearer hierarchy, stronger spacing, and calmer
-            surfaces so the interface supports momentum instead of adding noise.
+            Clear visual hierarchy and intentional negative space keep your attention on
+            the next high-leverage action.
           </p>
 
-          <div className="space-y-4 pt-2">
+          <div className="space-y-5 pt-4">
             {workflow.map((item) => (
               <div
                 key={item.step}
-                className="rounded-[1.5rem] border border-border/80 bg-card/80 p-5"
+                className="rounded-[1.75rem] border border-border/80 bg-card/85 p-7"
               >
-                <div className="flex items-center gap-3">
-                  <span className="rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                <div className="flex items-center gap-3.5">
+                  <span className="rounded-full bg-primary/15 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                     {item.step}
                   </span>
                   <h3 className="text-xl font-semibold">{item.title}</h3>
                 </div>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                <p className="mt-3.5 text-sm leading-relaxed text-muted-foreground sm:text-base">
                   {item.body}
                 </p>
               </div>
@@ -278,72 +369,83 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2 lg:pt-8">
           {featureTiles.map(({ title, body, Icon }) => (
             <div
               key={title}
-              className="hover-card rounded-[1.75rem] border border-border/80 bg-card/82 p-6 shadow-[0_18px_45px_-34px_rgba(15,23,42,0.45)]"
+              className="hover-card flex flex-col justify-between rounded-[2rem] border border-border/80 bg-card/85 p-8"
             >
-              <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <Icon className="h-5 w-5" />
+              <div>
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-7 text-xl font-semibold">{title}</h3>
+                <p className="mt-3.5 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  {body}
+                </p>
               </div>
-              <h3 className="mt-5 text-xl font-semibold">{title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                {body}
-              </p>
+              <div className="mt-8 border-t border-border/60 pt-4 text-xs font-medium text-muted-foreground">
+                Included in all workspaces
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section id="pricing" className="grid gap-8 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="surface-panel p-6 sm:p-8">
+      {/* Pricing & Native Accordion FAQ Section */}
+      <section id="pricing" className="grid gap-12 xl:grid-cols-[1.08fr_0.92fr] xl:items-start">
+        <div className="surface-panel p-8 sm:p-12">
           <Badge variant="outline" className="w-fit">
             Pricing
           </Badge>
-          <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">
-            Pricing that respects your runway.
+          <h2 className="mt-5 text-3xl font-semibold sm:text-4xl">
+            Simple pricing that respects your runway.
           </h2>
-          <p className="mt-3 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Start with the free plan, keep the product usable out of the box, and
-            upgrade when saved assets and team workflows matter.
+          <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            Start free with full access to opportunity discovery and pipeline tracking.
+            Upgrade only when you need higher AI generation volume.
           </p>
 
-          <div className="mt-8 grid gap-5 md:grid-cols-2">
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`rounded-[1.75rem] border p-6 ${
+                className={`flex flex-col justify-between rounded-[2rem] border p-8 ${
                   plan.featured
-                    ? "border-primary/30 bg-primary/10 shadow-[0_20px_55px_-36px_rgba(59,130,246,0.45)]"
-                    : "border-border/80 bg-background/45"
+                    ? "border-primary/35 bg-primary/8 shadow-[0_24px_60px_-32px_rgba(59,130,246,0.38)]"
+                    : "border-border/80 bg-background/55"
                 }`}
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-2xl font-semibold">{plan.name}</p>
-                    <p className="mt-2 text-sm text-muted-foreground">{plan.detail}</p>
+                <div>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-2xl font-semibold">{plan.name}</p>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {plan.detail}
+                      </p>
+                    </div>
+                    {plan.featured && <Badge>Recommended</Badge>}
                   </div>
-                  {plan.featured && <Badge>Recommended</Badge>}
+
+                  <p className="mt-8 text-4xl font-semibold sm:text-5xl">
+                    {plan.price}
+                    <span className="ml-1.5 text-sm font-medium text-muted-foreground">/mo</span>
+                  </p>
+
+                  <ul className="mt-8 space-y-3.5 text-sm text-muted-foreground">
+                    {plan.perks.map((perk) => (
+                      <li key={perk} className="flex items-center gap-2.5">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                        <span>{perk}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-
-                <p className="mt-6 text-4xl font-semibold">
-                  {plan.price}
-                  <span className="ml-1 text-sm font-medium text-muted-foreground">/mo</span>
-                </p>
-
-                <ul className="mt-5 space-y-3 text-sm text-muted-foreground">
-                  {plan.perks.map((perk) => (
-                    <li key={perk} className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
-                      {perk}
-                    </li>
-                  ))}
-                </ul>
 
                 <Button
                   variant={plan.featured ? "default" : "outline"}
-                  className="mt-6 w-full"
+                  size="lg"
+                  className="mt-9 w-full"
                   asChild
                 >
                   <Link href={plan.href}>{plan.cta}</Link>
@@ -353,30 +455,51 @@ export default function Home() {
           </div>
         </div>
 
-        <div id="faq" className="space-y-5">
-          {faqs.map((faq) => (
-            <div
-              key={faq.question}
-              className="rounded-[1.75rem] border border-border/80 bg-card/82 p-6"
-            >
-              <h3 className="text-xl font-semibold">{faq.question}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                {faq.answer}
-              </p>
-            </div>
-          ))}
+        <div id="faq" className="space-y-6">
+          <div className="px-2">
+            <Badge variant="outline" className="w-fit">
+              FAQ
+            </Badge>
+            <h3 className="mt-4 text-2xl font-semibold sm:text-3xl">
+              Common questions, answered clearly.
+            </h3>
+          </div>
 
-          <div className="surface-panel p-6">
-            <h3 className="text-2xl font-semibold">Ready to simplify the workflow?</h3>
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <details
+                key={faq.question}
+                name="launchpath-faq"
+                open={index === 0}
+                className="group rounded-[1.75rem] border border-border/80 bg-card/85 p-6 sm:p-7"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold">
+                  <span>{faq.question}</span>
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background/60 text-muted-foreground transition-transform duration-200 group-open:rotate-180">
+                    <ChevronDown className="h-4 w-4" />
+                  </span>
+                </summary>
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  {faq.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+
+          <div className="surface-panel p-8 sm:p-10">
+            <h3 className="text-2xl font-semibold">Ready to step into a calmer workspace?</h3>
             <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Open the dashboard, start a draft, and see how the cleaner shell feels
-              across jobs, scholarships, grants, admissions, and writing tools.
+              Create your account or sign in to explore the live dashboard, AI studio,
+              and Neon-backed application pipeline.
             </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              <Button asChild>
-                <Link href="/signup">Create an account</Link>
+            <div className="mt-7 flex flex-wrap gap-3.5">
+              <Button size="lg" asChild>
+                <Link href="/signup">
+                  Create an account
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
-              <Button variant="outline" asChild>
+              <Button size="lg" variant="outline" asChild>
                 <Link href="/login">Log in</Link>
               </Button>
             </div>

@@ -1,57 +1,40 @@
-import { createServerClient } from "@supabase/ssr"
-import { NextResponse, type NextRequest } from "next/server"
-import { requireSupabasePublicEnv } from "@/lib/supabase-env"
+import { NextResponse, type NextRequest } from "next/server";
+import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth-token";
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next()
-  const env = requireSupabasePublicEnv("middleware")
+  const response = NextResponse.next();
 
-  const supabase = createServerClient(
-    env.url,
-    env.anonKey,
-    {
-      cookies: {
-        get(name) {
-          return request.cookies.get(name)?.value
-        },
-        set(name, value, options) {
-          request.cookies.set({ name, value, ...options })
-          response.cookies.set({ name, value, ...options })
-        },
-        remove(name, options) {
-          request.cookies.delete(name)
-          if (options) {
-            response.cookies.delete({ name, ...options })
-          } else {
-            response.cookies.delete(name)
-          }
-        },
-      },
+  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  const session = await verifySessionToken(token);
+
+  const pathname = request.nextUrl.pathname;
+  const isProtected = pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding");
+  const isAuthPage = pathname.startsWith("/login");
+  const isMfaPage = pathname === "/mfa";
+
+  if (!session && (isProtected || isMfaPage)) {
+    const redirectUrl = new URL("/login", request.url);
+    redirectUrl.searchParams.set("redirectedFrom", pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (session) {
+    const needsMfa = session.nextAal === "aal2" && session.aal !== "aal2";
+
+    if (needsMfa && (isProtected || isAuthPage)) {
+      const redirectUrl = new URL("/mfa", request.url);
+      if (isProtected) redirectUrl.searchParams.set("redirectedFrom", pathname);
+      return NextResponse.redirect(redirectUrl);
     }
-  )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  const isProtected =
-    request.nextUrl.pathname.startsWith("/dashboard") ||
-    request.nextUrl.pathname.startsWith("/onboarding")
-  const isAuthPage = request.nextUrl.pathname.startsWith("/login")
-
-  if (!user && isProtected) {
-    const redirectUrl = new URL("/login", request.url)
-    redirectUrl.searchParams.set("redirectedFrom", request.nextUrl.pathname)
-    return NextResponse.redirect(redirectUrl)
+    if (!needsMfa && (isAuthPage || isMfaPage)) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
   }
 
-  if (user && isAuthPage) {
-    return NextResponse.redirect(new URL("/dashboard", request.url))
-  }
-
-  return response
+  return response;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding", "/login"],
-}
+  matcher: ["/dashboard/:path*", "/onboarding", "/login", "/mfa"],
+};

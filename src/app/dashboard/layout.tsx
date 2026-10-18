@@ -16,7 +16,7 @@ export default function DashboardLayout({
 
         <main className="flex min-w-0 flex-1 flex-col">
           <Topbar />
-          <div className="flex-1 px-4 pb-8 pt-6 sm:px-6 lg:px-8">
+          <div className="flex-1 px-5 pb-14 pt-8 sm:px-8 lg:px-12 lg:pb-20 lg:pt-10">
             <div className="mx-auto w-full max-w-7xl">
               <DashboardClient>{children}</DashboardClient>
             </div>

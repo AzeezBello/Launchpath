@@ -6,8 +6,10 @@ import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Download, FileText, Plus } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient";
+import { Copy, Download, FileText, Plus, Sparkles } from "lucide-react";
+import { TailorResumeDialog } from "@/components/resume/TailorResumeDialog";
+import { handlePlanLimit } from "@/lib/plan-limit";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { downloadResumeAsPdf } from "@/components/resume/downloadResumePdf";
@@ -22,37 +24,58 @@ interface Resume {
 
 export default function ResumePage() {
   const [resumes, setResumes] = useState<Resume[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchResumes = useCallback(async () => {
     setLoading(true);
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
+    try {
+      const res = await fetch("/api/resumes", { cache: "no-store" });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(payload?.error || "Failed to load resumes");
+      setResumes(Array.isArray(payload?.data) ? payload.data : []);
+    } catch (err) {
+      console.error(err);
       setResumes([]);
-      setUserId(null);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setUserId(user.id);
-    const { data, error } = await supabase
-      .from("resumes")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (!error) setResumes(data || []);
-    setLoading(false);
   }, []);
 
   useEffect(() => {
     fetchResumes();
   }, [fetchResumes]);
+
+  const [tailoring, setTailoring] = useState<Resume | null>(null);
+
+  const duplicateResume = async (id: string) => {
+    try {
+      const res = await fetch(`/api/resumes/${id}/duplicate`, { method: "POST" });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) {
+        if (!handlePlanLimit(res.status, payload)) toast.error(payload?.error || "Could not duplicate");
+        return;
+      }
+      toast.success("Resume duplicated");
+      await fetchResumes();
+    } catch (err) {
+      console.error(err);
+      toast.error("Could not duplicate resume");
+    }
+  };
+
+  const deleteResume = async (id: string) => {
+    const previous = resumes;
+    setResumes((prev) => prev.filter((r) => r.id !== id));
+    try {
+      const res = await fetch(`/api/resumes/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete resume");
+      toast.success("Resume deleted");
+    } catch (err) {
+      console.error(err);
+      setResumes(previous);
+      toast.error("Could not delete resume");
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -106,8 +129,8 @@ export default function ResumePage() {
                     <FileText className="h-5 w-5 text-primary" /> {resume.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
+                <CardContent className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Link href={`/dashboard/resume/${resume.id}`}>
                       <Button variant="secondary">Edit</Button>
                     </Link>
@@ -115,19 +138,31 @@ export default function ResumePage() {
                       variant="outline"
                       size="icon-sm"
                       aria-label="Download PDF"
+                      title="Download PDF"
                       onClick={() => downloadResumeAsPdf(resume.title || "resume", resume.data)}
                     >
                       <Download className="h-4 w-4" />
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      aria-label="Duplicate"
+                      title="Duplicate"
+                      onClick={() => duplicateResume(resume.id)}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      title="Create a copy tailored to a job description"
+                      onClick={() => setTailoring(resume)}
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Tailor
+                    </Button>
                   </div>
-                  <Button
-                    variant="destructive"
-                    onClick={async () => {
-                      if (!userId) return;
-                      await supabase.from("resumes").delete().eq("id", resume.id).eq("user_id", userId);
-                      fetchResumes();
-                    }}
-                  >
+                  <Button variant="destructive" onClick={() => deleteResume(resume.id)}>
                     Delete
                   </Button>
                 </CardContent>
@@ -136,6 +171,18 @@ export default function ResumePage() {
           ))}
         </div>
       )}
+
+      <TailorResumeDialog
+        resumeId={tailoring?.id ?? null}
+        resumeTitle={tailoring?.title}
+        open={Boolean(tailoring)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setTailoring(null);
+            fetchResumes();
+          }
+        }}
+      />
     </div>
   );
 }

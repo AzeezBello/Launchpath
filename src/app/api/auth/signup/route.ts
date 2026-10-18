@@ -23,28 +23,36 @@ export async function POST(request: Request) {
       });
     }
 
-    // Never fall back to the request's own Host/Origin here — that header is
-    // attacker-controllable and would let it be used to point confirmation
-    // emails at an attacker-chosen domain (host-header injection).
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-    if (!baseUrl) {
-      console.error("Signup error: NEXT_PUBLIC_BASE_URL is not configured");
-      return apiError("Server misconfiguration", { status: 500, headers: rateLimit.headers });
-    }
+    const db = await createServerSupabaseClient();
 
-    const supabase = await createServerSupabaseClient();
-
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await db.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: `${baseUrl}/login`,
       },
     });
 
     if (error) {
       return apiError(error.message, { status: 400, headers: rateLimit.headers });
+    }
+
+    if (data.user?.id) {
+      await db.from("user_settings").upsert(
+        {
+          user_id: data.user.id,
+          data: {
+            profile: {
+              fullName,
+              headline: "",
+              location: "",
+              website: "",
+              bio: "",
+            },
+          },
+        },
+        { onConflict: "user_id" }
+      );
     }
 
     return apiSuccess(

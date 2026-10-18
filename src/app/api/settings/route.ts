@@ -91,7 +91,7 @@ export async function GET(req: Request) {
     decryptSettingsForClient(resolved),
     { status: 200, headers: mergeHeaders(rateLimit.headers) },
     {
-      source: error ? "cookie-fallback" : "supabase",
+      source: error ? "cookie-fallback" : "neon",
     }
   );
 }
@@ -175,7 +175,7 @@ export async function PATCH(req: Request) {
     merged,
     { status: 200, headers: mergeHeaders(rateLimit.headers) },
     {
-      source: isLikelyMissingTable(currentResult.error) ? "cookie-fallback" : "supabase",
+      source: isLikelyMissingTable(currentResult.error) ? "cookie-fallback" : "neon",
     }
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Settings as SettingsIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -16,36 +16,49 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/dashboard/PageHeader";
-import { InfoTooltip } from "@/components/ui/info-tooltip";
+import { TwoFactorCard } from "@/components/settings/TwoFactorCard";
+import { PasswordCard } from "@/components/settings/PasswordCard";
+import { BillingCard } from "@/components/settings/BillingCard";
+import { useTheme } from "next-themes";
+
+type Focus = "scholarship" | "grant" | "job" | "admission";
 
 type Settings = {
   profile: { name?: string; email?: string; company?: string };
-  integrations: { meta_token?: string; tiktok_token?: string; google_refresh?: string };
-  security: { twofa?: boolean; session_alerts?: boolean };
-  appearance: {
-    theme?: "light" | "dark" | "system";
-    accent?: "violet" | "indigo" | "fuchsia" | "emerald" | "cyan";
-  };
+  security: { session_alerts?: boolean };
+  appearance: { theme?: "light" | "dark" | "system" };
+  onboarding: { focus?: Focus[] };
+  notifications: { deadlineReminders?: boolean };
 };
 
 const DEFAULTS: Settings = {
   profile: { name: "", email: "", company: "" },
-  integrations: { meta_token: "", tiktok_token: "", google_refresh: "" },
-  security: { twofa: false, session_alerts: false },
-  appearance: { theme: "light", accent: "indigo" },
+  security: { session_alerts: false },
+  appearance: { theme: "system" },
+  onboarding: { focus: [] },
+  notifications: { deadlineReminders: true },
 };
+
+const FOCUS_OPTIONS: { value: Focus; label: string }[] = [
+  { value: "scholarship", label: "Scholarships" },
+  { value: "grant", label: "Grants" },
+  { value: "job", label: "Jobs" },
+  { value: "admission", label: "Admissions" },
+];
 
 function normalizeSettings(input: unknown): Settings {
   const source = (input || {}) as Partial<Settings>;
   return {
     profile: { ...DEFAULTS.profile, ...(source.profile || {}) },
-    integrations: { ...DEFAULTS.integrations, ...(source.integrations || {}) },
     security: { ...DEFAULTS.security, ...(source.security || {}) },
     appearance: { ...DEFAULTS.appearance, ...(source.appearance || {}) },
+    onboarding: { focus: Array.isArray(source.onboarding?.focus) ? source.onboarding.focus : [] },
+    notifications: { ...DEFAULTS.notifications, ...(source.notifications || {}) },
   };
 }
 
 export default function SettingsPage() {
+  const { setTheme } = useTheme();
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -81,6 +94,15 @@ export default function SettingsPage() {
     }));
   };
 
+  const toggleFocus = (value: Focus) => {
+    const current = settings.onboarding.focus || [];
+    update(
+      "onboarding",
+      "focus",
+      current.includes(value) ? current.filter((f) => f !== value) : [...current, value]
+    );
+  };
+
   const save = async () => {
     setSaving(true);
     try {
@@ -91,7 +113,11 @@ export default function SettingsPage() {
       });
       const payload = await res.json();
       if (!res.ok) throw new Error(payload?.error || "Failed to update settings");
-      setSettings(normalizeSettings(payload?.data ?? payload));
+      const next = normalizeSettings(payload?.data ?? payload);
+      setSettings(next);
+      // The theme preference is stored server-side and applied here so it
+      // actually changes what the user sees.
+      if (next.appearance.theme) setTheme(next.appearance.theme);
       toast.success("Settings updated");
     } catch (error) {
       console.error(error);
@@ -119,7 +145,7 @@ export default function SettingsPage() {
       <PageHeader
         icon={SettingsIcon}
         title="Settings"
-        description="Manage your profile, appearance, security, and integrations."
+        description="Manage your profile, focus, appearance, and account security."
         action={
           <Button onClick={save} disabled={saving}>
             {saving ? "Saving..." : "Save changes"}
@@ -131,25 +157,70 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Profile</CardTitle>
-            <CardDescription>Basic account details shown across the workspace.</CardDescription>
+            <CardDescription>
+              Your name signs generated cover letters when no resume is attached.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Input
-              placeholder="Full name"
-              value={settings.profile.name || ""}
-              onChange={(e) => update("profile", "name", e.target.value)}
-            />
-            <Input
-              placeholder="Email"
-              type="email"
-              value={settings.profile.email || ""}
-              onChange={(e) => update("profile", "email", e.target.value)}
-            />
-            <Input
-              placeholder="Company"
-              value={settings.profile.company || ""}
-              onChange={(e) => update("profile", "company", e.target.value)}
-            />
+            <div className="space-y-1.5">
+              <Label htmlFor="profile-name">Full name</Label>
+              <Input
+                id="profile-name"
+                placeholder="Full name"
+                value={settings.profile.name || ""}
+                onChange={(e) => update("profile", "name", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="profile-email">Contact email</Label>
+              <Input
+                id="profile-email"
+                placeholder="Email"
+                type="email"
+                value={settings.profile.email || ""}
+                onChange={(e) => update("profile", "email", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="profile-company">School or company</Label>
+              <Input
+                id="profile-company"
+                placeholder="School or company"
+                value={settings.profile.company || ""}
+                onChange={(e) => update("profile", "company", e.target.value)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Focus</CardTitle>
+            <CardDescription>
+              What you are working toward. These lead your overview and recommendations.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-2">
+              {FOCUS_OPTIONS.map((option) => {
+                const selected = (settings.onboarding.focus || []).includes(option.value);
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => toggleFocus(option.value)}
+                    className={
+                      selected
+                        ? "rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm font-medium text-primary"
+                        : "rounded-2xl border border-border/80 bg-background/45 px-4 py-3 text-sm font-medium text-muted-foreground hover:border-primary/25 hover:text-foreground"
+                    }
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
 
@@ -163,7 +234,11 @@ export default function SettingsPage() {
               <Label>Theme</Label>
               <Select
                 value={settings.appearance.theme}
-                onValueChange={(val) => update("appearance", "theme", val as Settings["appearance"]["theme"])}
+                onValueChange={(val) => {
+                  const theme = val as Settings["appearance"]["theme"];
+                  update("appearance", "theme", theme);
+                  if (theme) setTheme(theme);
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Choose theme" />
@@ -175,41 +250,28 @@ export default function SettingsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Accent</Label>
-              <Select
-                value={settings.appearance.accent}
-                onValueChange={(val) => update("appearance", "accent", val as Settings["appearance"]["accent"])}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Accent color" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="violet">Violet</SelectItem>
-                  <SelectItem value="indigo">Indigo</SelectItem>
-                  <SelectItem value="fuchsia">Fuchsia</SelectItem>
-                  <SelectItem value="emerald">Emerald</SelectItem>
-                  <SelectItem value="cyan">Cyan</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Security</CardTitle>
-            <CardDescription>Keep your account protected.</CardDescription>
+            <CardTitle>Notifications</CardTitle>
+            <CardDescription>Email reminders and account alerts.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <label className="flex items-center gap-2.5">
+            <label className="flex items-start gap-2.5">
               <input
                 type="checkbox"
-                checked={!!settings.security.twofa}
-                onChange={(e) => update("security", "twofa", e.target.checked)}
-                className="h-4 w-4 rounded border-input accent-primary"
+                checked={settings.notifications.deadlineReminders !== false}
+                onChange={(e) => update("notifications", "deadlineReminders", e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-input accent-primary"
               />
-              Enable 2FA
+              <span>
+                Deadline reminders
+                <span className="block text-xs text-muted-foreground">
+                  One email when an open application is 7, 3, and 1 days from its deadline, and on the day.
+                </span>
+              </span>
             </label>
             <label className="flex items-center gap-2.5">
               <input
@@ -218,55 +280,16 @@ export default function SettingsPage() {
                 onChange={(e) => update("security", "session_alerts", e.target.checked)}
                 className="h-4 w-4 rounded border-input accent-primary"
               />
-              Session alerts
+              Email me when a new device signs in
             </label>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Integrations</CardTitle>
-            <CardDescription>Connect external accounts and services.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
-                Meta token
-                <InfoTooltip text="Used to cross-post application updates to Meta-connected tools, if you use them." />
-              </Label>
-              <Input
-                type="password"
-                placeholder="Meta token"
-                value={settings.integrations.meta_token || ""}
-                onChange={(e) => update("integrations", "meta_token", e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
-                TikTok token
-                <InfoTooltip text="Used for TikTok-connected creator tools, if you use them." />
-              </Label>
-              <Input
-                type="password"
-                placeholder="TikTok token"
-                value={settings.integrations.tiktok_token || ""}
-                onChange={(e) => update("integrations", "tiktok_token", e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
-                Google refresh token
-                <InfoTooltip text="Used to keep a connected Google account (e.g. Calendar reminders) authorized without re-logging in." />
-              </Label>
-              <Input
-                type="password"
-                placeholder="Google refresh token"
-                value={settings.integrations.google_refresh || ""}
-                onChange={(e) => update("integrations", "google_refresh", e.target.value)}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <TwoFactorCard />
+        <PasswordCard />
+        <Suspense fallback={null}>
+          <BillingCard />
+        </Suspense>
       </div>
     </div>
   );
