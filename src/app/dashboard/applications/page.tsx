@@ -22,6 +22,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -62,11 +70,6 @@ type ViewMode = "grid" | "board";
 const NONE = "__none__";
 const VIEW_STORAGE_KEY = "launchpath:applications:view";
 const PAGE_SIZE = 12;
-
-const SELECT_CLASS =
-  "h-11 rounded-2xl border border-input bg-background/60 px-4 text-sm text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring";
-const SELECT_SM_CLASS =
-  "h-9 rounded-xl border border-input bg-background/60 px-3 text-xs text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring";
 
 function coverLetterHref(app: Application) {
   if (app.cover_letter_id) return `/dashboard/cover-letter/${app.cover_letter_id}`;
@@ -360,18 +363,18 @@ export default function ApplicationsPage() {
               onChange={(e) => setProgram(e.target.value)}
               placeholder="Program or role name"
             />
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as ApplicationStatus)}
-              className={SELECT_CLASS}
-              aria-label="Status"
-            >
-              {APPLICATION_STATUSES.map((option) => (
-                <option key={option} value={option} className="bg-background text-foreground">
-                  {option}
-                </option>
-              ))}
-            </select>
+            <Select value={status} onValueChange={(v) => setStatus(v as ApplicationStatus)}>
+              <SelectTrigger aria-label="Status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {APPLICATION_STATUSES.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button onClick={addApplication} disabled={saving}>
               <Plus className="h-4 w-4" />
               {saving ? "Saving..." : "Add"}
@@ -413,68 +416,53 @@ export default function ApplicationsPage() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          <div className="mr-1 inline-flex rounded-xl border border-border/80 bg-background/60 p-0.5">
-            <button
-              type="button"
-              onClick={() => switchView("grid")}
-              aria-pressed={view === "grid"}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${
-                view === "grid" ? "bg-primary/12 text-primary" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <LayoutGrid className="h-3.5 w-3.5" />
-              Cards
-            </button>
-            <button
-              type="button"
-              onClick={() => switchView("board")}
-              aria-pressed={view === "board"}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${
-                view === "board" ? "bg-primary/12 text-primary" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <KanbanSquare className="h-3.5 w-3.5" />
-              Board
-            </button>
-          </div>
+          <Tabs value={view} onValueChange={(v) => switchView(v as ViewMode)}>
+            <TabsList className="h-9">
+              <TabsTrigger value="grid" className="gap-1.5 px-2.5 text-xs">
+                <LayoutGrid className="h-3.5 w-3.5" />
+                Cards
+              </TabsTrigger>
+              <TabsTrigger value="board" className="gap-1.5 px-2.5 text-xs">
+                <KanbanSquare className="h-3.5 w-3.5" />
+                Board
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
           {view === "grid" && <ListFilter className="h-4 w-4 text-muted-foreground" />}
           {view === "grid" && (
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as ApplicationStatus | "all")}
-            className={SELECT_SM_CLASS}
-            aria-label="Filter by status"
-          >
-            <option value="all" className="bg-background text-foreground">
-              All statuses
-            </option>
-            {APPLICATION_STATUSES.map((option) => (
-              <option key={option} value={option} className="bg-background text-foreground">
-                {option}
-              </option>
-            ))}
-          </select>
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => setStatusFilter(v as ApplicationStatus | "all")}
+            >
+              <SelectTrigger size="sm" aria-label="Filter by status" className="w-[155px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {APPLICATION_STATUSES.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
           {view === "grid" && (
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
-            className={SELECT_SM_CLASS}
-            aria-label="Sort"
-          >
-            <option value="date" className="bg-background text-foreground">
-              Newest first
-            </option>
-            <option value="deadline" className="bg-background text-foreground">
-              Deadline soonest
-            </option>
-          </select>
+            <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
+              <SelectTrigger size="sm" aria-label="Sort" className="w-[155px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">Newest first</SelectItem>
+                <SelectItem value="deadline">Deadline soonest</SelectItem>
+              </SelectContent>
+            </Select>
           )}
         </div>
         {view === "board" ? (
           <p className="text-sm text-muted-foreground">Drag a card to change its status.</p>
         ) : !loading && !error && (
-          <p className="text-sm text-muted-foreground">
+          <p className="font-mono text-xs tabular-nums text-muted-foreground">
             {total} {total === 1 ? "application" : "applications"}
           </p>
         )}
@@ -531,9 +519,9 @@ export default function ApplicationsPage() {
           {applications.map((app, i) => (
             <motion.div
               key={app.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.4) }}
+              initial={{ opacity: 0, y: 6, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.24, delay: Math.min(i * 0.035, 0.24), ease: [0.23, 1, 0.32, 1] }}
             >
               <Card className="flex h-full flex-col">
                 <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
@@ -545,26 +533,30 @@ export default function ApplicationsPage() {
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon-sm"
                       aria-label="Edit details"
                       onClick={() => setEditing(app)}
-                      className="rounded-full p-1.5 text-muted-foreground hover:bg-accent/70 hover:text-foreground"
+                      className="text-muted-foreground hover:text-foreground"
                     >
                       <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon-sm"
                       aria-label="Delete application"
                       onClick={() => deleteApplication(app.id)}
-                      className="rounded-full p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col gap-3">
-                  <p className="text-sm text-muted-foreground">Applied {app.date}</p>
+                  <p className="font-mono text-xs tabular-nums text-muted-foreground">Applied {app.date}</p>
 
                   {app.notes ? (
                     <p className="line-clamp-2 text-sm text-muted-foreground">{app.notes}</p>
@@ -586,19 +578,22 @@ export default function ApplicationsPage() {
                   </div>
 
                   <div className="mt-auto flex flex-wrap items-center gap-2 pt-1">
-                    <select
+                    <Select
                       value={app.status}
                       disabled={updatingId === app.id}
-                      onChange={(e) => updateStatus(app.id, e.target.value as ApplicationStatus)}
-                      className={SELECT_SM_CLASS}
-                      aria-label="Change status"
+                      onValueChange={(v) => updateStatus(app.id, v as ApplicationStatus)}
                     >
-                      {APPLICATION_STATUSES.map((option) => (
-                        <option key={option} value={option} className="bg-background text-foreground">
-                          {option}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger size="sm" aria-label="Change status" className="w-[148px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {APPLICATION_STATUSES.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <Button asChild size="sm" variant="ghost">
                       <Link href={coverLetterHref(app)}>
                         <Mail className="h-3.5 w-3.5" />
@@ -629,7 +624,7 @@ export default function ApplicationsPage() {
         <Button variant="outline" disabled={page <= 1 || loading} onClick={() => fetchApplications(page - 1)}>
           Previous
         </Button>
-        <span className="text-sm text-muted-foreground">
+        <span className="font-mono text-xs tabular-nums text-muted-foreground">
           Page {page} of {totalPages}
         </span>
         <Button
@@ -697,46 +692,46 @@ export default function ApplicationsPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="edit-resume">Resume submitted</Label>
-                  <select
-                    id="edit-resume"
+                  <Select
                     value={editing.resume_id || NONE}
-                    onChange={(e) =>
-                      setEditing({ ...editing, resume_id: e.target.value === NONE ? null : e.target.value })
-                    }
-                    className={`${SELECT_CLASS} w-full`}
+                    onValueChange={(v) => setEditing({ ...editing, resume_id: v === NONE ? null : v })}
                   >
-                    <option value={NONE} className="bg-background text-foreground">
-                      None
-                    </option>
-                    {resumes.map((r) => (
-                      <option key={r.id} value={r.id} className="bg-background text-foreground">
-                        {r.title || "Untitled Resume"}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger id="edit-resume">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE}>None</SelectItem>
+                      {resumes.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.title || "Untitled Resume"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="edit-letter">Cover letter</Label>
-                  <select
-                    id="edit-letter"
+                  <Select
                     value={editing.cover_letter_id || NONE}
-                    onChange={(e) =>
+                    onValueChange={(v) =>
                       setEditing({
                         ...editing,
-                        cover_letter_id: e.target.value === NONE ? null : e.target.value,
+                        cover_letter_id: v === NONE ? null : v,
                       })
                     }
-                    className={`${SELECT_CLASS} w-full`}
                   >
-                    <option value={NONE} className="bg-background text-foreground">
-                      None
-                    </option>
-                    {letters.map((l) => (
-                      <option key={l.id} value={l.id} className="bg-background text-foreground">
-                        {letterTitle.get(l.id)}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger id="edit-letter">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE}>None</SelectItem>
+                      {letters.map((l) => (
+                        <SelectItem key={l.id} value={l.id}>
+                          {letterTitle.get(l.id)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 

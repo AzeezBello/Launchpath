@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,45 +23,53 @@ export function EntryActions({
   onDelete: () => void;
   editing?: boolean;
 }) {
-  const base =
-    "rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground disabled:pointer-events-none disabled:opacity-40";
-
   return (
     <div className="flex shrink-0 items-center gap-0.5">
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-xs"
         aria-label="Move up"
         disabled={index === 0}
         onClick={() => onMove(-1)}
-        className={base}
+        className="text-muted-foreground hover:text-foreground"
       >
         <ArrowUp className="h-3.5 w-3.5" />
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-xs"
         aria-label="Move down"
         disabled={index === count - 1}
         onClick={() => onMove(1)}
-        className={base}
+        className="text-muted-foreground hover:text-foreground"
       >
         <ArrowDown className="h-3.5 w-3.5" />
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-xs"
         aria-label="Edit"
         onClick={onEdit}
-        className={cn(base, editing && "bg-primary/10 text-primary")}
+        className={cn(
+          "text-muted-foreground hover:text-foreground",
+          editing && "bg-primary/10 text-primary"
+        )}
       >
         <Pencil className="h-3.5 w-3.5" />
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="ghost"
+        size="icon-xs"
         aria-label="Delete"
         onClick={onDelete}
-        className={cn(base, "hover:bg-destructive/10 hover:text-destructive")}
+        className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
       >
         <Trash2 className="h-3.5 w-3.5" />
-      </button>
+      </Button>
     </div>
   );
 }

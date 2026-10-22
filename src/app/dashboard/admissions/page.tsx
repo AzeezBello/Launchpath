@@ -45,17 +45,25 @@ export default function AdmissionsPage() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Input
+          type="search"
+          aria-label="Filter admissions by country"
           placeholder="Country (e.g. Nigeria)"
           value={country}
           onChange={(e) => setCountry(e.target.value)}
           onKeyDown={handleKeyDown}
+          spellCheck={false}
+          autoComplete="off"
           className="sm:max-w-xs"
         />
         <Input
+          type="search"
+          aria-label="Filter admissions by field of study"
           placeholder="Field (e.g. Engineering)"
           value={field}
           onChange={(e) => setField(e.target.value)}
           onKeyDown={handleKeyDown}
+          spellCheck={false}
+          autoComplete="off"
           className="sm:max-w-xs"
         />
         <Button onClick={handleSearch} disabled={loading}>

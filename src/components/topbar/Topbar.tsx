@@ -3,9 +3,19 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 import { DashboardNavigation } from "@/components/sidebar/DashboardSidebar";
 import { UserDropdown } from "@/components/user/UserDropdown";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const ROUTE_META = [
   {
@@ -94,44 +104,61 @@ export function Topbar() {
   const meta = getRouteMeta(pathname);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/70 bg-background/65 backdrop-blur-2xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 border-b border-border/75 bg-background/80 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-3">
           <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
             <SheetTrigger asChild>
-              <button
-                className="inline-flex size-10 items-center justify-center rounded-full border border-border/80 bg-card/70 lg:hidden"
+              <Button
+                variant="outline"
+                size="icon"
+                className="lg:hidden"
                 aria-label="Open dashboard navigation"
               >
-                <Menu className="h-4 w-4" />
-              </button>
+                <Menu className="size-4" />
+              </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[86vw] max-w-sm px-0">
-              <SheetHeader className="border-b border-border/70 px-5 pb-4 pt-6 text-left">
-                <SheetTitle>LaunchPath</SheetTitle>
+            <SheetContent side="left" className="w-[84vw] max-w-xs p-0">
+              <SheetHeader className="border-b border-border/75 px-5 pb-4 pt-5 text-left">
+                <SheetTitle className="flex items-center gap-2.5">
+                  <span className="flex size-7 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#3B82F6,#10B981)] font-display text-[11px] font-bold text-slate-950">
+                    LP
+                  </span>
+                  LaunchPath
+                </SheetTitle>
                 <SheetDescription>
                   Navigate the workspace across career and academic tools.
                 </SheetDescription>
               </SheetHeader>
               <DashboardNavigation
-                className="px-4 py-5"
+                className="px-4 py-4 overflow-y-auto"
+                layoutScope="mobile"
                 onNavigate={() => setMobileNavOpen(false)}
               />
             </SheetContent>
           </Sheet>
 
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-              LaunchPath
-            </p>
-            <h1 className="truncate text-xl font-semibold">{meta.title}</h1>
-            <p className="hidden text-sm text-muted-foreground sm:block">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Workspace
+              </span>
+              <span className="text-border">/</span>
+              <h1 className="truncate font-display text-base font-semibold tracking-tight sm:text-lg">
+                {meta.title}
+              </h1>
+            </div>
+            <p className="hidden truncate text-xs text-muted-foreground sm:block">
               {meta.description}
             </p>
           </div>
         </div>
 
-        <UserDropdown />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Separator orientation="vertical" className="hidden h-5 sm:block" />
+          <UserDropdown />
+        </div>
       </div>
     </header>
   );

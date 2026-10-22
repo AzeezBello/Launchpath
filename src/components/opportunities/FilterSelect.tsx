@@ -1,7 +1,17 @@
 "use client";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const ALL_SENTINEL = "__all__";
+
 /**
- * Compact native select used for client-side facet filters on the
+ * Compact shadcn Select used for client-side facet filters on the
  * opportunity listing pages. Options are derived from the loaded results.
  */
 export function FilterSelect({
@@ -18,21 +28,22 @@ export function FilterSelect({
   allLabel?: string;
 }) {
   return (
-    <select
-      aria-label={label}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="h-9 max-w-[220px] rounded-xl border border-input bg-background/60 px-3 text-xs text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring"
+    <Select
+      value={value === "" ? ALL_SENTINEL : value}
+      onValueChange={(next) => onChange(next === ALL_SENTINEL ? "" : next)}
     >
-      <option value="" className="bg-background text-foreground">
-        {allLabel}
-      </option>
-      {options.map((option) => (
-        <option key={option} value={option} className="bg-background text-foreground">
-          {option}
-        </option>
-      ))}
-    </select>
+      <SelectTrigger size="sm" aria-label={label} className="w-auto min-w-[148px] max-w-[220px]">
+        <SelectValue placeholder={allLabel} />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={ALL_SENTINEL}>{allLabel}</SelectItem>
+        {options.map((option) => (
+          <SelectItem key={option} value={option}>
+            {option}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
 

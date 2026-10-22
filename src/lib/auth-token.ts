@@ -34,13 +34,21 @@ export type SessionTokenPayload = {
   exp: number;
 };
 
+let warnedMissingSecret = false;
+let cachedKeySecret: string | null = null;
+let cachedHmacKey: CryptoKey | null = null;
+
 function getAuthSecret(): string {
-  return (
+  const configured =
     process.env.AUTH_SECRET ||
     process.env.ENCRYPTION_KEY ||
-    process.env.DATABASE_URL ||
-    "launchpath-neon-default-secret-key-2026"
-  );
+    process.env.DATABASE_URL;
+  if (configured) return configured;
+  if (process.env.NODE_ENV === "production" && !warnedMissingSecret) {
+    warnedMissingSecret = true;
+    console.warn("[auth-token] AUTH_SECRET is not set in production; configure AUTH_SECRET in environment variables.");
+  }
+  return "launchpath-neon-default-secret-key-2026";
 }
 
 function toBase64Url(bytes: Uint8Array): string {
@@ -62,15 +70,22 @@ function fromBase64Url(str: string): Uint8Array {
 }
 
 async function getHmacKey(): Promise<CryptoKey> {
+  const secret = getAuthSecret();
+  if (cachedHmacKey && cachedKeySecret === secret) {
+    return cachedHmacKey;
+  }
   const encoder = new TextEncoder();
-  const secretBytes = encoder.encode(getAuthSecret());
-  return crypto.subtle.importKey(
+  const secretBytes = encoder.encode(secret);
+  const key = await crypto.subtle.importKey(
     "raw",
     secretBytes,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign", "verify"]
   );
+  cachedKeySecret = secret;
+  cachedHmacKey = key;
+  return key;
 }
 
 export async function signSessionToken(

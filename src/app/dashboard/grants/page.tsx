@@ -71,10 +71,14 @@ export default function GrantsPage() {
           <div className="relative sm:max-w-md sm:flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              type="search"
+              aria-label="Search grants by category, funder, or country"
               placeholder="Search by category, funder, or country..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
+              spellCheck={false}
+              autoComplete="off"
               className="pl-10"
             />
           </div>
@@ -95,7 +99,7 @@ export default function GrantsPage() {
             allLabel="All funders"
           />
           {!loading && !error && (
-            <span className="text-xs text-muted-foreground">
+            <span className="font-mono text-xs tabular-nums text-muted-foreground">
               {visible.length} of {items.length}
             </span>
           )}

@@ -8,11 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useSupabase } from "@/providers/SupabaseProvider";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
+
+function safeRedirect(raw: string | null): string {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
+  return raw;
+}
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -41,7 +47,7 @@ export default function LoginForm() {
     }
 
     await refreshSession();
-    const redirectTo = searchParams.get("redirectedFrom") || "/dashboard";
+    const redirectTo = safeRedirect(searchParams.get("redirectedFrom"));
 
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
@@ -60,12 +66,16 @@ export default function LoginForm() {
         <Label htmlFor="login-email">Email</Label>
         <Input
           id="login-email"
+          name="email"
           type="email"
           inputMode="email"
           placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
+          spellCheck={false}
+          autoCapitalize="none"
+          autoCorrect="off"
           required
         />
       </div>
@@ -77,15 +87,30 @@ export default function LoginForm() {
             Forgot password?
           </Link>
         </div>
-        <Input
-          id="login-password"
-          type="password"
-          placeholder="Enter your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="current-password"
-          required
-        />
+        <div className="relative">
+          <Input
+            id="login-password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter your password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            className="pr-10"
+            required
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+          </Button>
+        </div>
       </div>
 
       <div className="pt-1">

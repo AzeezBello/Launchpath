@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useSupabase } from "@/providers/SupabaseProvider";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { jsPDF } from "jspdf";
 import { motion } from "framer-motion";
 import { Download, Save, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -113,7 +112,8 @@ export default function EditCoverLetterPage() {
     }
   };
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
+    const { jsPDF } = await import("jspdf");
     const doc = new jsPDF();
     doc.setFont("helvetica", "normal");
     doc.setFontSize(14);

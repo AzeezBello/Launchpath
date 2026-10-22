@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 export const START_TOUR_EVENT = "launchpath:start-tour";
 
@@ -47,7 +48,7 @@ const STEPS: TourStep[] = [
   },
 ];
 
-const CARD_WIDTH = 300;
+const CARD_WIDTH = 312;
 
 function resolveTargetRect(target: string): DOMRect | null {
   const el = document.querySelector<HTMLElement>(`[data-tour="${target}"]`);
@@ -82,8 +83,6 @@ export function ProductTour() {
     }).catch(() => {});
   }, []);
 
-  // Auto-launch once per account, desktop only (the tour targets the sidebar,
-  // which is hidden below the lg breakpoint).
   useEffect(() => {
     if (checkedAutoStart.current) return;
     checkedAutoStart.current = true;
@@ -101,7 +100,6 @@ export function ProductTour() {
       .catch(() => {});
   }, []);
 
-  // Manual replay trigger (e.g. from the account menu).
   useEffect(() => {
     const handler = () => {
       if (!isDesktopViewport()) return;
@@ -117,7 +115,6 @@ export function ProductTour() {
     const step = STEPS[stepIndex];
     const next = resolveTargetRect(step.target);
     if (!next) {
-      // Target not present on this screen size/route — skip forward, or end the tour.
       if (stepIndex < STEPS.length - 1) {
         setStepIndex((i) => i + 1);
       } else {
@@ -148,44 +145,55 @@ export function ProductTour() {
   const isLast = stepIndex === STEPS.length - 1;
 
   const cardTop =
-    rect.bottom + 176 > window.innerHeight ? Math.max(16, rect.top - 152) : rect.bottom + 14;
+    rect.bottom + 184 > window.innerHeight ? Math.max(16, rect.top - 160) : rect.bottom + 12;
   const cardLeft = Math.min(Math.max(16, rect.left), window.innerWidth - CARD_WIDTH - 16);
 
   return createPortal(
     <div className="pointer-events-none fixed inset-0 z-[100]">
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="absolute rounded-2xl ring-2 ring-primary/70"
-        style={{
+        layout
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{
+          opacity: 1,
+          scale: 1,
           top: rect.top - 6,
           left: rect.left - 6,
           width: rect.width + 12,
           height: rect.height + 12,
-          boxShadow: "0 0 0 9999px rgba(8,15,25,0.6)",
+        }}
+        transition={{ type: "spring", duration: 0.35, bounce: 0.08 }}
+        className="absolute rounded-xl ring-2 ring-primary/80"
+        style={{
+          boxShadow: "0 0 0 9999px rgba(8,15,25,0.62)",
         }}
       />
 
       <AnimatePresence mode="wait">
         <motion.div
           key={stepIndex}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.18 }}
-          className="pointer-events-auto absolute rounded-2xl border border-border/80 bg-popover p-4 text-popover-foreground shadow-xl"
+          initial={{ opacity: 0, y: 6, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -4, scale: 0.97 }}
+          transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+          className="pointer-events-auto absolute rounded-2xl border border-border/85 bg-popover p-4 text-popover-foreground shadow-2xl"
           style={{ top: cardTop, left: cardLeft, width: CARD_WIDTH }}
         >
           <div className="flex items-start justify-between gap-2">
-            <p className="text-sm font-semibold">{step.title}</p>
-            <button
+            <div className="space-y-1">
+              <Badge variant="outline" className="font-mono text-[10px]">
+                {String(stepIndex + 1).padStart(2, "0")} / {String(STEPS.length).padStart(2, "0")}
+              </Badge>
+              <p className="pt-1 text-sm font-semibold">{step.title}</p>
+            </div>
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => finish(true)}
               aria-label="Close tour"
-              className="text-muted-foreground hover:text-foreground"
             >
-              <X className="h-4 w-4" />
-            </button>
+              <X className="size-3.5" />
+            </Button>
           </div>
           <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{step.body}</p>
 
@@ -194,23 +202,24 @@ export function ProductTour() {
               {STEPS.map((_, i) => (
                 <span
                   key={i}
-                  className={`h-1.5 rounded-full transition-all ${
+                  className={`h-1.5 rounded-full transition-[width,background-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
                     i === stepIndex ? "w-4 bg-primary" : "w-1.5 bg-muted"
                   }`}
                 />
               ))}
             </div>
-            <div className="flex items-center gap-2">
-              <button
+            <div className="flex items-center gap-1.5">
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => finish(true)}
-                className="text-xs font-medium text-muted-foreground hover:text-foreground"
               >
                 Skip
-              </button>
+              </Button>
               <Button size="sm" onClick={() => (isLast ? finish(true) : setStepIndex((i) => i + 1))}>
                 {isLast ? "Done" : "Next"}
-                {!isLast && <ArrowRight className="h-3.5 w-3.5" />}
+                {!isLast && <ArrowRight className="size-3.5" />}
               </Button>
             </div>
           </div>

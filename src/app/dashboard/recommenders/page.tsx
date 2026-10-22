@@ -12,6 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { DeadlineBadge } from "@/components/dashboard/DeadlineBadge";
@@ -31,10 +38,6 @@ type Recommender = {
 type ApplicationOption = { id: string; program: string };
 
 const NONE = "__none__";
-const SELECT_CLASS =
-  "h-11 w-full rounded-2xl border border-input bg-background/60 px-4 text-sm text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring";
-const SELECT_SM_CLASS =
-  "h-9 rounded-xl border border-input bg-background/60 px-2.5 text-xs text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring";
 
 const STATUS_TONE: Record<RecommenderStatus, string> = {
   "To ask": "bg-muted text-muted-foreground",
@@ -239,21 +242,19 @@ export default function RecommendersPage() {
               <Label htmlFor="rec-application" className="text-xs text-muted-foreground">
                 For application (optional)
               </Label>
-              <select
-                id="rec-application"
-                value={applicationId}
-                onChange={(e) => setApplicationId(e.target.value)}
-                className={SELECT_CLASS}
-              >
-                <option value={NONE} className="bg-background text-foreground">
-                  Not linked
-                </option>
-                {applications.map((app) => (
-                  <option key={app.id} value={app.id} className="bg-background text-foreground">
-                    {app.program}
-                  </option>
-                ))}
-              </select>
+              <Select value={applicationId} onValueChange={setApplicationId}>
+                <SelectTrigger id="rec-application">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Not linked</SelectItem>
+                  {applications.map((app) => (
+                    <SelectItem key={app.id} value={app.id}>
+                      {app.program}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="rec-due" className="text-xs text-muted-foreground">
@@ -266,7 +267,7 @@ export default function RecommendersPage() {
       </Card>
 
       {!loading && !error && rows.length > 0 && (
-        <p className="text-sm text-muted-foreground">
+        <p className="font-mono text-xs tabular-nums text-muted-foreground">
           {pending} of {rows.length} still outstanding.
         </p>
       )}
@@ -298,9 +299,9 @@ export default function RecommendersPage() {
             return (
               <motion.div
                 key={rec.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.4) }}
+                initial={{ opacity: 0, y: 6, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.24, delay: Math.min(i * 0.035, 0.24), ease: [0.23, 1, 0.32, 1] }}
               >
                 <Card className="hover-card">
                   <CardContent className="space-y-4 p-5">
@@ -318,7 +319,7 @@ export default function RecommendersPage() {
                         {rec.relationship && <p className="text-sm text-muted-foreground">{rec.relationship}</p>}
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                           {rec.email && <span>{rec.email}</span>}
-                          {rec.due_date && <span>Due {rec.due_date}</span>}
+                          {rec.due_date && <span className="font-mono tabular-nums">Due {rec.due_date}</span>}
                           {linked && (
                             <Link
                               href="/dashboard/applications"
@@ -331,19 +332,22 @@ export default function RecommendersPage() {
                         </div>
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center gap-2">
-                        <select
+                        <Select
                           value={rec.status}
                           disabled={updatingId === rec.id}
-                          onChange={(e) => updateStatus(rec.id, e.target.value as RecommenderStatus)}
-                          className={SELECT_SM_CLASS}
-                          aria-label="Change status"
+                          onValueChange={(v) => updateStatus(rec.id, v as RecommenderStatus)}
                         >
-                          {RECOMMENDER_STATUSES.map((s) => (
-                            <option key={s} value={s} className="bg-background text-foreground">
-                              {s}
-                            </option>
-                          ))}
-                        </select>
+                          <SelectTrigger size="sm" aria-label="Change status" className="w-[130px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {RECOMMENDER_STATUSES.map((s) => (
+                              <SelectItem key={s} value={s}>
+                                {s}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         {rec.email && rec.status === "To ask" && (
                           <Button asChild size="sm" variant="outline">
                             <a href={requestEmailHref(rec, linked)}>
@@ -356,14 +360,16 @@ export default function RecommendersPage() {
                           <StickyNote className="h-3.5 w-3.5" />
                           {rec.notes ? "Notes" : "Add notes"}
                         </Button>
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon-sm"
                           aria-label="Remove recommender"
                           onClick={() => remove(rec.id)}
-                          className="rounded-full p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
 

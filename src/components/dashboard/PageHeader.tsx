@@ -17,14 +17,14 @@ export function PageHeader({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      initial={{ opacity: 0, y: -4, scale: 0.99 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+      className="flex flex-col gap-4 border-b border-border/70 pb-6 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div className="flex items-start gap-4">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-          <Icon className="h-5 w-5" />
+      <div className="flex items-start gap-3.5">
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary shadow-2xs">
+          <Icon className="size-5" />
         </span>
         <div>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h1>

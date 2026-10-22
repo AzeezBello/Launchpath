@@ -26,9 +26,13 @@ export function DeadlineBadge({
     <Badge
       variant="secondary"
       title={info.date ? info.date.toDateString() : undefined}
-      className={cn(DEADLINE_TONE_CLASS[info.tone], "gap-1.5", className)}
+      className={cn(
+        DEADLINE_TONE_CLASS[info.tone],
+        "gap-1.5 font-mono text-[10px] tabular-nums tracking-[0.06em]",
+        className
+      )}
     >
-      <CalendarClock className="h-3 w-3" />
+      <CalendarClock className="size-3" />
       {info.label}
     </Badge>
   );

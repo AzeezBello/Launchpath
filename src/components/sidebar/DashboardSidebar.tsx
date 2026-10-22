@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   BookOpen,
   Bookmark,
@@ -18,6 +19,7 @@ import {
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 type DashboardLink = {
@@ -39,7 +41,7 @@ const PRIMARY_LINKS: DashboardLink[] = [
     label: "Overview",
     href: "/dashboard",
     icon: LayoutDashboard,
-    description: "Monitor your workspace in one place.",
+    description: "Command center & metrics",
     tourId: "nav-overview",
   },
 ];
@@ -86,10 +88,12 @@ function DashboardNavItem({
   link,
   active,
   onNavigate,
+  layoutScope = "desktop",
 }: {
   link: DashboardLink;
   active: boolean;
   onNavigate?: () => void;
+  layoutScope?: string;
 }) {
   const Icon = link.icon;
 
@@ -99,25 +103,35 @@ function DashboardNavItem({
       onClick={onNavigate}
       data-tour={link.tourId}
       className={cn(
-        "group flex items-center gap-3 rounded-[1.3rem] border px-3.5 py-3",
+        "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 scale-100 active:scale-[0.985] transition-[color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] outline-none focus-visible:ring-2 focus-visible:ring-ring",
         active
-          ? "border-primary/25 bg-primary/10 text-foreground shadow-[0_18px_40px_-30px_rgba(59,130,246,0.45)]"
-          : "border-transparent text-muted-foreground hover:border-border/80 hover:bg-accent/65 hover:text-foreground"
+          ? "text-foreground"
+          : "text-muted-foreground hover:bg-accent/55 hover:text-foreground"
       )}
-      >
-        <span
-          className={cn(
-            "flex size-10 items-center justify-center rounded-2xl",
-            active ? "bg-primary/15 text-primary" : "bg-background/55 text-muted-foreground"
-          )}
-        >
-          <Icon className="h-4 w-4" />
-        </span>
+    >
+      {active && (
+        <motion.span
+          layoutId={`sidebar-active-${layoutScope}`}
+          transition={{ type: "spring", duration: 0.32, bounce: 0.08 }}
+          className="pointer-events-none absolute inset-0 rounded-xl border border-primary/25 bg-primary/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]"
+        />
+      )}
 
-      <span className="min-w-0">
-        <span className="block text-sm font-semibold">{link.label}</span>
+      <span
+        className={cn(
+          "relative z-10 flex size-8 shrink-0 items-center justify-center rounded-lg border transition-colors duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]",
+          active
+            ? "border-primary/20 bg-primary/15 text-primary"
+            : "border-border/60 bg-background/60 text-muted-foreground group-hover:border-border group-hover:text-foreground"
+        )}
+      >
+        <Icon className="size-4" />
+      </span>
+
+      <span className="relative z-10 min-w-0">
+        <span className="block text-xs font-semibold leading-tight">{link.label}</span>
         {link.description ? (
-          <span className="block truncate text-xs text-muted-foreground">
+          <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">
             {link.description}
           </span>
         ) : null}
@@ -129,50 +143,57 @@ function DashboardNavItem({
 export function DashboardNavigation({
   className,
   onNavigate,
+  layoutScope = "desktop",
 }: {
   className?: string;
   onNavigate?: () => void;
+  layoutScope?: string;
 }) {
   const pathname = usePathname() ?? "/dashboard";
 
   return (
-    <nav className={cn("space-y-6", className)}>
-      <div className="space-y-2">
+    <nav className={cn("space-y-5", className)} aria-label="Workspace navigation">
+      <div className="space-y-1">
         {PRIMARY_LINKS.map((link) => (
           <DashboardNavItem
             key={link.href}
             link={link}
             active={isActivePath(pathname, link.href)}
             onNavigate={onNavigate}
+            layoutScope={layoutScope}
           />
         ))}
       </div>
 
       {DASHBOARD_GROUPS.map((group) => (
-        <div key={group.label} data-tour={group.tourId} className="space-y-2">
-          <p className="px-3 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        <div key={group.label} data-tour={group.tourId} className="space-y-1.5">
+          <p className="px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/85">
             {group.label}
           </p>
-          <div className="space-y-1.5">
+          <div className="space-y-0.5">
             {group.links.map((link) => (
               <DashboardNavItem
                 key={link.href}
                 link={link}
                 active={isActivePath(pathname, link.href)}
                 onNavigate={onNavigate}
+                layoutScope={layoutScope}
               />
             ))}
           </div>
         </div>
       ))}
 
-      <div className="space-y-1.5 border-t border-border/70 pt-5">
+      <Separator className="my-3" />
+
+      <div className="space-y-0.5">
         {UTILITY_LINKS.map((link) => (
           <DashboardNavItem
             key={link.href}
             link={link}
             active={isActivePath(pathname, link.href)}
             onNavigate={onNavigate}
+            layoutScope={layoutScope}
           />
         ))}
       </div>
@@ -182,26 +203,34 @@ export function DashboardNavigation({
 
 export function DashboardSidebar() {
   return (
-    <aside className="sticky top-0 hidden h-screen w-[302px] flex-col border-r border-border/70 bg-background/45 px-4 py-5 backdrop-blur-2xl lg:flex">
-      <div data-tour="sidebar-brand" className="flex items-center gap-3 px-3">
-        <span className="flex size-11 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(59,130,246,0.9),rgba(16,185,129,0.85))] text-sm font-bold text-slate-950 shadow-[0_14px_36px_-18px_rgba(59,130,246,0.8)]">
+    <aside className="sticky top-0 hidden h-screen w-[268px] shrink-0 flex-col border-r border-border/75 bg-card/55 px-3.5 py-5 backdrop-blur-xl lg:flex">
+      <Link
+        href="/"
+        data-tour="sidebar-brand"
+        className="group flex items-center gap-3 rounded-xl px-2.5 py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <span className="flex size-9 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3B82F6,#10B981)] font-display text-xs font-bold text-slate-950 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35),0_6px_16px_-4px_rgba(59,130,246,0.5)] scale-100 transition-transform duration-160 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03]">
           LP
         </span>
         <div>
-          <p className="text-base font-semibold tracking-tight">LaunchPath</p>
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            Dashboard
+          <p className="font-display text-sm font-semibold tracking-tight leading-none">
+            LaunchPath
+          </p>
+          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground leading-none">
+            Workspace OS
           </p>
         </div>
-      </div>
+      </Link>
 
-      <DashboardNavigation className="mt-8 flex-1 overflow-y-auto pr-1" />
+      <DashboardNavigation className="mt-6 flex-1 overflow-y-auto pr-1" layoutScope="desktop" />
 
-      <div className="mt-6 rounded-[1.5rem] border border-border/80 bg-card/80 p-4">
-        <p className="text-sm font-semibold">Keep momentum high</p>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          Save one resume version, one cover letter draft, and one next step for each
-          application to keep the pipeline easy to review.
+      <div className="mt-4 rounded-xl border border-border/80 bg-background/60 p-3.5">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold text-foreground">Pipeline cadence</p>
+          <span className="size-1.5 rounded-full bg-success" aria-hidden />
+        </div>
+        <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+          Attach one tailored resume and one cover letter per role to keep submission velocity high.
         </p>
       </div>
     </aside>

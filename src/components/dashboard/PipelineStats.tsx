@@ -15,11 +15,9 @@ type Stats = {
 };
 
 /**
- * Pipeline analytics for the overview. One series per chart, so a single
- * hue carries magnitude and no legend is needed: a horizontal funnel of
- * counts, three rate tiles, and an 8-week column strip of new applications.
- * Bars are <= 24px thick with a rounded data-end and a hover tooltip; a
- * screen-reader table mirrors every value.
+ * Pipeline analytics for the overview. Uses GPU-accelerated scaleX/scaleY
+ * transforms with Emil Kowalski's custom cubic-bezier(0.23, 1, 0.32, 1) curve
+ * and monospace tabular numerals for every metric.
  */
 export function PipelineStats() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -56,10 +54,10 @@ export function PipelineStats() {
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-          <TrendingUp className="h-5 w-5 text-primary" />
-          Pipeline
+          <TrendingUp className="size-5 text-primary" />
+          Pipeline Conversion
         </CardTitle>
-        <CardDescription>How your applications convert, and how many you started each week.</CardDescription>
+        <CardDescription>How your applications convert, and weekly submission cadence.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {error ? (
@@ -67,7 +65,7 @@ export function PipelineStats() {
         ) : !stats ? (
           <div className="space-y-3">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-6 animate-pulse rounded-full bg-muted/60" />
+              <div key={i} className="h-6 animate-pulse rounded-lg bg-muted/60" />
             ))}
           </div>
         ) : stats.total === 0 ? (
@@ -80,32 +78,37 @@ export function PipelineStats() {
           </p>
         ) : (
           <>
-            {/* Funnel: horizontal bars, single hue, value at the tip */}
-            <div className="space-y-2" role="img" aria-label="Application funnel by stage">
+            {/* Funnel: horizontal bars animated with GPU scaleX */}
+            <div className="space-y-2.5" role="img" aria-label="Application funnel by stage">
               {stats.funnel.map((row) => {
-                const widthPct = Math.max(row.count > 0 ? 3 : 0, Math.round((row.count / maxFunnel) * 100));
+                const ratio = Math.max(row.count > 0 ? 0.04 : 0, row.count / maxFunnel);
                 return (
-                  <div key={row.stage} className="grid grid-cols-[92px_1fr_32px] items-center gap-3 text-sm">
-                    <span className="truncate text-muted-foreground">{row.stage}</span>
-                    <div className="h-4 w-full rounded-r-[4px] bg-muted/50">
+                  <div key={row.stage} className="grid grid-cols-[96px_1fr_36px] items-center gap-3 text-xs">
+                    <span className="truncate font-medium text-muted-foreground">{row.stage}</span>
+                    <div className="h-3.5 w-full overflow-hidden rounded-sm bg-muted/55">
                       <div
-                        className="h-4 rounded-r-[4px] bg-primary transition-[width] duration-500"
-                        style={{ width: `${widthPct}%` }}
+                        className="h-full w-full origin-left rounded-sm bg-primary transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]"
+                        style={{ transform: `scaleX(${ratio})` }}
                         title={`${row.stage}: ${row.count}`}
                       />
                     </div>
-                    <span className="text-right font-medium tabular-nums">{row.count}</span>
+                    <span className="text-right font-mono text-xs font-semibold tabular-nums text-foreground">
+                      {row.count}
+                    </span>
                   </div>
                 );
               })}
             </div>
 
             {/* Rate tiles */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2.5">
               {tiles.map((tile) => (
-                <div key={tile.label} className="rounded-[1.1rem] border border-border/80 bg-background/45 px-3 py-3">
-                  <p className="text-xs text-muted-foreground">{tile.label}</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums">
+                <div
+                  key={tile.label}
+                  className="rounded-xl border border-border/80 bg-background/50 px-3 py-3"
+                >
+                  <p className="text-[11px] font-medium text-muted-foreground">{tile.label}</p>
+                  <p className="mt-1 font-mono text-xl font-semibold tabular-nums tracking-tight sm:text-2xl">
                     {tile.value === null ? "—" : `${tile.value}%`}
                   </p>
                   <p className="mt-0.5 text-[11px] text-muted-foreground">{tile.hint}</p>
@@ -113,25 +116,32 @@ export function PipelineStats() {
               ))}
             </div>
 
-            {/* Weekly volume: 8 columns, single hue, current week emphasised */}
+            {/* Weekly volume: 8 columns animated with GPU scaleY */}
             <div>
-              <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-                <span>New applications per week</span>
-                <span>last 8 weeks</span>
+              <div className="mb-2 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                <span>Weekly volume</span>
+                <span>Last 8 weeks</span>
               </div>
-              <div className="flex h-16 items-end gap-1.5" role="img" aria-label="New applications per week, last 8 weeks">
+              <div
+                className="flex h-16 items-end gap-1.5 rounded-xl border border-border/60 bg-background/35 p-2.5"
+                role="img"
+                aria-label="New applications per week, last 8 weeks"
+              >
                 {stats.weekly.map((week, i) => {
                   const isCurrent = i === stats.weekly.length - 1;
-                  const heightPct = week.count === 0 ? 0 : Math.max(8, Math.round((week.count / maxWeekly) * 100));
+                  const ratio = week.count === 0 ? 0.04 : Math.max(0.12, week.count / maxWeekly);
                   return (
-                    <div key={week.weekStart} className="flex h-full flex-1 flex-col justify-end">
+                    <div key={week.weekStart} className="flex h-full flex-1 flex-col justify-end items-center">
                       <div
                         className={cn(
-                          "w-full max-w-[24px] rounded-t-[4px] transition-[height] duration-500",
-                          isCurrent ? "bg-primary" : "bg-primary/45",
-                          week.count === 0 && "h-px bg-border"
+                          "h-full w-full max-w-[22px] origin-bottom rounded-t-[3px] transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]",
+                          week.count === 0
+                            ? "bg-border/80"
+                            : isCurrent
+                              ? "bg-primary"
+                              : "bg-primary/45"
                         )}
-                        style={week.count > 0 ? { height: `${heightPct}%` } : undefined}
+                        style={{ transform: `scaleY(${ratio})` }}
                         title={`Week of ${week.weekStart}: ${week.count}`}
                       />
                     </div>

@@ -1,104 +1,149 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { ArrowRight, Menu } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { label: "Product", href: "/#product" },
+  { label: "Workflow", href: "/#workflow" },
   { label: "Pricing", href: "/#pricing" },
-  { label: "Resources", href: "/#faq" },
+  { label: "FAQ", href: "/#faq" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname() ?? "/";
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-border/70 bg-background/70 backdrop-blur-2xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-3 text-foreground">
-          <span className="flex size-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(59,130,246,0.9),rgba(16,185,129,0.9))] text-sm font-bold text-slate-950 shadow-[0_14px_36px_-18px_rgba(59,130,246,0.9)]">
+    <header className="sticky top-0 z-40 border-b border-border/75 bg-background/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <Link
+          href="/"
+          className="group flex items-center gap-3 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+        >
+          <span className="flex size-9 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3B82F6,#10B981)] font-display text-xs font-bold tracking-tight text-slate-950 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35),0_6px_16px_-4px_rgba(59,130,246,0.5)] scale-100 transition-transform duration-160 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03]">
             LP
           </span>
-          <span>
-            <span className="block text-base font-semibold tracking-tight">LaunchPath</span>
-            <span className="block text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              Opportunity workspace
+          <span className="flex flex-col">
+            <span className="font-display text-sm font-semibold tracking-tight leading-none">
+              LaunchPath
+            </span>
+            <span className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground leading-none">
+              Opportunity OS
             </span>
           </span>
         </Link>
 
-        <div className="hidden items-center gap-1 rounded-full border border-border/80 bg-card/70 p-1 md:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="rounded-full px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/70 hover:text-foreground"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
+        <nav
+          aria-label="Primary navigation"
+          className="hidden items-center gap-0.5 rounded-xl border border-border/80 bg-card/75 p-1 shadow-2xs md:flex"
+        >
+          {NAV_LINKS.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]",
+                  isActive
+                    ? "bg-primary/12 text-primary"
+                    : "text-muted-foreground hover:bg-accent/70 hover:text-foreground"
+                )}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
 
         <div className="hidden items-center gap-2 md:flex">
           <ThemeToggle />
-          <Button variant="ghost" asChild>
+          <Separator orientation="vertical" className="mx-0.5 h-5" />
+          <Button variant="ghost" size="sm" asChild>
             <Link href="/login">Log in</Link>
           </Button>
           <Button size="sm" asChild>
             <Link href="/signup">
               Start free
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="size-3.5" />
             </Link>
           </Button>
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-1.5 md:hidden">
           <ThemeToggle />
-          <button
-            onClick={() => setIsOpen((prev) => !prev)}
-            className="inline-flex size-10 items-center justify-center rounded-full border border-border/80 bg-card/70 text-foreground"
-            aria-label="Toggle navigation"
-            aria-expanded={isOpen}
-          >
-            {isOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Open navigation menu"
+              >
+                <Menu className="size-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[84vw] max-w-xs p-0">
+              <SheetHeader className="border-b border-border/75 px-5 py-5 text-left">
+                <SheetTitle className="flex items-center gap-2.5">
+                  <span className="flex size-7 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#3B82F6,#10B981)] font-display text-[11px] font-bold text-slate-950">
+                    LP
+                  </span>
+                  LaunchPath
+                </SheetTitle>
+                <SheetDescription>
+                  Scholarships, grants, jobs, and admissions in one calm workspace.
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="flex flex-1 flex-col justify-between p-5">
+                <nav className="flex flex-col gap-1">
+                  {NAV_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setIsOpen(false)}
+                      className="rounded-xl px-3.5 py-2.5 text-sm font-medium text-muted-foreground transition-colors duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-accent/70 hover:text-foreground"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </nav>
+
+                <div className="space-y-2.5 border-t border-border/75 pt-4">
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                      Log in
+                    </Link>
+                  </Button>
+                  <Button className="w-full" asChild>
+                    <Link href="/signup" onClick={() => setIsOpen(false)}>
+                      Start free
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-
-      {isOpen && (
-        <div className="border-t border-border/70 px-4 pb-4 md:hidden">
-          <div className="mx-auto mt-4 flex max-w-7xl flex-col gap-4 rounded-[1.75rem] border border-border/80 bg-card/85 p-4 shadow-[0_22px_55px_-34px_rgba(15,23,42,0.45)] backdrop-blur-xl">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-2xl px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/70 hover:text-foreground"
-                onClick={() => setIsOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            <div className="grid grid-cols-2 gap-2 pt-2">
-              <Button variant="outline" asChild>
-                <Link href="/login" onClick={() => setIsOpen(false)}>
-                  Log in
-                </Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup" onClick={() => setIsOpen(false)}>
-                  Start free
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-    </nav>
+    </header>
   );
 }

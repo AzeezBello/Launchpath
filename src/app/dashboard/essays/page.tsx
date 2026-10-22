@@ -14,6 +14,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { type EssayStatus, countWords } from "@/lib/server/essays";
@@ -32,8 +39,6 @@ type Essay = {
 type ApplicationOption = { id: string; program: string };
 
 const NONE = "__none__";
-const SELECT_CLASS =
-  "h-11 w-full rounded-2xl border border-input bg-background/60 px-4 text-sm text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring";
 
 const STATUS_TONE: Record<EssayStatus, string> = {
   "Not started": "bg-muted text-muted-foreground",
@@ -198,21 +203,19 @@ function EssaysIndex() {
             <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
               <div className="space-y-1.5">
                 <Label htmlFor="essay-application">Linked application (optional)</Label>
-                <select
-                  id="essay-application"
-                  value={applicationId}
-                  onChange={(e) => setApplicationId(e.target.value)}
-                  className={SELECT_CLASS}
-                >
-                  <option value={NONE} className="bg-background text-foreground">
-                    Not linked
-                  </option>
-                  {applications.map((app) => (
-                    <option key={app.id} value={app.id} className="bg-background text-foreground">
-                      {app.program}
-                    </option>
-                  ))}
-                </select>
+                <Select value={applicationId} onValueChange={setApplicationId}>
+                  <SelectTrigger id="essay-application">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>Not linked</SelectItem>
+                    {applications.map((app) => (
+                      <SelectItem key={app.id} value={app.id}>
+                        {app.program}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setShowForm(false)} disabled={saving}>
@@ -260,9 +263,9 @@ function EssaysIndex() {
             return (
               <motion.div
                 key={essay.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.4) }}
+                initial={{ opacity: 0, y: 6, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.24, delay: Math.min(i * 0.035, 0.24), ease: [0.23, 1, 0.32, 1] }}
               >
                 <Card className="flex h-full flex-col">
                   <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
@@ -277,29 +280,33 @@ function EssaysIndex() {
                       </Badge>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon-sm"
                         aria-label="Duplicate essay"
                         title="Duplicate for a similar prompt"
                         onClick={() => duplicateEssay(essay.id)}
-                        className="rounded-full p-1.5 text-muted-foreground hover:bg-accent/70 hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground"
                       >
                         <Copy className="h-4 w-4" />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon-sm"
                         aria-label="Delete essay"
                         onClick={() => deleteEssay(essay.id)}
-                        className="rounded-full p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
-                      </button>
+                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent className="flex flex-1 flex-col gap-3">
                     {essay.prompt && <p className="line-clamp-2 text-sm text-muted-foreground">{essay.prompt}</p>}
                     <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center justify-between font-mono text-xs tabular-nums text-muted-foreground">
                         <span>{words} words</span>
                         {essay.word_limit && <span>limit {essay.word_limit}</span>}
                       </div>

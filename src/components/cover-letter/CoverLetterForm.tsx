@@ -136,21 +136,22 @@ export default function CoverLetterForm({
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Cover letter tone">
           {TONES.map((t) => (
-            <button
+            <Button
               key={t}
               type="button"
+              size="xs"
+              variant={tone === t ? "default" : "outline"}
+              aria-pressed={tone === t}
               onClick={() => setTone(t)}
               className={cn(
-                "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
-                tone === t
-                  ? "border-transparent bg-primary text-primary-foreground"
-                  : "border-border/80 bg-background/55 text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground"
+                "rounded-full px-3.5",
+                tone !== t && "bg-background/55 text-muted-foreground"
               )}
             >
               {t}
-            </button>
+            </Button>
           ))}
         </div>
         <div className="ml-auto">

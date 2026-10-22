@@ -7,44 +7,58 @@ import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => setMounted(true), [])
-  if (!mounted) return null
+  if (!mounted) {
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="Toggle theme"
+        className="relative overflow-hidden rounded-xl"
+        disabled
+      >
+        <span className="size-4" />
+      </Button>
+    )
+  }
 
-  const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark")
+  const isDark = resolvedTheme === "dark"
+  const toggleTheme = () => setTheme(isDark ? "light" : "dark")
 
   return (
-   <Button
+    <Button
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      aria-label="Toggle theme"
-      className="relative overflow-hidden rounded-full transition-colors duration-300 bg-transparent hover:bg-muted/50 dark:hover:bg-muted/70"
+      aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
+      className="relative overflow-hidden rounded-xl border border-transparent hover:border-border/70 hover:bg-accent/60"
     >
-
-      <AnimatePresence mode="wait" initial={false}>
-        {theme === "dark" ? (
-          <motion.div
+      <AnimatePresence mode="popLayout" initial={false}>
+        {isDark ? (
+          <motion.span
             key="sun"
-            initial={{ opacity: 0, x: -10, rotate: -90, scale: 0.8 }}
-            animate={{ opacity: 1, x: 0, rotate: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 10, rotate: 90, scale: 0.8 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
+            initial={{ opacity: 0, rotate: -45, scale: 0.85, filter: "blur(2px)" }}
+            animate={{ opacity: 1, rotate: 0, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, rotate: 45, scale: 0.85, filter: "blur(2px)" }}
+            transition={{ type: "spring", duration: 0.28, bounce: 0.08 }}
+            className="flex items-center justify-center"
           >
-            <Sun className="h-5 w-5" />
-          </motion.div>
+            <Sun className="size-4 text-amber-400" />
+          </motion.span>
         ) : (
-          <motion.div
+          <motion.span
             key="moon"
-            initial={{ opacity: 0, x: 10, rotate: 90, scale: 0.8 }}
-            animate={{ opacity: 1, x: 0, rotate: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -10, rotate: -90, scale: 0.8 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
+            initial={{ opacity: 0, rotate: 45, scale: 0.85, filter: "blur(2px)" }}
+            animate={{ opacity: 1, rotate: 0, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, rotate: -45, scale: 0.85, filter: "blur(2px)" }}
+            transition={{ type: "spring", duration: 0.28, bounce: 0.08 }}
+            className="flex items-center justify-center"
           >
-            <Moon className="h-5 w-5" />
-          </motion.div>
+            <Moon className="size-4 text-foreground" />
+          </motion.span>
         )}
       </AnimatePresence>
     </Button>

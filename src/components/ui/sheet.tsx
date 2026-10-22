@@ -36,7 +36,7 @@ function SheetOverlay({
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-slate-950/55 backdrop-blur-sm",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-slate-950/55 backdrop-blur-xs duration-200 ease-[cubic-bezier(0.32,0.72,0,1)]",
         className
       )}
       {...props}
@@ -58,7 +58,7 @@ function SheetContent({
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          "bg-background/95 data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 border-border/80 shadow-[0_24px_80px_-38px_rgba(15,23,42,0.55)] backdrop-blur-2xl transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+          "bg-background/96 data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 border-border/85 shadow-2xl backdrop-blur-2xl transition ease-[cubic-bezier(0.32,0.72,0,1)] data-[state=closed]:duration-200 data-[state=open]:duration-280",
           side === "right" &&
             "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
           side === "left" &&
@@ -72,7 +72,7 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="data-[state=open]:bg-secondary absolute top-4 right-4 rounded-full border border-border/70 bg-background/70 p-2 opacity-80 transition-opacity hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring disabled:pointer-events-none">
+        <SheetPrimitive.Close className="data-[state=open]:bg-secondary absolute top-4 right-4 flex size-8 cursor-pointer items-center justify-center rounded-lg border border-border/75 bg-background/75 opacity-80 scale-100 active:scale-[0.96] transition-[opacity,scale,background-color] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:opacity-100 focus:outline-hidden focus:ring-2 focus:ring-ring disabled:pointer-events-none">
           <XIcon className="size-4" />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>
@@ -108,7 +108,7 @@ function SheetTitle({
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
-      className={cn("text-foreground font-semibold", className)}
+      className={cn("text-foreground font-semibold tracking-tight", className)}
       {...props}
     />
   )

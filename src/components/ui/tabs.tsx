@@ -26,7 +26,7 @@ function TabsList({
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        "inline-flex h-11 w-fit items-center justify-center rounded-full border border-border/80 bg-muted/85 p-1 text-muted-foreground",
+        "inline-flex h-10 w-fit items-center justify-center rounded-xl border border-border/85 bg-muted/80 p-1 text-muted-foreground",
         className
       )}
       {...props}
@@ -42,7 +42,7 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "text-foreground inline-flex h-full flex-1 items-center justify-center gap-1.5 rounded-full border border-transparent px-3 py-2 text-sm font-semibold whitespace-nowrap transition-[color,box-shadow,background-color] disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-border/80 data-[state=active]:bg-background/90 data-[state=active]:shadow-sm focus-visible:ring-[3px] focus-visible:ring-ring [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "inline-flex h-full flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-transparent px-3 py-1.5 text-xs font-semibold whitespace-nowrap text-muted-foreground scale-100 active:scale-[0.97] transition-[color,box-shadow,background-color,border-color,scale] duration-160 ease-[cubic-bezier(0.23,1,0.32,1)] hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-border/80 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs focus-visible:ring-[3px] focus-visible:ring-ring [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
         className
       )}
       {...props}
@@ -57,7 +57,10 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn("flex-1 outline-none", className)}
+      className={cn(
+        "flex-1 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:zoom-in-98 duration-180 ease-[cubic-bezier(0.23,1,0.32,1)]",
+        className
+      )}
       {...props}
     />
   )

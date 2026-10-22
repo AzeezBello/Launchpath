@@ -15,6 +15,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { OnboardingFocus } from "@/lib/server/settings";
 
@@ -55,15 +56,15 @@ export default function OnboardingPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.14),transparent_24%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.1),transparent_24%)]" />
 
-      <div className="surface-panel relative z-10 w-full max-w-2xl p-8 text-center sm:p-10">
-        <div className="mx-auto mb-6 flex w-fit items-center gap-2">
+      <Card className="relative z-10 w-full max-w-xl p-8 text-center sm:p-10">
+        <div className="mx-auto mb-4 flex w-fit items-center gap-2">
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
             <span
               key={i}
               className={cn(
-                "h-1.5 rounded-full transition-all",
+                "h-1.5 rounded-full transition-[width,background-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]",
                 i + 1 === step ? "w-8 bg-primary" : i + 1 < step ? "w-4 bg-primary/50" : "w-4 bg-muted"
               )}
             />
@@ -74,25 +75,25 @@ export default function OnboardingPage() {
           {step === 1 && (
             <motion.div
               key="step-1"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25 }}
+              initial={{ opacity: 0, y: 6, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -4, scale: 0.985 }}
+              transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
             >
               <Badge variant="outline" className="mx-auto w-fit">
-                <Sparkles className="h-3.5 w-3.5" />
-                Welcome
+                <Sparkles className="size-3.5 text-primary" />
+                Step 01 // Welcome
               </Badge>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
                 Welcome to LaunchPath
               </h1>
-              <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              <p className="mx-auto mt-3.5 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
                 Track scholarships, grants, jobs, and admissions in one workspace — plus a resume
                 builder and AI cover letters to go with them. Two quick questions and you&apos;re set.
               </p>
               <Button onClick={() => setStep(2)} className="mt-6" size="lg">
                 Get started
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="size-4" />
               </Button>
             </motion.div>
           )}
@@ -100,20 +101,23 @@ export default function OnboardingPage() {
           {step === 2 && (
             <motion.div
               key="step-2"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25 }}
+              initial={{ opacity: 0, y: 6, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -4, scale: 0.985 }}
+              transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
             >
-              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              <Badge variant="outline" className="mx-auto w-fit font-mono">
+                Step 02 // Focus
+              </Badge>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
                 What are you focused on?
               </h2>
-              <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <p className="mx-auto mt-2.5 max-w-md text-xs leading-relaxed text-muted-foreground sm:text-sm">
                 Pick as many as apply — we&apos;ll surface these first on your dashboard. You can
                 change this anytime in Settings.
               </p>
 
-              <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-3">
+              <div className="mx-auto mt-7 grid max-w-md grid-cols-2 gap-3">
                 {FOCUS_OPTIONS.map(({ value, label, icon: Icon }) => {
                   const selected = focus.includes(value);
                   return (
@@ -123,19 +127,19 @@ export default function OnboardingPage() {
                       onClick={() => toggleFocus(value)}
                       aria-pressed={selected}
                       className={cn(
-                        "flex flex-col items-center gap-2 rounded-2xl border px-4 py-5 text-sm font-medium transition-colors",
+                        "flex cursor-pointer flex-col items-center gap-2 rounded-xl border px-4 py-4 text-xs font-semibold scale-100 active:scale-[0.97] transition-[border-color,background-color,color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]",
                         selected
-                          ? "border-primary/30 bg-primary/10 text-primary"
-                          : "border-border/80 bg-background/45 text-muted-foreground hover:border-primary/25 hover:text-foreground"
+                          ? "border-primary/35 bg-primary/10 text-primary shadow-2xs"
+                          : "border-border/80 bg-background/50 text-muted-foreground hover:border-primary/25 hover:text-foreground"
                       )}
                     >
                       <span
                         className={cn(
-                          "flex size-10 items-center justify-center rounded-2xl",
+                          "flex size-9 items-center justify-center rounded-lg",
                           selected ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
                         )}
                       >
-                        {selected ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                        {selected ? <Check className="size-4" /> : <Icon className="size-4" />}
                       </span>
                       {label}
                     </button>
@@ -143,13 +147,13 @@ export default function OnboardingPage() {
                 })}
               </div>
 
-              <div className="mt-8 flex items-center justify-center gap-3">
+              <div className="mt-7 flex items-center justify-center gap-2.5">
                 <Button variant="outline" onClick={() => setStep(1)}>
                   Back
                 </Button>
                 <Button onClick={() => setStep(3)}>
                   Continue
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="size-4" />
                 </Button>
               </div>
             </motion.div>
@@ -158,49 +162,49 @@ export default function OnboardingPage() {
           {step === 3 && (
             <motion.div
               key="step-3"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25 }}
+              initial={{ opacity: 0, y: 6, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -4, scale: 0.985 }}
+              transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
             >
-              <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-primary/12 text-primary">
-                <Check className="h-6 w-6" />
+              <span className="mx-auto flex size-12 items-center justify-center rounded-xl border border-primary/25 bg-primary/12 text-primary">
+                <Check className="size-5" />
               </span>
-              <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+              <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">
                 You&apos;re all set
               </h2>
-              <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-muted-foreground sm:text-sm">
                 Here&apos;s what to do first:
               </p>
 
-              <ul className="mx-auto mt-6 max-w-sm space-y-3 text-left text-sm">
+              <ul className="mx-auto mt-5 max-w-sm space-y-2.5 rounded-xl border border-border/80 bg-background/50 p-4 text-left text-xs sm:text-sm">
                 <li className="flex items-start gap-2.5">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  Build your resume so your score and job matches improve.
+                  <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span>Build your resume so your readiness score and job matches improve.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  Bookmark opportunities you like and apply straight from the card.
+                  <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span>Bookmark opportunities you like and apply straight from the card.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  Take the quick tour from your account menu anytime.
+                  <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                  <span>Replay the workspace tour from your account menu anytime.</span>
                 </li>
               </ul>
 
-              <div className="mt-8 flex items-center justify-center gap-3">
+              <div className="mt-7 flex items-center justify-center gap-2.5">
                 <Button variant="outline" onClick={() => setStep(2)}>
                   Back
                 </Button>
                 <Button onClick={finish} disabled={saving} size="lg">
                   {saving ? "Setting up..." : "Open dashboard"}
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="size-4" />
                 </Button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </Card>
     </div>
   );
 }

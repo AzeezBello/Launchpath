@@ -1,7 +1,6 @@
 // src/app/dashboard/cover-letter/components/GeneratedLetterPreview.tsx
 "use client";
 
-import { jsPDF } from "jspdf";
 import { Download, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +14,8 @@ type Props = {
 };
 
 export default function GeneratedLetterPreview({ content, meta, onSave, source }: Props) {
-  const downloadPdf = () => {
+  const downloadPdf = async () => {
+    const { jsPDF } = await import("jspdf");
     const doc = new jsPDF();
     doc.setFontSize(12);
     doc.text(`${meta?.position || "Cover Letter"} — ${meta?.company || ""}`, 10, 15);

@@ -78,17 +78,19 @@ export default function SkillsForm({
           {skills.map((skill, i) => (
             <li
               key={`${skill}-${i}`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 py-1 pl-3 pr-1.5 text-sm font-medium text-primary"
+              className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 py-1 pl-3 pr-1 text-sm font-medium text-primary"
             >
-              {skill}
-              <button
+              <span>{skill}</span>
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-xs"
                 aria-label={`Remove ${skill}`}
                 onClick={() => remove(i)}
-                className="rounded-full p-0.5 hover:bg-primary/15"
+                className="size-5 rounded-full text-primary hover:bg-primary/15 hover:text-primary"
               >
-                <X className="h-3.5 w-3.5" />
-              </button>
+                <X className="h-3 w-3" />
+              </Button>
             </li>
           ))}
         </ul>

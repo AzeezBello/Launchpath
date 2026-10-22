@@ -2,12 +2,13 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Settings as SettingsIcon } from "lucide-react";
+import { Check, Settings as SettingsIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -20,6 +21,7 @@ import { TwoFactorCard } from "@/components/settings/TwoFactorCard";
 import { PasswordCard } from "@/components/settings/PasswordCard";
 import { BillingCard } from "@/components/settings/BillingCard";
 import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 type Focus = "scholarship" | "grant" | "job" | "admission";
 
@@ -115,8 +117,6 @@ export default function SettingsPage() {
       if (!res.ok) throw new Error(payload?.error || "Failed to update settings");
       const next = normalizeSettings(payload?.data ?? payload);
       setSettings(next);
-      // The theme preference is stored server-side and applied here so it
-      // actually changes what the user sees.
       if (next.appearance.theme) setTheme(next.appearance.theme);
       toast.success("Settings updated");
     } catch (error) {
@@ -161,7 +161,7 @@ export default function SettingsPage() {
               Your name signs generated cover letters when no resume is attached.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3.5">
             <div className="space-y-1.5">
               <Label htmlFor="profile-name">Full name</Label>
               <Input
@@ -201,7 +201,7 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               {FOCUS_OPTIONS.map((option) => {
                 const selected = (settings.onboarding.focus || []).includes(option.value);
                 return (
@@ -210,13 +210,15 @@ export default function SettingsPage() {
                     type="button"
                     aria-pressed={selected}
                     onClick={() => toggleFocus(option.value)}
-                    className={
+                    className={cn(
+                      "flex cursor-pointer items-center justify-between rounded-xl border px-3.5 py-3 text-xs font-semibold scale-100 active:scale-[0.97] transition-[border-color,background-color,color,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]",
                       selected
-                        ? "rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm font-medium text-primary"
-                        : "rounded-2xl border border-border/80 bg-background/45 px-4 py-3 text-sm font-medium text-muted-foreground hover:border-primary/25 hover:text-foreground"
-                    }
+                        ? "border-primary/35 bg-primary/10 text-primary"
+                        : "border-border/80 bg-background/45 text-muted-foreground hover:border-primary/25 hover:text-foreground"
+                    )}
                   >
-                    {option.label}
+                    <span>{option.label}</span>
+                    {selected && <Check className="size-3.5 text-primary" />}
                   </button>
                 );
               })}
@@ -258,30 +260,33 @@ export default function SettingsPage() {
             <CardTitle>Notifications</CardTitle>
             <CardDescription>Email reminders and account alerts.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <label className="flex items-start gap-2.5">
-              <input
-                type="checkbox"
-                checked={settings.notifications.deadlineReminders !== false}
-                onChange={(e) => update("notifications", "deadlineReminders", e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-input accent-primary"
-              />
-              <span>
-                Deadline reminders
-                <span className="block text-xs text-muted-foreground">
+          <CardContent className="space-y-4 text-sm">
+            <div className="flex items-start justify-between gap-4 rounded-xl border border-border/75 bg-background/45 p-3.5">
+              <div className="space-y-1">
+                <Label htmlFor="deadline-reminders" className="cursor-pointer font-semibold">
+                  Deadline reminders
+                </Label>
+                <p className="text-xs leading-relaxed text-muted-foreground">
                   One email when an open application is 7, 3, and 1 days from its deadline, and on the day.
-                </span>
-              </span>
-            </label>
-            <label className="flex items-center gap-2.5">
-              <input
-                type="checkbox"
-                checked={!!settings.security.session_alerts}
-                onChange={(e) => update("security", "session_alerts", e.target.checked)}
-                className="h-4 w-4 rounded border-input accent-primary"
+                </p>
+              </div>
+              <Switch
+                id="deadline-reminders"
+                checked={settings.notifications.deadlineReminders !== false}
+                onCheckedChange={(checked) => update("notifications", "deadlineReminders", checked)}
               />
-              Email me when a new device signs in
-            </label>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 rounded-xl border border-border/75 bg-background/45 p-3.5">
+              <Label htmlFor="session-alerts" className="cursor-pointer font-semibold">
+                Email me when a new device signs in
+              </Label>
+              <Switch
+                id="session-alerts"
+                checked={!!settings.security.session_alerts}
+                onCheckedChange={(checked) => update("security", "session_alerts", checked)}
+              />
+            </div>
           </CardContent>
         </Card>
 

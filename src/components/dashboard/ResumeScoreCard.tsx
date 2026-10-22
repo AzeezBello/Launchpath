@@ -64,12 +64,12 @@ export function ResumeScoreCard() {
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-          <FileText className="h-5 w-5 text-primary" />
-          Resume Score
+          <FileText className="size-5 text-primary" />
+          Resume Readiness
           <InfoTooltip text="Checks whether your latest resume has contact info, a summary, education, experience, and skills filled in." />
         </CardTitle>
         <CardDescription>
-          A quick quality signal based on your most recently updated resume.
+          Completeness index based on your most recently updated resume.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -88,10 +88,17 @@ export function ResumeScoreCard() {
           </p>
         ) : (
           <>
-            <div className="mb-3 text-4xl font-bold text-primary">{score}%</div>
+            <div className="mb-3 flex items-baseline gap-2">
+              <span className="font-mono text-4xl font-bold tabular-nums tracking-tight text-primary">
+                {score}%
+              </span>
+              <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                ATS Baseline
+              </span>
+            </div>
             <Progress value={score} className="h-2" />
-            <p className="mt-3 text-sm text-muted-foreground">
-              Strong formatting, clear outcomes, and role-specific language increase your odds of getting interviews.
+            <p className="mt-3.5 text-xs leading-relaxed text-muted-foreground">
+              Quantified outcomes, clear section structure, and role-specific keywords increase interview conversion.
             </p>
           </>
         )}

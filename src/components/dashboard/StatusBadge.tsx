@@ -2,40 +2,35 @@
 
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
-const TONE_STYLES: Record<string, string> = {
-  success: "bg-success/15 text-success",
-  info: "bg-info/15 text-info",
-  danger: "bg-destructive/15 text-destructive",
-  neutral: "bg-muted text-muted-foreground",
-};
+type StatusTone = "success" | "info" | "destructive" | "warning" | "secondary";
 
-function toneForStatus(status: string): keyof typeof TONE_STYLES {
+function toneForStatus(status: string): StatusTone {
   const normalized = status.toLowerCase();
-  if (normalized.includes("accept") || normalized.includes("complete")) return "success";
-  if (normalized.includes("reject")) return "danger";
+  if (normalized.includes("accept") || normalized.includes("complete") || normalized.includes("offer"))
+    return "success";
+  if (normalized.includes("reject")) return "destructive";
+  if (normalized.includes("interview")) return "warning";
   if (normalized.includes("review") || normalized.includes("schedule")) return "info";
-  return "neutral";
+  return "secondary";
 }
 
 function IconForStatus({ status }: { status: string }) {
   const tone = toneForStatus(status);
-  if (tone === "success") return <CheckCircle2 className="h-4 w-4 text-success" />;
-  if (tone === "danger") return <XCircle className="h-4 w-4 text-destructive" />;
-  if (tone === "info") return <Clock className="h-4 w-4 text-info" />;
-  return <Clock className="h-4 w-4 text-muted-foreground" />;
+  if (tone === "success") return <CheckCircle2 className="size-3.5 text-success" />;
+  if (tone === "destructive") return <XCircle className="size-3.5 text-destructive" />;
+  if (tone === "warning") return <Clock className="size-3.5 text-warning" />;
+  if (tone === "info") return <Clock className="size-3.5 text-info" />;
+  return <Clock className="size-3.5 text-muted-foreground" />;
 }
 
 export function StatusBadge({ status, showIcon = false }: { status: string; showIcon?: boolean }) {
   const tone = toneForStatus(status);
 
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="inline-flex items-center gap-1.5">
       {showIcon && <IconForStatus status={status} />}
-      <Badge variant="secondary" className={cn(TONE_STYLES[tone])}>
-        {status}
-      </Badge>
+      <Badge variant={tone}>{status}</Badge>
     </span>
   );
 }

@@ -59,12 +59,20 @@ export function isNeonConfigured(): boolean {
   return url.startsWith("postgres://") || url.startsWith("postgresql://");
 }
 
+let cachedSqlUrl: string | null = null;
+let cachedSqlExecutor: ReturnType<typeof neon> | null = null;
+
 function getSqlExecutor() {
   const url = getDatabaseUrl();
   if (!url) {
     throw new Error("DATABASE_URL is not configured. Connect Neon Postgres in .env.local or Vercel.");
   }
-  return neon(url);
+  if (cachedSqlExecutor && cachedSqlUrl === url) {
+    return cachedSqlExecutor;
+  }
+  cachedSqlUrl = url;
+  cachedSqlExecutor = neon(url);
+  return cachedSqlExecutor;
 }
 
 export async function rawQuery<T = Record<string, unknown>>(

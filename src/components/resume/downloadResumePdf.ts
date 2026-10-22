@@ -1,4 +1,4 @@
-import { jsPDF } from "jspdf";
+import type { jsPDF } from "jspdf";
 import type { ResumeFormData } from "@/types/resume";
 
 const PAGE_HEIGHT = 297; // A4 in mm
@@ -56,7 +56,8 @@ function makeCursor(doc: jsPDF) {
   return { title, heading, line, spacer };
 }
 
-export function downloadResumeAsPdf(filename: string, resume: ResumeFormData) {
+export async function downloadResumeAsPdf(filename: string, resume: ResumeFormData) {
+  const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const cursor = makeCursor(doc);
 

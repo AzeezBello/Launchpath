@@ -45,16 +45,16 @@ export function UpcomingDeadlines() {
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-          <CalendarClock className="h-5 w-5 text-primary" />
-          Due soon
+          <CalendarClock className="size-5 text-primary" />
+          Due Soon
         </CardTitle>
         <CardDescription>Open applications with the nearest deadlines.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2.5">
         {loading ? (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {[0, 1, 2].map((item) => (
-              <div key={item} className="h-14 animate-pulse rounded-[1.25rem] bg-muted/60" />
+              <div key={item} className="h-14 animate-pulse rounded-xl bg-muted/60" />
             ))}
           </div>
         ) : error ? (
@@ -72,10 +72,10 @@ export function UpcomingDeadlines() {
             {rows.map((row) => (
               <div
                 key={row.id}
-                className="flex items-start justify-between gap-3 rounded-[1.25rem] border border-border/80 bg-background/45 p-4"
+                className="flex items-start justify-between gap-3 rounded-xl border border-border/80 bg-background/50 p-3.5 transition-colors duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-border"
               >
                 <div className="min-w-0">
-                  <h4 className="truncate font-medium">{row.program}</h4>
+                  <h4 className="truncate text-sm font-semibold">{row.program}</h4>
                   <div className="mt-1.5">
                     <StatusBadge status={row.status} />
                   </div>
@@ -83,10 +83,10 @@ export function UpcomingDeadlines() {
                 <DeadlineBadge value={row.deadline} className="shrink-0" />
               </div>
             ))}
-            <Button variant="ghost" className="px-0" asChild>
+            <Button variant="ghost" size="sm" className="mt-1 px-0" asChild>
               <Link href="/dashboard/applications">
                 View all applications
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="size-3.5" />
               </Link>
             </Button>
           </>

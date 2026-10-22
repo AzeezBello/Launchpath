@@ -72,10 +72,14 @@ export default function JobsPage() {
           <div className="relative sm:max-w-md sm:flex-1">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              type="search"
+              aria-label="Search jobs by title, company, or location"
               placeholder="Search by title, company, or location..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
+              spellCheck={false}
+              autoComplete="off"
               className="pl-10"
             />
           </div>
@@ -90,13 +94,17 @@ export default function JobsPage() {
           <FilterSelect label="Job type" value={jobType} onChange={setJobType} options={types} allLabel="All types" />
           <FilterSelect label="Source" value={source} onChange={setSource} options={sources} allLabel="All sources" />
           <Input
+            type="search"
+            aria-label="Filter jobs by location"
             placeholder="Location contains..."
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
+            spellCheck={false}
+            autoComplete="off"
             className="h-9 max-w-[220px] rounded-xl px-3 text-xs"
           />
           {!loading && !error && (
-            <span className="text-xs text-muted-foreground">
+            <span className="font-mono text-xs tabular-nums text-muted-foreground">
               {visible.length} of {items.length}
             </span>
           )}

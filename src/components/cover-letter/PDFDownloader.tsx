@@ -1,9 +1,8 @@
 // src/app/dashboard/cover-letter/components/PDFDownloader.tsx
 "use client";
 
-import { jsPDF } from "jspdf";
-
-export function downloadLetterAsPdf(filename: string, title: string, content: string) {
+export async function downloadLetterAsPdf(filename: string, title: string, content: string) {
+  const { jsPDF } = await import("jspdf");
   const doc = new jsPDF();
   doc.setFontSize(14);
   doc.text(title, 10, 15);

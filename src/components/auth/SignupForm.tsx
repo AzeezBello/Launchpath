@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useSupabase } from "@/providers/SupabaseProvider";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 
 export default function SignupForm() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { refreshSession } = useSupabase();
@@ -55,6 +56,7 @@ export default function SignupForm() {
         <Label htmlFor="signup-name">Full name</Label>
         <Input
           id="signup-name"
+          name="name"
           type="text"
           placeholder="Ada Lovelace"
           value={fullName}
@@ -67,27 +69,47 @@ export default function SignupForm() {
         <Label htmlFor="signup-email">Email</Label>
         <Input
           id="signup-email"
+          name="email"
           type="email"
           inputMode="email"
           placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
+          spellCheck={false}
+          autoCapitalize="none"
+          autoCorrect="off"
           required
         />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="signup-password">Password</Label>
-        <Input
-          id="signup-password"
-          type="password"
-          placeholder="Create a strong password (8+ chars)"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="new-password"
-          required
-        />
+        <div className="relative">
+          <Input
+            id="signup-password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Create a strong password (8+ chars)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+            minLength={8}
+            className="pr-10"
+            required
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+          </Button>
+        </div>
       </div>
 
       <div className="pt-1">

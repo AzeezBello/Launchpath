@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 type AuthShellProps = {
   eyebrow: string;
@@ -26,41 +27,43 @@ export function AuthShell({
 }: AuthShellProps) {
   return (
     <div className="relative isolate min-h-screen overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_12%,rgba(59,130,246,0.12),transparent_32%),radial-gradient(circle_at_85%_88%,rgba(16,185,129,0.1),transparent_28%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_12%,rgba(59,130,246,0.1),transparent_32%),radial-gradient(circle_at_85%_88%,rgba(16,185,129,0.08),transparent_28%)]" />
 
-      <div className="mx-auto grid min-h-screen max-w-7xl gap-14 px-6 py-12 sm:px-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:px-14 lg:py-16">
-        <div className="hidden flex-col justify-between gap-10 lg:flex">
-          <div className="space-y-10">
-            <Link href="/" className="inline-flex items-center gap-3.5">
-              <span className="flex size-11 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(59,130,246,0.92),rgba(16,185,129,0.88))] text-sm font-bold text-slate-950 shadow-[0_14px_36px_-18px_rgba(59,130,246,0.8)]">
+      <div className="mx-auto grid min-h-screen max-w-7xl gap-12 px-6 py-10 sm:px-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:px-14 lg:py-14">
+        <div className="hidden flex-col justify-between gap-8 lg:flex">
+          <div className="space-y-8">
+            <Link href="/" className="group inline-flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#3B82F6,#10B981)] font-display text-xs font-bold text-slate-950 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35),0_6px_16px_-4px_rgba(59,130,246,0.5)] scale-100 transition-transform duration-160 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[1.03]">
                 LP
               </span>
               <div>
-                <p className="text-base font-semibold tracking-tight">LaunchPath</p>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                  Opportunity workspace
+                <p className="font-display text-base font-semibold tracking-tight leading-none">
+                  LaunchPath
+                </p>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground leading-none">
+                  Opportunity OS
                 </p>
               </div>
             </Link>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               <Badge variant="outline" className="w-fit">
-                <Sparkles className="h-3.5 w-3.5" />
+                <Sparkles className="size-3.5 text-primary" />
                 Calm application operating system
               </Badge>
-              <h1 className="text-balance max-w-xl text-4xl font-semibold leading-[1.12] xl:text-5xl">
+              <h1 className="max-w-xl text-4xl font-semibold leading-[1.1] tracking-tight xl:text-[2.75rem]">
                 One spacious workspace for every application path.
               </h1>
-              <p className="max-w-lg text-base leading-relaxed text-muted-foreground xl:text-lg">
+              <p className="max-w-lg text-sm leading-relaxed text-muted-foreground xl:text-base">
                 Discover opportunities, draft stronger materials, and stay ahead of
                 deadlines without juggling scattered tabs.
               </p>
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="mockup-frame overflow-hidden p-2.5">
-              <div className="overflow-hidden rounded-[1.25rem] border border-slate-800/80 bg-slate-950">
+          <div className="space-y-5">
+            <div className="mockup-frame overflow-hidden p-2">
+              <div className="overflow-hidden rounded-xl border border-slate-800/80 bg-slate-950">
                 <Image
                   src="/images/workspace-hero-mockup.svg"
                   alt="LaunchPath workspace preview"
@@ -71,40 +74,48 @@ export function AuthShell({
               </div>
             </div>
 
-            <div className="rounded-[1.75rem] border border-border/80 bg-card/85 p-6">
-              <div className="grid gap-3.5">
+            <Card className="py-5">
+              <CardContent className="grid gap-3 px-5">
                 {BENEFITS.map((benefit) => (
-                  <div key={benefit} className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <p className="text-sm leading-relaxed text-muted-foreground">{benefit}</p>
+                  <div key={benefit} className="flex items-start gap-2.5">
+                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
+                    <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                      {benefit}
+                    </p>
                   </div>
                 ))}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
         <div className="flex items-center justify-center">
-          <div className="surface-panel w-full max-w-md p-8 sm:p-11">
-            <Link href="/" className="mb-8 inline-flex items-center gap-3 lg:hidden">
-              <span className="flex size-10 items-center justify-center rounded-[1.2rem] bg-[linear-gradient(135deg,rgba(59,130,246,0.9),rgba(16,185,129,0.85))] text-sm font-bold text-slate-950">
-                LP
-              </span>
-              <span className="text-sm font-semibold">LaunchPath</span>
-            </Link>
+          <Card className="w-full max-w-md p-7 sm:p-9">
+            <div>
+              <Link href="/" className="mb-7 inline-flex items-center gap-2.5 lg:hidden">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#3B82F6,#10B981)] font-display text-xs font-bold text-slate-950">
+                  LP
+                </span>
+                <span className="font-display text-sm font-semibold">LaunchPath</span>
+              </Link>
 
-            <Badge variant="outline" className="w-fit">
-              {eyebrow}
-            </Badge>
-            <h2 className="mt-5 text-3xl font-semibold tracking-tight">{title}</h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-              {description}
-            </p>
+              <Badge variant="outline" className="w-fit">
+                {eyebrow}
+              </Badge>
+              <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h2>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {description}
+              </p>
 
-            <div className="mt-9">{children}</div>
+              <div className="mt-7">{children}</div>
 
-            {footer ? <div className="mt-8 text-sm text-muted-foreground">{footer}</div> : null}
-          </div>
+              {footer ? (
+                <div className="mt-6 border-t border-border/70 pt-5 text-xs text-muted-foreground sm:text-sm">
+                  {footer}
+                </div>
+              ) : null}
+            </div>
+          </Card>
         </div>
       </div>
     </div>

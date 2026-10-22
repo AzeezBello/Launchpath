@@ -131,9 +131,9 @@ export default function ResumePage() {
                 </CardHeader>
                 <CardContent className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Link href={`/dashboard/resume/${resume.id}`}>
-                      <Button variant="secondary">Edit</Button>
-                    </Link>
+                    <Button variant="secondary" asChild>
+                      <Link href={`/dashboard/resume/${resume.id}`}>Edit</Link>
+                    </Button>
                     <Button
                       variant="outline"
                       size="icon-sm"

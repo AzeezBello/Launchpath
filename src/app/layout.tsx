@@ -1,7 +1,11 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { AppShell } from "@/components/layout/AppShell";
 import { SupabaseProvider } from "@/providers/SupabaseProvider";
+
+export const viewport: Viewport = {
+  colorScheme: "light dark",
+};
 
 export const metadata: Metadata = {
   title: "LaunchPath | Scholarships, Jobs, Grants & Admissions in one workspace",

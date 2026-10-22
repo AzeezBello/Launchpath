@@ -25,7 +25,16 @@ export async function POST(req: Request) {
     const store = await cookies();
     store.delete(SETTINGS_COOKIE_KEY);
 
-    return apiSuccess({ message: "Signed out successfully" }, { status: 200, headers: rateLimit.headers });
+    return apiSuccess(
+      { message: "Signed out successfully" },
+      {
+        status: 200,
+        headers: {
+          ...rateLimit.headers,
+          "Clear-Site-Data": '"cookies", "storage"',
+        },
+      }
+    );
   } catch (err: unknown) {
     console.error("Logout error:", err);
     return apiError("Server error", { status: 500, headers: rateLimit.headers });

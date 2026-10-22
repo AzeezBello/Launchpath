@@ -4,6 +4,8 @@ import { useCallback, useMemo, useState } from "react";
 import { GraduationCap, ListFilter, Loader2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
 import { OpportunityCard, OpportunityGridSkeleton } from "@/components/opportunities/OpportunityCard";
@@ -70,7 +72,7 @@ export default function ScholarshipsPage() {
       <div className="space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative sm:max-w-md sm:flex-1">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search by keyword, provider, or country..."
               value={query}
@@ -80,25 +82,30 @@ export default function ScholarshipsPage() {
             />
           </div>
           <Button onClick={handleSearch} disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+            {loading ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
             Search
           </Button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <ListFilter className="h-4 w-4 text-muted-foreground" />
+        <div className="flex flex-wrap items-center gap-2.5">
+          <ListFilter className="size-4 text-muted-foreground" />
           <FilterSelect label="Country" value={country} onChange={setCountry} options={countries} allLabel="All countries" />
           <FilterSelect label="Level" value={level} onChange={setLevel} options={levels} allLabel="All levels" />
-          <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <input
-              type="checkbox"
+          <div className="flex items-center gap-2 rounded-lg border border-border/75 bg-card/60 px-3 py-1.5">
+            <Switch
+              id="hide-passed-deadlines"
               checked={hidePassed}
-              onChange={(e) => setHidePassed(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-input accent-primary"
+              onCheckedChange={setHidePassed}
             />
-            Hide passed deadlines
-            {hiddenPassed > 0 && <span className="text-muted-foreground/70">({hiddenPassed} hidden)</span>}
-          </label>
+            <Label htmlFor="hide-passed-deadlines" className="cursor-pointer text-xs font-normal text-muted-foreground">
+              Hide passed deadlines
+              {hiddenPassed > 0 && (
+                <span className="ml-1 font-mono text-[11px] text-muted-foreground/75">
+                  ({hiddenPassed} hidden)
+                </span>
+              )}
+            </Label>
+          </div>
         </div>
       </div>
 
@@ -112,12 +119,12 @@ export default function ScholarshipsPage() {
           title="No scholarships match"
           description={
             hiddenPassed > 0
-              ? "Every match has a passed deadline. Untick the filter to see them; most reopen annually."
+              ? "Every match has a passed deadline. Toggle off the filter to see them; most reopen annually."
               : "Try a different keyword, country, or level."
           }
         />
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((sch, i) => (
             <OpportunityCard
               key={sch.id}

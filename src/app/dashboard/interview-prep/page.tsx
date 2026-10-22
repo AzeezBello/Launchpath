@@ -10,6 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 import { EmptyState } from "@/components/dashboard/EmptyState";
@@ -32,11 +39,6 @@ type ApplicationOption = { id: string; program: string };
 
 const STATUS_OPTIONS = ["Scheduled", "Completed", "Pending"] as const;
 const NONE = "__none__";
-
-const SELECT_CLASS =
-  "h-11 rounded-2xl border border-input bg-background/60 px-4 text-sm text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring";
-const SELECT_SM_CLASS =
-  "h-9 rounded-xl border border-input bg-background/60 px-2.5 text-xs text-foreground shadow-sm outline-none focus-visible:border-primary/50 focus-visible:ring-[3px] focus-visible:ring-ring";
 
 export default function InterviewPage() {
   const [interviews, setInterviews] = useState<Interview[]>([]);
@@ -267,18 +269,21 @@ export default function InterviewPage() {
               onChange={(e) => setPosition(e.target.value)}
             />
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-            <select
+            <Select
               value={status}
-              onChange={(e) => setStatus(e.target.value as (typeof STATUS_OPTIONS)[number])}
-              className={SELECT_CLASS}
-              aria-label="Status"
+              onValueChange={(v) => setStatus(v as (typeof STATUS_OPTIONS)[number])}
             >
-              {STATUS_OPTIONS.map((option) => (
-                <option key={option} value={option} className="bg-background text-foreground">
-                  {option}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger aria-label="Status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button onClick={addInterview} disabled={saving}>
               <Plus className="h-4 w-4" />
               {saving ? "Saving..." : "Add"}
@@ -289,21 +294,19 @@ export default function InterviewPage() {
               <Label htmlFor="int-application" className="text-xs text-muted-foreground">
                 Linked application (optional)
               </Label>
-              <select
-                id="int-application"
-                value={applicationId}
-                onChange={(e) => handlePickApplication(e.target.value)}
-                className={`${SELECT_CLASS} w-full`}
-              >
-                <option value={NONE} className="bg-background text-foreground">
-                  Not linked
-                </option>
-                {applications.map((app) => (
-                  <option key={app.id} value={app.id} className="bg-background text-foreground">
-                    {app.program}
-                  </option>
-                ))}
-              </select>
+              <Select value={applicationId} onValueChange={handlePickApplication}>
+                <SelectTrigger id="int-application">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={NONE}>Not linked</SelectItem>
+                  {applications.map((app) => (
+                    <SelectItem key={app.id} value={app.id}>
+                      {app.program}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="int-location" className="text-xs text-muted-foreground">
@@ -349,9 +352,9 @@ export default function InterviewPage() {
             return (
               <motion.div
                 key={interview.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: Math.min(i * 0.05, 0.4) }}
+                initial={{ opacity: 0, y: 6, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.24, delay: Math.min(i * 0.035, 0.24), ease: [0.23, 1, 0.32, 1] }}
               >
                 <Card className="hover-card">
                   <CardContent className="space-y-4 p-5">
@@ -364,7 +367,7 @@ export default function InterviewPage() {
                         </div>
                         <p className="text-sm text-muted-foreground">Role: {interview.position}</p>
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          <span>Date: {interview.date}</span>
+                          <span className="font-mono tabular-nums">Date: {interview.date}</span>
                           {interview.location && (
                             <span className="inline-flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
@@ -383,19 +386,22 @@ export default function InterviewPage() {
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
-                        <select
+                        <Select
                           value={interview.status}
                           disabled={updatingId === interview.id}
-                          onChange={(e) => updateInterviewStatus(interview.id, e.target.value)}
-                          className={SELECT_SM_CLASS}
-                          aria-label="Change status"
+                          onValueChange={(v) => updateInterviewStatus(interview.id, v)}
                         >
-                          {STATUS_OPTIONS.map((option) => (
-                            <option key={option} value={option} className="bg-background text-foreground">
-                              {option}
-                            </option>
-                          ))}
-                        </select>
+                          <SelectTrigger size="sm" aria-label="Change status" className="w-[130px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {STATUS_OPTIONS.map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <Button
                           size="sm"
                           variant={notesOpen ? "secondary" : "ghost"}
@@ -404,14 +410,16 @@ export default function InterviewPage() {
                           <StickyNote className="h-3.5 w-3.5" />
                           {interview.notes ? "Notes" : "Add notes"}
                         </Button>
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon-sm"
                           aria-label="Delete interview"
                           onClick={() => deleteInterview(interview.id)}
-                          className="rounded-full p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
 
